@@ -26,7 +26,7 @@ func Execute(configPath string) {
 	reportGenerator := NewReportGenerator(stateManager, log, config.Chains)
 
 	for {
-		_ := reportGenerator.GenerateReport()
+		_ = reportGenerator.GenerateReport()
 		time.Sleep(time.Second * 30)
 	}
 }
