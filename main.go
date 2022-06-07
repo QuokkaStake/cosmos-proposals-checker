@@ -1,10 +1,8 @@
 package main
 
 import (
-	"os"
 	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
@@ -23,10 +21,12 @@ func Execute(configPath string) {
 	log := GetLogger(config.LogConfig)
 
 	stateManager := NewStateManager(config.StatePath, log)
+	stateManager.Load()
+
 	reportGenerator := NewReportGenerator(stateManager, log, config.Chains)
 
 	for {
-		_ = reportGenerator.GenerateReport()
+		_ := reportGenerator.GenerateReport()
 		time.Sleep(time.Second * 30)
 	}
 }
@@ -34,7 +34,7 @@ func Execute(configPath string) {
 func main() {
 	var ConfigPath string
 
-	var rootCmd = &cobra.Command{
+	rootCmd := &cobra.Command{
 		Use:  "cosmos-proposals-checker",
 		Long: "Checks the specific wallets on different chains for proposal votes.",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -43,10 +43,11 @@ func main() {
 	}
 
 	rootCmd.PersistentFlags().StringVar(&ConfigPath, "config", "", "Config file path")
-	rootCmd.MarkPersistentFlagRequired("config")
+	if err := rootCmd.MarkPersistentFlagRequired("config"); err != nil {
+		GetDefaultLogger().Fatal().Err(err).Msg("Could not set flag as required")
+	}
 
 	if err := rootCmd.Execute(); err != nil {
-		log := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).With().Timestamp().Logger()
-		log.Fatal().Err(err).Msg("Could not start application")
+		GetDefaultLogger().Fatal().Err(err).Msg("Could not start application")
 	}
 }

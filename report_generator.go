@@ -16,9 +16,13 @@ type ReportGenerator struct {
 type ReportEntry struct {
 	Chain               string
 	Wallet              string
-	ProposalId          string
+	ProposalID          string
 	ProposalDescription string
 	Vote                string
+}
+
+func (e *ReportEntry) HasVoted() bool {
+	return e.Vote != ""
 }
 
 type Report struct {
@@ -95,20 +99,30 @@ func (g *ReportGenerator) GenerateReport() *Report {
 					entries = append(entries, ReportEntry{
 						Chain:               chain.Name,
 						Wallet:              wallet,
-						ProposalId:          proposal.ProposalID,
+						ProposalID:          proposal.ProposalID,
 						ProposalDescription: proposal.Content.Description,
 					})
 				}
 
 				// Hasn't voted before but voted now - need to close alert/notify about new vote.
 				if votedNow && !votedBefore {
-					// entries = append(entries, ReportEntry{
-					// 	Chain:               chain.Name,
-					// 	Wallet:              wallet,
-					// 	ProposalId:          proposal.ProposalID,
-					// 	ProposalDescription: proposal.Content.Description,
-					// 	Vote: ,
-					// })
+					vote := g.StateManager.GetVote(chain.Name, proposal.ProposalID, wallet)
+					if vote == nil {
+						g.Logger.Info().
+							Str("chain", chain.Name).
+							Str("proposal", proposal.ProposalID).
+							Str("wallet", wallet).
+							Msg("No vote found while there should be one")
+						continue
+					}
+
+					entries = append(entries, ReportEntry{
+						Chain:               chain.Name,
+						Wallet:              wallet,
+						ProposalID:          proposal.ProposalID,
+						ProposalDescription: proposal.Content.Description,
+						Vote:                vote.Option,
+					})
 				}
 			}
 		}
@@ -116,5 +130,5 @@ func (g *ReportGenerator) GenerateReport() *Report {
 
 	g.StateManager.CommitNewState()
 
-	return &Report{}
+	return &Report{Entries: entries}
 }

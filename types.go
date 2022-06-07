@@ -1,7 +1,5 @@
 package main
 
-const VotingPeriod = "PROPOSAL_STATUS_VOTING_PERIOD"
-
 // RPC response types.
 type Proposal struct {
 	ProposalID string           `json:"proposal_id"`

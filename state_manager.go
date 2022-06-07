@@ -18,28 +18,27 @@ type State struct {
 	OldVotesState VotesState
 }
 
-type WalletVotes map[string]*Vote
-type ProposalVotes map[string]WalletVotes
+type (
+	WalletVotes   map[string]*Vote
+	ProposalVotes map[string]WalletVotes
+)
 
-// ["chain"]["proposal"]["wallet"]["vote"]
+// ["chain"]["proposal"]["wallet"]["vote"].
 type VotesState map[string]ProposalVotes
 
 func NewStateManager(path string, logger *zerolog.Logger) *StateManager {
 	return &StateManager{
 		StatePath: path,
 		Logger:    logger.With().Str("component", "state_manager").Logger(),
+		State: State{
+			VotesState:    make(VotesState),
+			OldVotesState: make(VotesState),
+		},
 	}
 }
 
 func (m *StateManager) SetVote(chain, proposal, wallet string, vote *Vote) {
-	var votesState VotesState
-
-	if m.State.VotesState == nil {
-		votesState = make(VotesState)
-		m.State.VotesState = votesState
-	}
-
-	votesState = m.State.VotesState
+	votesState := m.State.VotesState
 
 	if _, ok := votesState[chain]; !ok {
 		votesState[chain] = make(ProposalVotes)
@@ -52,6 +51,20 @@ func (m *StateManager) SetVote(chain, proposal, wallet string, vote *Vote) {
 	if vote != nil {
 		votesState[chain][proposal][wallet] = vote
 	}
+}
+
+func (m *StateManager) GetVote(chain, proposal, wallet string) *Vote {
+	votesState := m.State.VotesState
+
+	if _, ok := votesState[chain]; !ok {
+		return nil
+	}
+
+	if _, ok := votesState[chain][proposal]; !ok {
+		return nil
+	}
+
+	return votesState[chain][proposal][wallet]
 }
 
 func (m *StateManager) HasVotedNow(chain, proposal, wallet string) bool {
@@ -98,13 +111,14 @@ func (m *StateManager) Load() {
 	}
 
 	var state VotesState
-	if err = json.Unmarshal([]byte(content), &state); err != nil {
+	if err = json.Unmarshal(content, &state); err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not unmarshall state")
 		m.State.OldVotesState = make(VotesState)
 		return
 	}
 
 	m.State.OldVotesState = state
+	m.State.VotesState = make(VotesState)
 }
 
 func (m *StateManager) Save() {
@@ -114,7 +128,7 @@ func (m *StateManager) Save() {
 		return
 	}
 
-	if err = os.WriteFile(m.StatePath, content, 0644); err != nil {
+	if err = os.WriteFile(m.StatePath, content, 0o600); err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not save state")
 		return
 	}

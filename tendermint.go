@@ -66,11 +66,11 @@ func (rpc *RPC) GetVote(proposal, voter string) (*VoteRPCResponse, error) {
 
 func (rpc *RPC) Get(url string, target interface{}) error {
 	for _, lcd := range rpc.URLs {
-		fullUrl := lcd + url
-		rpc.Logger.Trace().Str("url", fullUrl).Msg("Trying making request to LCD")
+		fullURL := lcd + url
+		rpc.Logger.Trace().Str("url", fullURL).Msg("Trying making request to LCD")
 
 		err := rpc.GetFull(
-			fullUrl,
+			fullURL,
 			target,
 		)
 
@@ -78,7 +78,7 @@ func (rpc *RPC) Get(url string, target interface{}) error {
 			return nil
 		}
 
-		rpc.Logger.Warn().Str("url", fullUrl).Err(err).Msg("LCD request failed")
+		rpc.Logger.Warn().Str("url", fullURL).Err(err).Msg("LCD request failed")
 	}
 
 	rpc.Logger.Warn().Str("url", url).Msg("All LCD requests failed")
