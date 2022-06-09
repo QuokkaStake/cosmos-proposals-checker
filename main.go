@@ -45,6 +45,8 @@ func Execute(configPath string) {
 			continue
 		}
 
+		log.Debug().Int("len", len(report.Entries)).Msg("Got non-empty report")
+
 		for _, reporter := range reporters {
 			if reporter.Enabled() {
 				log.Debug().Str("name", reporter.Name()).Msg("Sending report...")
