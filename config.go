@@ -49,6 +49,7 @@ type Config struct {
 	LogConfig       LogConfig       `toml:"log"`
 	StatePath       string          `toml:"state-path"`
 	Chains          []Chain         `toml:"chains"`
+	Interval        int64           `toml:"interval" default:"30"`
 }
 
 type PagerDutyConfig struct {

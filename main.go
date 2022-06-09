@@ -41,7 +41,7 @@ func Execute(configPath string) {
 
 		if report.Empty() {
 			log.Debug().Msg("Empty report, not sending.")
-			time.Sleep(time.Second * 30)
+			time.Sleep(time.Second * time.Duration(config.Interval))
 			continue
 		}
 
@@ -54,7 +54,7 @@ func Execute(configPath string) {
 			}
 		}
 
-		time.Sleep(time.Second * 30)
+		time.Sleep(time.Second * time.Duration(config.Interval))
 	}
 }
 
