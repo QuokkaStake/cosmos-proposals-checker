@@ -26,3 +26,31 @@ type VoteRPCResponse struct {
 	Code int64 `json:"code"`
 	Vote *Vote `json:"vote"`
 }
+
+type Report struct {
+	Entries []ReportEntry
+}
+
+func (r *Report) Empty() bool {
+	return len(r.Entries) == 0
+}
+
+type ReportEntry struct {
+	Chain               string
+	Wallet              string
+	ProposalID          string
+	ProposalTitle       string
+	ProposalDescription string
+	Vote                string
+}
+
+func (e *ReportEntry) HasVoted() bool {
+	return e.Vote != ""
+}
+
+type Reporter interface {
+	Init()
+	Enabled() bool
+	SendReport(report Report) error
+	Name() string
+}

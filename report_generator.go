@@ -13,22 +13,6 @@ type ReportGenerator struct {
 	Logger       zerolog.Logger
 }
 
-type ReportEntry struct {
-	Chain               string
-	Wallet              string
-	ProposalID          string
-	ProposalDescription string
-	Vote                string
-}
-
-func (e *ReportEntry) HasVoted() bool {
-	return e.Vote != ""
-}
-
-type Report struct {
-	Entries []ReportEntry
-}
-
 func NewReportGenerator(
 	manager *StateManager,
 	logger *zerolog.Logger,
@@ -41,7 +25,7 @@ func NewReportGenerator(
 	}
 }
 
-func (g *ReportGenerator) GenerateReport() *Report {
+func (g *ReportGenerator) GenerateReport() Report {
 	votesMap := make(map[string]map[string]map[string]*Vote)
 	proposalsMap := make(map[string][]Proposal)
 
@@ -67,6 +51,12 @@ func (g *ReportGenerator) GenerateReport() *Report {
 						Str("proposal", proposal.ProposalID).
 						Str("wallet", wallet).
 						Msg("Wallet has already voted, not checking again,")
+					g.StateManager.SetVote(
+						chain.Name,
+						proposal.ProposalID,
+						wallet,
+						g.StateManager.GetVoteBefore(chain.Name, proposal.ProposalID, wallet),
+					)
 					continue
 				}
 
@@ -96,10 +86,16 @@ func (g *ReportGenerator) GenerateReport() *Report {
 
 				// Hasn't voted for this proposal - need to notify.
 				if !votedNow {
+					g.Logger.Debug().
+						Str("chain", chain.Name).
+						Str("proposal", proposal.ProposalID).
+						Str("wallet", wallet).
+						Msg("Wallet hasn't voted now - sending an alert")
 					entries = append(entries, ReportEntry{
 						Chain:               chain.Name,
 						Wallet:              wallet,
 						ProposalID:          proposal.ProposalID,
+						ProposalTitle:       proposal.Content.Title,
 						ProposalDescription: proposal.Content.Description,
 					})
 				}
@@ -116,10 +112,17 @@ func (g *ReportGenerator) GenerateReport() *Report {
 						continue
 					}
 
+					g.Logger.Debug().
+						Str("chain", chain.Name).
+						Str("proposal", proposal.ProposalID).
+						Str("wallet", wallet).
+						Msg("Wallet hasn't voted before but voted now - closing an alert")
+
 					entries = append(entries, ReportEntry{
 						Chain:               chain.Name,
 						Wallet:              wallet,
 						ProposalID:          proposal.ProposalID,
+						ProposalTitle:       proposal.Content.Title,
 						ProposalDescription: proposal.Content.Description,
 						Vote:                vote.Option,
 					})
@@ -130,5 +133,5 @@ func (g *ReportGenerator) GenerateReport() *Report {
 
 	g.StateManager.CommitNewState()
 
-	return &Report{Entries: entries}
+	return Report{Entries: entries}
 }

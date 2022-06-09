@@ -25,8 +25,35 @@ func Execute(configPath string) {
 
 	reportGenerator := NewReportGenerator(stateManager, log, config.Chains)
 
+	reporters := []Reporter{
+		NewPagerDutyReporter(config.PagerDutyConfig, log),
+	}
+
+	for _, reporter := range reporters {
+		reporter.Init()
+		if reporter.Enabled() {
+			log.Info().Str("name", reporter.Name()).Msg("Init reporter")
+		}
+	}
+
 	for {
-		_ = reportGenerator.GenerateReport()
+		report := reportGenerator.GenerateReport()
+
+		if report.Empty() {
+			log.Debug().Msg("Empty report, not sending.")
+			time.Sleep(time.Second * 30)
+			continue
+		}
+
+		for _, reporter := range reporters {
+			if reporter.Enabled() {
+				log.Debug().Str("name", reporter.Name()).Msg("Sending report...")
+				if err := reporter.SendReport(report); err != nil {
+					log.Error().Err(err).Str("name", reporter.Name()).Msg("Failed to send report")
+				}
+			}
+		}
+
 		time.Sleep(time.Second * 30)
 	}
 }

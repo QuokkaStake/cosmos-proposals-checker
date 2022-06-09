@@ -67,6 +67,20 @@ func (m *StateManager) GetVote(chain, proposal, wallet string) *Vote {
 	return votesState[chain][proposal][wallet]
 }
 
+func (m *StateManager) GetVoteBefore(chain, proposal, wallet string) *Vote {
+	votesState := m.State.OldVotesState
+
+	if _, ok := votesState[chain]; !ok {
+		return nil
+	}
+
+	if _, ok := votesState[chain][proposal]; !ok {
+		return nil
+	}
+
+	return votesState[chain][proposal][wallet]
+}
+
 func (m *StateManager) HasVotedNow(chain, proposal, wallet string) bool {
 	if m.State.VotesState == nil {
 		return false

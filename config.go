@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/BurntSushi/toml"
+	"github.com/mcuadros/go-defaults"
 )
 
 type Chain struct {
@@ -30,14 +31,20 @@ func (c *Chain) Validate() error {
 }
 
 type Config struct {
-	LogConfig LogConfig `toml:"log"`
-	StatePath string    `toml:"state-path"`
-	Chains    []Chain   `toml:"chains"`
+	PagerDutyConfig PagerDutyConfig `toml:"pagerduty"`
+	LogConfig       LogConfig       `toml:"log"`
+	StatePath       string          `toml:"state-path"`
+	Chains          []Chain         `toml:"chains"`
+}
+
+type PagerDutyConfig struct {
+	PagerDutyURL string `toml:"url"`
+	APIKey       string `toml:"api-key"`
 }
 
 type LogConfig struct {
-	LogLevel   string `toml:"level"`
-	JSONOutput bool   `toml:"json"`
+	LogLevel   string `toml:"level" default:"info"`
+	JSONOutput bool   `toml:"json" default:"false"`
 }
 
 func (c *Config) Validate() error {
@@ -67,5 +74,6 @@ func GetConfig(path string) (*Config, error) {
 		return nil, err
 	}
 
+	defaults.SetDefaults(&configStruct)
 	return &configStruct, nil
 }
