@@ -10,6 +10,8 @@ import (
 
 type Chain struct {
 	Name         string   `toml:"name"`
+	PrettyName   string   `toml:"pretty-name"`
+	KeplrName    string   `toml:"keplr-name"`
 	LCDEndpoints []string `toml:"lcd-endpoints"`
 	Wallets      []string `toml:"wallets"`
 }
@@ -28,6 +30,18 @@ func (c *Chain) Validate() error {
 	}
 
 	return nil
+}
+
+func (c *Chain) GetName() string {
+	if c.PrettyName != "" {
+		return c.PrettyName
+	}
+
+	return c.Name
+}
+
+func (c *Chain) GetKeplrLink(proposalId string) string {
+	return fmt.Sprintf("https://wallet.keplr.app/#/%s/governance?detailId=%s", c.KeplrName, proposalId)
 }
 
 type Config struct {

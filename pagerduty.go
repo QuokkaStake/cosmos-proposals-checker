@@ -36,6 +36,7 @@ type PagerDutyAlert struct {
 	EventAction string                `json:"event_action"`
 	DedupKey    string                `json:"dedup_key"`
 	Client      string                `json:"client"`
+	Links       []PagerDutyLink       `json:"links"`
 	ClientURL   string                `json:"client_url"`
 }
 
@@ -52,7 +53,7 @@ func (r *PagerDutyReporter) NewPagerDutyAlertFromReportEntry(e ReportEntry) Page
 
 	dedupKey := fmt.Sprintf(
 		"cosmos-proposals-checker alert chain=%s proposal=%s wallet=%s",
-		e.Chain,
+		e.Chain.Name,
 		e.ProposalID,
 		e.Wallet,
 	)
@@ -62,20 +63,35 @@ func (r *PagerDutyReporter) NewPagerDutyAlertFromReportEntry(e ReportEntry) Page
 		hostname = "unknown-host"
 	}
 
+	links := []PagerDutyLink{}
+	if e.Chain.KeplrName != "" {
+		links = append(links, PagerDutyLink{
+			Href: e.Chain.GetKeplrLink(e.ProposalID),
+			Text: "Proposal on Keplr",
+		})
+	}
+
 	return PagerDutyAlert{
 		Payload: PagerDutyAlertPayload{
-			Summary:   fmt.Sprintf("Wallet %s hasn't voted on proposal %s on %s: %s", e.Wallet, e.ProposalID, e.Chain, e.ProposalTitle),
+			Summary: fmt.Sprintf(
+				"Wallet %s hasn't voted on proposal %s on %s: %s",
+				e.Wallet,
+				e.ProposalID,
+				e.Chain.GetName(),
+				e.ProposalTitle,
+			),
 			Timestamp: time.Now().Format(time.RFC3339),
 			Severity:  "error",
 			Source:    hostname,
 			CustomDetails: map[string]string{
 				"Wallet":               e.Wallet,
-				"Chain":                e.Chain,
+				"Chain":                e.Chain.GetName(),
 				"Proposal ID":          e.ProposalID,
 				"Proposal title":       e.ProposalTitle,
 				"Proposal description": e.ProposalDescription,
 			},
 		},
+		Links:       links,
 		RoutingKey:  r.APIKey,
 		EventAction: eventAction,
 		DedupKey:    dedupKey,

@@ -36,7 +36,7 @@ func (r *Report) Empty() bool {
 }
 
 type ReportEntry struct {
-	Chain               string
+	Chain               Chain
 	Wallet              string
 	ProposalID          string
 	ProposalTitle       string

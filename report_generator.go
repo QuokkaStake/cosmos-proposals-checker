@@ -92,7 +92,7 @@ func (g *ReportGenerator) GenerateReport() Report {
 						Str("wallet", wallet).
 						Msg("Wallet hasn't voted now - sending an alert")
 					entries = append(entries, ReportEntry{
-						Chain:               chain.Name,
+						Chain:               chain,
 						Wallet:              wallet,
 						ProposalID:          proposal.ProposalID,
 						ProposalTitle:       proposal.Content.Title,
@@ -119,7 +119,7 @@ func (g *ReportGenerator) GenerateReport() Report {
 						Msg("Wallet hasn't voted before but voted now - closing an alert")
 
 					entries = append(entries, ReportEntry{
-						Chain:               chain.Name,
+						Chain:               chain,
 						Wallet:              wallet,
 						ProposalID:          proposal.ProposalID,
 						ProposalTitle:       proposal.Content.Title,
