@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"strings"
 	"time"
 
+	"github.com/rs/zerolog"
 	telegramBot "gopkg.in/tucnak/telebot.v2"
 )
 
@@ -43,32 +42,7 @@ func (reporter *TelegramReporter) Init() {
 	}
 
 	reporter.TelegramBot = bot
-
-	//r.TelegramBot.Handle(r.TelegramSetAliasCommand, r.processSetAliasCommand)
-	//r.TelegramBot.Handle(r.TelegramClearAliasCommand, r.processClearAliasCommand)
-	//r.TelegramBot.Handle(r.TelegramListAliasesCommand, r.processListAliasesCommand)
 	go reporter.TelegramBot.Start()
-}
-
-func (reporter *TelegramReporter) logQuery(message *telegramBot.Message, command string) {
-	log.Info().
-		Str("command", command).
-		Str("text", message.Text).
-		Str("user", message.Sender.Username).
-		Msg("Received command")
-}
-
-func (reporter *TelegramReporter) sendMessage(message *telegramBot.Message, text string) error {
-	_, err := reporter.TelegramBot.Send(
-		message.Chat,
-		text,
-		&telegramBot.SendOptions{
-			ParseMode: telegramBot.ModeHTML,
-			ReplyTo:   message,
-		},
-	)
-
-	return err
 }
 
 func (reporter TelegramReporter) Enabled() bool {

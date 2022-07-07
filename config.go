@@ -40,8 +40,8 @@ func (c *Chain) GetName() string {
 	return c.Name
 }
 
-func (c *Chain) GetKeplrLink(proposalId string) string {
-	return fmt.Sprintf("https://wallet.keplr.app/#/%s/governance?detailId=%s", c.KeplrName, proposalId)
+func (c *Chain) GetKeplrLink(proposalID string) string {
+	return fmt.Sprintf("https://wallet.keplr.app/#/%s/governance?detailId=%s", c.KeplrName, proposalID)
 }
 
 type Config struct {
