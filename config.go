@@ -46,6 +46,7 @@ func (c *Chain) GetKeplrLink(proposalId string) string {
 
 type Config struct {
 	PagerDutyConfig PagerDutyConfig `toml:"pagerduty"`
+	TelegramConfig  TelegramConfig  `toml:"telegram"`
 	LogConfig       LogConfig       `toml:"log"`
 	StatePath       string          `toml:"state-path"`
 	Chains          []Chain         `toml:"chains"`
@@ -55,6 +56,11 @@ type Config struct {
 type PagerDutyConfig struct {
 	PagerDutyURL string `toml:"url"`
 	APIKey       string `toml:"api-key"`
+}
+
+type TelegramConfig struct {
+	TelegramChat  int64  `toml:"chat"`
+	TelegramToken string `toml:"token"`
 }
 
 type LogConfig struct {

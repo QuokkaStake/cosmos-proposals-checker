@@ -27,6 +27,7 @@ func Execute(configPath string) {
 
 	reporters := []Reporter{
 		NewPagerDutyReporter(config.PagerDutyConfig, log),
+		NewTelegramReporter(config.TelegramConfig, log),
 	}
 
 	for _, reporter := range reporters {
