@@ -67,7 +67,15 @@ func (r *PagerDutyReporter) NewPagerDutyAlertFromReportEntry(e ReportEntry) Page
 	if e.Chain.KeplrName != "" {
 		links = append(links, PagerDutyLink{
 			Href: e.Chain.GetKeplrLink(e.ProposalID),
-			Text: "Proposal on Keplr",
+			Text: "Keplr",
+		})
+	}
+
+	explorerLinks := e.Chain.GetExplorerProposalsLinks(e.ProposalID)
+	for _, link := range explorerLinks {
+		links = append(links, PagerDutyLink{
+			Href: link.Link,
+			Text: link.Name,
 		})
 	}
 

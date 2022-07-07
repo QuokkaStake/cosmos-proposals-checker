@@ -54,7 +54,7 @@ func (reporter *TelegramReporter) SerializeReportEntry(e ReportEntry) string {
 
 	messageText := "🔴 <strong>Wallet %s hasn't voted on proposal %s on %s</strong>\n%s\n"
 	if e.HasVoted() {
-		messageText = "✅ <strong>Wallet %s has voted on proposal %s on %s</strong\n%s\n"
+		messageText = "✅ <strong>Wallet %s has voted on proposal %s on %s</strong>\n%s\n"
 	}
 
 	sb.WriteString(fmt.Sprintf(
@@ -67,8 +67,17 @@ func (reporter *TelegramReporter) SerializeReportEntry(e ReportEntry) string {
 
 	if e.Chain.KeplrName != "" {
 		sb.WriteString(fmt.Sprintf(
-			"<a href='%s'>Proposal on Keplr</a>\n",
+			"<a href='%s'>Keplr</a>\n",
 			e.Chain.GetKeplrLink(e.ProposalID),
+		))
+	}
+
+	explorerLinks := e.Chain.GetExplorerProposalsLinks(e.ProposalID)
+	for _, link := range explorerLinks {
+		sb.WriteString(fmt.Sprintf(
+			"<a href='%s'>%s</a>\n",
+			link.Link,
+			link.Name,
 		))
 	}
 

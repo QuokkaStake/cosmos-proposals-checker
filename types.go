@@ -54,3 +54,8 @@ type Reporter interface {
 	SendReport(report Report) error
 	Name() string
 }
+
+type ExplorerLink struct {
+	Name string
+	Link string
+}
