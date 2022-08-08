@@ -23,11 +23,14 @@ func Execute(configPath string) {
 	stateManager := NewStateManager(config.StatePath, log)
 	stateManager.Load()
 
+	mutesManager := NewMutesManager(config.MutesPath, log)
+	mutesManager.Load()
+
 	reportGenerator := NewReportGenerator(stateManager, log, config.Chains)
 
 	reporters := []Reporter{
 		NewPagerDutyReporter(config.PagerDutyConfig, log),
-		NewTelegramReporter(config.TelegramConfig, log),
+		NewTelegramReporter(config.TelegramConfig, mutesManager, log),
 	}
 
 	for _, reporter := range reporters {
