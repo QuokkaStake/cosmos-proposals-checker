@@ -18,7 +18,7 @@ type TelegramReporter struct {
 	Logger      zerolog.Logger
 }
 
-const MAX_MESSAGE_SIZE = 4096
+const MaxMessageSize = 4096
 
 func NewTelegramReporter(config TelegramConfig, mutesManager *MutesManager, logger *zerolog.Logger) *TelegramReporter {
 	return &TelegramReporter{
@@ -163,15 +163,15 @@ func (reporter *TelegramReporter) HandleHelp(c tele.Context) error {
 	return reporter.BotReply(c, sb.String())
 }
 
-func (r *TelegramReporter) BotReply(c tele.Context, msg string) error {
+func (reporter *TelegramReporter) BotReply(c tele.Context, msg string) error {
 	msgsByNewline := strings.Split(msg, "\n")
 
 	var sb strings.Builder
 
 	for _, line := range msgsByNewline {
-		if sb.Len()+len(line) > MAX_MESSAGE_SIZE {
+		if sb.Len()+len(line) > MaxMessageSize {
 			if err := c.Reply(sb.String(), tele.ModeHTML); err != nil {
-				r.Logger.Error().Err(err).Msg("Could not send Telegram message")
+				reporter.Logger.Error().Err(err).Msg("Could not send Telegram message")
 				return err
 			}
 
@@ -182,7 +182,7 @@ func (r *TelegramReporter) BotReply(c tele.Context, msg string) error {
 	}
 
 	if err := c.Reply(sb.String(), tele.ModeHTML); err != nil {
-		r.Logger.Error().Err(err).Msg("Could not send Telegram message")
+		reporter.Logger.Error().Err(err).Msg("Could not send Telegram message")
 		return err
 	}
 
