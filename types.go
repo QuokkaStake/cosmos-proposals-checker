@@ -1,6 +1,8 @@
 package main
 
-import "time"
+import (
+	"time"
+)
 
 // RPC response types.
 type Proposal struct {
@@ -73,10 +75,14 @@ type Mutes struct {
 	Mutes []Mute
 }
 
+func (m *Mute) IsExpired() bool {
+	return m.Expires.Before(time.Now())
+}
+
 func (m *Mutes) IsMuted(chain string, proposalID string) bool {
 	for _, mute := range m.Mutes {
 		if mute.Chain == chain && mute.ProposalID == proposalID {
-			return mute.Expires.After(time.Now())
+			return !mute.IsExpired()
 		}
 	}
 
@@ -84,10 +90,9 @@ func (m *Mutes) IsMuted(chain string, proposalID string) bool {
 }
 
 func (m *Mutes) AddMute(mute Mute) {
-	for _, muteInRange := range m.Mutes {
+	for index, muteInRange := range m.Mutes {
 		if mute.Chain == muteInRange.Chain && mute.ProposalID == muteInRange.ProposalID {
-			muteInRange.Expires = mute.Expires
-			muteInRange.Comment = mute.Comment
+			m.Mutes[index] = mute
 			return
 		}
 	}

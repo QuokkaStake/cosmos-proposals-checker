@@ -48,6 +48,7 @@ func (reporter *TelegramReporter) Init() {
 	bot.Handle("/start", reporter.HandleHelp)
 	bot.Handle("/help", reporter.HandleHelp)
 	bot.Handle("/proposals_mute", reporter.HandleAddMute)
+	bot.Handle("/proposals_mutes", reporter.HandleListMutes)
 
 	reporter.TelegramBot = bot
 	go reporter.TelegramBot.Start()
@@ -141,7 +142,43 @@ func (reporter *TelegramReporter) HandleAddMute(c tele.Context) error {
 	}
 
 	reporter.MutesManager.AddMute(mute)
-	return reporter.BotReply(c, "Notification muted.")
+	return reporter.BotReply(c, fmt.Sprintf(
+		"Notification for proposal #%s on %s are muted till %s.",
+		mute.ProposalID,
+		mute.Chain,
+		mute.Expires.Format(time.RFC1123),
+	))
+}
+
+func (reporter *TelegramReporter) HandleListMutes(c tele.Context) error {
+	reporter.Logger.Info().
+		Str("sender", c.Sender().Username).
+		Str("text", c.Text()).
+		Msg("Got list mutes query")
+
+	var sb strings.Builder
+	sb.WriteString("<strong>Active mutes:</strong>\n\n")
+
+	mutesCount := 0
+
+	for _, mute := range reporter.MutesManager.Mutes.Mutes {
+		if mute.IsExpired() {
+			continue
+		}
+
+		mutesCount++
+
+		sb.WriteString(fmt.Sprintf(
+			"<strong>Chain: </strong>%s\n<strong>Proposal ID: </strong>%s\n<strong>Expires: </strong>%s\n\n",
+			mute.Chain, mute.ProposalID, mute.Expires,
+		))
+	}
+
+	if mutesCount == 0 {
+		sb.WriteString("No active mutes.")
+	}
+
+	return reporter.BotReply(c, sb.String())
 }
 
 func (reporter *TelegramReporter) HandleHelp(c tele.Context) error {
@@ -155,6 +192,7 @@ func (reporter *TelegramReporter) HandleHelp(c tele.Context) error {
 	sb.WriteString("Notifies you about the proposals your wallets hasn't voted upon.\n")
 	sb.WriteString("Can understand the following commands:\n")
 	sb.WriteString("- /proposals_mute &lt;duration&gt; &lt;chain&gt; &lt;proposal ID&gt; - mute notifications for a specific proposal\n")
+	sb.WriteString("- /proposals_mutes - display the active proposals mutes list\n")
 	sb.WriteString("- /help - display this command\n")
 	sb.WriteString("Created by <a href=\"https://freak12techno.github.io\">freak12techno</a> with ❤️.\n")
 	sb.WriteString("This bot is open-sourced, you can get the source code at https://github.com/freak12techno/cosmos-proposals-checker.\n\n")
