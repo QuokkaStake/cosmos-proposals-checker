@@ -35,3 +35,4 @@ linters:
     - tagliatelle
     - errorlint
     - gofumpt
+    - noctx
