@@ -89,7 +89,7 @@ func (rpc *RPC) GetFull(url string, target interface{}) error {
 	client := &http.Client{Timeout: 10 * 1000000000}
 	start := time.Now()
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return err
 	}

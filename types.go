@@ -1,5 +1,9 @@
 package main
 
+import (
+	"time"
+)
+
 // RPC response types.
 type Proposal struct {
 	ProposalID string           `json:"proposal_id"`
@@ -58,4 +62,51 @@ type Reporter interface {
 type ExplorerLink struct {
 	Name string
 	Link string
+}
+
+type Mute struct {
+	Chain      string
+	ProposalID string
+	Expires    time.Time
+	Comment    string
+}
+
+type Mutes struct {
+	Mutes []Mute
+}
+
+func (m *Mute) IsExpired() bool {
+	return m.Expires.Before(time.Now())
+}
+
+func (m *Mutes) IsMuted(chain string, proposalID string) bool {
+	for _, mute := range m.Mutes {
+		if mute.Chain == chain && mute.ProposalID == proposalID {
+			return !mute.IsExpired()
+		}
+	}
+
+	return false
+}
+
+func (m *Mutes) AddMute(mute Mute) {
+	for index, muteInRange := range m.Mutes {
+		if mute.Chain == muteInRange.Chain && mute.ProposalID == muteInRange.ProposalID {
+			m.Mutes[index] = mute
+			return
+		}
+	}
+
+	m.Mutes = append(m.Mutes, mute)
+}
+
+func (m *Mutes) DeleteMute(chain string, proposalID string) bool {
+	for index, mute := range m.Mutes {
+		if mute.Chain == chain && mute.ProposalID == proposalID {
+			m.Mutes = append(m.Mutes[:index], m.Mutes[index+1:]...)
+			return true
+		}
+	}
+
+	return false
 }

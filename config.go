@@ -63,6 +63,7 @@ type Config struct {
 	TelegramConfig  TelegramConfig  `toml:"telegram"`
 	LogConfig       LogConfig       `toml:"log"`
 	StatePath       string          `toml:"state-path"`
+	MutesPath       string          `toml:"mutes-path"`
 	Chains          []Chain         `toml:"chains"`
 	Interval        int64           `toml:"interval" default:"30"`
 }

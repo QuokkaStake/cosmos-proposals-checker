@@ -165,7 +165,7 @@ func (r PagerDutyReporter) DoRequest(url string, body interface{}, target interf
 		return err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer((jsonBody)))
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer((jsonBody)))
 	if err != nil {
 		r.Logger.Err(err).Msg("Error instantiating request")
 		return err
