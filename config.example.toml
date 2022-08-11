@@ -1,0 +1,57 @@
+# A path to a file that will store the state of the app.
+state-path = "cosmos-proposals-checker-state.json"
+# A path to a file that will store mutes of this app. Omitting it will disable the mute functionality.
+mutes-path = "cosmos-proposals-checker-mutes.json"
+# Interval to check and notify, in seconds. Defaults to 3600 (1 hour)
+interval = 60
+
+# Logging configuration
+[log]
+# Log level. Defaults to "info". Set it to "debug" or "trace" to add more verbosity and for debugging.
+level = "trace"
+# Whether to write all logs in JSON instead of pretty-printing. Useful if you use a centralised logging
+# solition, like ELK. Defaults to false.
+json = false
+
+# Per-chain config. There can be multiple chains.
+[[chains]]
+# Chain name, used internally. Required. Should be unique.
+name = "sentinel"
+# Pretty name that is used when reporting. Optional.
+pretty-name = "Sentinel"
+# Chain name in Keplr wallet, to generate links to a proposal. Optional.
+keplr-name = "sentinel"
+# Mintscan prefix, to generate links to a proposal. Optional.
+mintscan-prefix = "sentinel"
+# List of LCD endpoints to get data from. At least 1 is required. You can use
+# multiple LCD endpoints, in case a single one fails.
+lcd-endpoints = ["https://lcd-sentinel-app.cosmostation.io", "https://lcd-sentinel.whispernode.com"]
+# List of wallets to monitor. At least 1 is required.
+wallets = [
+    "sent1rw9wtyhsus7jvx55v3qv5nzun054ma6kas4u3l"
+]
+
+[[chains]]
+name = "bitsong"
+pretty-name = "Bitsong"
+keplr-name = "bitsong"
+mintscan-prefix = "bitsong"
+lcd-endpoints = ["https://lcd-bitsong-app.cosmostation.io"]
+wallets = [
+    "bitsong14rvn7anf22e00vj5x3al4w50ns78s7n4t8yxcy" # freak12techno self delegate wallet
+]
+
+# PagerDuty notifier config.
+[pagerduty]
+# PagerDuty URL. You may need to override it if you use EU version of Pagerduty.
+# Defaults to "https://events.pagerduty.com"
+url = "https://events.eu.pagerduty.com"
+# PagerDuty API key. If omitted, the PagerDuty reporter will be disabled.
+api-key = "xxxyyyzzz"
+
+# Telegram notifier config.
+[telegram]
+# Telegram bot token. If omitted, the Telegram reporter will be disabled.
+token = "aaaa:bbbbb"
+# Chat ID to write to. Check README for integration info.
+chat = 123456
