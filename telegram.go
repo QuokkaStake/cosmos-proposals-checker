@@ -74,6 +74,12 @@ func (reporter *TelegramReporter) SerializeReportEntry(e ReportEntry) string {
 		e.ProposalTitle,
 	))
 
+	sb.WriteString(fmt.Sprintf(
+		"Voting ends at: %s (in %s)\n\n",
+		e.ProposalVoteEndingTime.Format(time.RFC3339Nano),
+		time.Until(e.ProposalVoteEndingTime).Round(time.Second),
+	))
+
 	if e.Chain.KeplrName != "" {
 		sb.WriteString(fmt.Sprintf(
 			"<a href='%s'>Keplr</a>\n",
