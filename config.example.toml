@@ -16,29 +16,33 @@ json = false
 # Per-chain config. There can be multiple chains.
 [[chains]]
 # Chain name, used internally. Required. Should be unique.
-name = "sentinel"
+name = "bitsong"
 # Pretty name that is used when reporting. Optional.
-pretty-name = "Sentinel"
+pretty-name = "Bitsong"
 # Chain name in Keplr wallet, to generate links to a proposal. Optional.
-keplr-name = "sentinel"
+keplr-name = "bitsong"
 # Mintscan prefix, to generate links to a proposal. Optional.
-mintscan-prefix = "sentinel"
+mintscan-prefix = "bitsong"
+# A pattern for proposal link for explorer, if there's no Mintscan support
+# for the chain, but there is a custom explorer. %s is replaced by the proposal ID.
+# Also optional.
+explorer-link-pattern = "https://explorebitsong.com/bitsong/proposals/%s"
 # List of LCD endpoints to get data from. At least 1 is required. You can use
 # multiple LCD endpoints, in case a single one fails.
-lcd-endpoints = ["https://lcd-sentinel-app.cosmostation.io", "https://lcd-sentinel.whispernode.com"]
+lcd-endpoints = ["https://lcd-bitsong-app.cosmostation.io"]
 # List of wallets to monitor. At least 1 is required.
 wallets = [
-    "sent1rw9wtyhsus7jvx55v3qv5nzun054ma6kas4u3l"
+    "bitsong14rvn7anf22e00vj5x3al4w50ns78s7n4t8yxcy"
 ]
 
 [[chains]]
-name = "bitsong"
-pretty-name = "Bitsong"
-keplr-name = "bitsong"
-mintscan-prefix = "bitsong"
-lcd-endpoints = ["https://lcd-bitsong-app.cosmostation.io"]
+name = "sentinel"
+pretty-name = "Sentinel"
+keplr-name = "sentinel"
+mintscan-prefix = "sentinel"
+lcd-endpoints = ["https://lcd-sentinel-app.cosmostation.io", "https://lcd-sentinel.whispernode.com"]
 wallets = [
-    "bitsong14rvn7anf22e00vj5x3al4w50ns78s7n4t8yxcy" # freak12techno self delegate wallet
+    "sent1rw9wtyhsus7jvx55v3qv5nzun054ma6kas4u3l"
 ]
 
 # PagerDuty notifier config.
