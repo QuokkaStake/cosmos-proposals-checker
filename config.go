@@ -9,12 +9,13 @@ import (
 )
 
 type Chain struct {
-	Name           string   `toml:"name"`
-	PrettyName     string   `toml:"pretty-name"`
-	KeplrName      string   `toml:"keplr-name"`
-	LCDEndpoints   []string `toml:"lcd-endpoints"`
-	Wallets        []string `toml:"wallets"`
-	MintscanPrefix string   `toml:"mintscan-prefix"`
+	Name                string   `toml:"name"`
+	PrettyName          string   `toml:"pretty-name"`
+	KeplrName           string   `toml:"keplr-name"`
+	LCDEndpoints        []string `toml:"lcd-endpoints"`
+	Wallets             []string `toml:"wallets"`
+	MintscanPrefix      string   `toml:"mintscan-prefix"`
+	ExplorerLinkPattern string   `toml:"explorer-link-pattern"`
 }
 
 func (c *Chain) Validate() error {
@@ -50,12 +51,21 @@ func (c *Chain) GetExplorerProposalsLinks(proposalID string) []ExplorerLink {
 		return []ExplorerLink{}
 	}
 
-	return []ExplorerLink{
+	links := []ExplorerLink{
 		{
 			Name: "Mintscan",
 			Link: fmt.Sprintf("https://mintscan.io/%s/proposals/%s", c.MintscanPrefix, proposalID),
 		},
 	}
+
+	if c.ExplorerLinkPattern != "" {
+		links = append(links, ExplorerLink{
+			Name: "Explorer",
+			Link: fmt.Sprintf(c.ExplorerLinkPattern, proposalID),
+		})
+	}
+
+	return links
 }
 
 type Config struct {
