@@ -6,9 +6,10 @@ import (
 
 // RPC response types.
 type Proposal struct {
-	ProposalID string           `json:"proposal_id"`
-	Status     string           `json:"status"`
-	Content    *ProposalContent `json:"content"`
+	ProposalID    string           `json:"proposal_id"`
+	Status        string           `json:"status"`
+	Content       *ProposalContent `json:"content"`
+	VotingEndTime time.Time        `json:"voting_end_time"`
 }
 
 type ProposalContent struct {
@@ -40,12 +41,13 @@ func (r *Report) Empty() bool {
 }
 
 type ReportEntry struct {
-	Chain               Chain
-	Wallet              string
-	ProposalID          string
-	ProposalTitle       string
-	ProposalDescription string
-	Vote                string
+	Chain                  Chain
+	Wallet                 string
+	ProposalID             string
+	ProposalTitle          string
+	ProposalDescription    string
+	ProposalVoteEndingTime time.Time
+	Vote                   string
 }
 
 func (e *ReportEntry) HasVoted() bool {
