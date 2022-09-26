@@ -18,7 +18,10 @@ type TelegramReporter struct {
 	Logger      zerolog.Logger
 }
 
-const MaxMessageSize = 4096
+const (
+	MaxMessageSize   = 4096
+	AuthorDisclaimer = "\nSent by <a href='https://github.com/freak12techno/cosmos-proposals-checker'>cosmos-proposals-checker.</a>"
+)
 
 func NewTelegramReporter(config TelegramConfig, mutesManager *MutesManager, logger *zerolog.Logger) *TelegramReporter {
 	return &TelegramReporter{
@@ -59,11 +62,20 @@ func (reporter TelegramReporter) Enabled() bool {
 }
 
 func (reporter *TelegramReporter) SerializeReportEntry(e ReportEntry) string {
+	if e.Type == ProposalQueryError {
+		return reporter.SerializeProposalsError(e)
+	}
+	if e.Type == VoteQueryError {
+		return reporter.SerializeVoteError(e)
+	}
+
 	var sb strings.Builder
 
-	messageText := "🔴 <strong>Wallet %s hasn't voted on proposal %s on %s</strong>\n%s\n"
-	if e.HasVoted() {
-		messageText = "✅ <strong>Wallet %s has voted on proposal %s on %s</strong>\n%s\n"
+	messageText := "🔴 <strong>Wallet %s hasn't voted on proposal %s on %s</strong>\n%s\n\n"
+	if e.HasRevoted() {
+		messageText = "↔️ <strong>Wallet %s hasn changed its vote on proposal %s on %s</strong>\n%s\n\n"
+	} else if e.HasVoted() {
+		messageText = "✅ <strong>Wallet %s has voted on proposal %s on %s</strong>\n%s\n\n"
 	}
 
 	sb.WriteString(fmt.Sprintf(
@@ -74,11 +86,33 @@ func (reporter *TelegramReporter) SerializeReportEntry(e ReportEntry) string {
 		e.ProposalTitle,
 	))
 
+	if e.HasVoted() {
+		sb.WriteString(fmt.Sprintf(
+			"<strong>Vote: </strong>%s\n",
+			e.Value,
+		))
+	}
+	if e.HasRevoted() {
+		sb.WriteString(fmt.Sprintf(
+			"<strong>Old vote: </strong>%s\n",
+			e.OldValue,
+		))
+	}
+
 	sb.WriteString(fmt.Sprintf(
 		"Voting ends at: %s (in %s)\n\n",
 		e.ProposalVoteEndingTime.Format(time.RFC3339Nano),
 		time.Until(e.ProposalVoteEndingTime).Round(time.Second),
 	))
+
+	sb.WriteString(reporter.SerializeLinks(e))
+	sb.WriteString(AuthorDisclaimer)
+
+	return sb.String()
+}
+
+func (reporter TelegramReporter) SerializeLinks(e ReportEntry) string {
+	var sb strings.Builder
 
 	if e.Chain.KeplrName != "" {
 		sb.WriteString(fmt.Sprintf(
@@ -96,10 +130,23 @@ func (reporter *TelegramReporter) SerializeReportEntry(e ReportEntry) string {
 		))
 	}
 
-	sb.WriteString(
-		"\nSent by <a href='https://github.com/freak12techno/cosmos-proposals-checker'>cosmos-proposals-checker.</a>",
-	)
+	return sb.String()
+}
 
+func (reporter TelegramReporter) SerializeProposalsError(e ReportEntry) string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("❌ There was an error querying proposals on %s.\n", e.Chain.GetName()))
+	sb.WriteString(fmt.Sprintf("<strong>Error text: </strong>%s.\n", e.Value))
+	sb.WriteString(AuthorDisclaimer)
+	return sb.String()
+}
+
+func (reporter TelegramReporter) SerializeVoteError(e ReportEntry) string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("❌ There was an error querying proposal on %s.\n", e.Chain.GetName()))
+	sb.WriteString(fmt.Sprintf("<strong>Proposal ID: </strong>%s.\n", e.ProposalID))
+	sb.WriteString(fmt.Sprintf("<strong>Error text: </strong>%s.\n", e.Value))
+	sb.WriteString(AuthorDisclaimer)
 	return sb.String()
 }
 

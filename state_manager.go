@@ -13,108 +13,12 @@ type StateManager struct {
 	State     State
 }
 
-type State struct {
-	VotesState    VotesState
-	OldVotesState VotesState
-}
-
-type (
-	WalletVotes   map[string]*Vote
-	ProposalVotes map[string]WalletVotes
-)
-
-// ["chain"]["proposal"]["wallet"]["vote"].
-type VotesState map[string]ProposalVotes
-
 func NewStateManager(path string, logger *zerolog.Logger) *StateManager {
 	return &StateManager{
 		StatePath: path,
 		Logger:    logger.With().Str("component", "state_manager").Logger(),
-		State: State{
-			VotesState:    make(VotesState),
-			OldVotesState: make(VotesState),
-		},
+		State:     NewState(),
 	}
-}
-
-func (m *StateManager) SetVote(chain, proposal, wallet string, vote *Vote) {
-	votesState := m.State.VotesState
-
-	if _, ok := votesState[chain]; !ok {
-		votesState[chain] = make(ProposalVotes)
-	}
-
-	if _, ok := votesState[chain][proposal]; !ok {
-		votesState[chain][proposal] = make(WalletVotes)
-	}
-
-	if vote != nil {
-		votesState[chain][proposal][wallet] = vote
-	}
-}
-
-func (m *StateManager) GetVote(chain, proposal, wallet string) *Vote {
-	votesState := m.State.VotesState
-
-	if _, ok := votesState[chain]; !ok {
-		return nil
-	}
-
-	if _, ok := votesState[chain][proposal]; !ok {
-		return nil
-	}
-
-	return votesState[chain][proposal][wallet]
-}
-
-func (m *StateManager) GetVoteBefore(chain, proposal, wallet string) *Vote {
-	votesState := m.State.OldVotesState
-
-	if _, ok := votesState[chain]; !ok {
-		return nil
-	}
-
-	if _, ok := votesState[chain][proposal]; !ok {
-		return nil
-	}
-
-	return votesState[chain][proposal][wallet]
-}
-
-func (m *StateManager) HasVotedNow(chain, proposal, wallet string) bool {
-	if m.State.VotesState == nil {
-		return false
-	}
-
-	votesState := m.State.VotesState
-	if _, ok := votesState[chain]; !ok {
-		return false
-	}
-
-	if _, ok := votesState[chain][proposal]; !ok {
-		return false
-	}
-
-	_, ok := votesState[chain][proposal][wallet]
-	return ok
-}
-
-func (m *StateManager) HasVotedBefore(chain, proposal, wallet string) bool {
-	if m.State.OldVotesState == nil {
-		return false
-	}
-
-	votesState := m.State.OldVotesState
-	if _, ok := votesState[chain]; !ok {
-		return false
-	}
-
-	if _, ok := votesState[chain][proposal]; !ok {
-		return false
-	}
-
-	_, ok := votesState[chain][proposal][wallet]
-	return ok
 }
 
 func (m *StateManager) Load() {
@@ -124,19 +28,18 @@ func (m *StateManager) Load() {
 		return
 	}
 
-	var state VotesState
+	var state State
 	if err = json.Unmarshal(content, &state); err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not unmarshall state")
-		m.State.OldVotesState = make(VotesState)
+		m.State = NewState()
 		return
 	}
 
-	m.State.OldVotesState = state
-	m.State.VotesState = make(VotesState)
+	m.State = state
 }
 
 func (m *StateManager) Save() {
-	content, err := json.Marshal(m.State.OldVotesState)
+	content, err := json.Marshal(m.State)
 	if err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not marshal state")
 		return
@@ -148,9 +51,7 @@ func (m *StateManager) Save() {
 	}
 }
 
-func (m *StateManager) CommitNewState() {
-	m.State.OldVotesState = m.State.VotesState
-	m.State.VotesState = make(VotesState)
-
+func (m *StateManager) CommitState(state State) {
+	m.State = state
 	m.Save()
 }

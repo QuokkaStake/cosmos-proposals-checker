@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -59,6 +60,10 @@ func (rpc *RPC) GetVote(proposal, voter string) (*VoteRPCResponse, error) {
 	var vote VoteRPCResponse
 	if err := rpc.Get(url, &vote); err != nil {
 		return nil, err
+	}
+
+	if vote.IsError() && vote.Code != 3 {
+		return nil, errors.New(vote.Message)
 	}
 
 	return &vote, nil
