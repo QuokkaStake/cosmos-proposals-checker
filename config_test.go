@@ -7,6 +7,8 @@ import (
 )
 
 func TestValidateChainWithEmptyName(t *testing.T) {
+	t.Parallel()
+
 	chain := Chain{
 		Name: "",
 	}
@@ -16,6 +18,8 @@ func TestValidateChainWithEmptyName(t *testing.T) {
 }
 
 func TestValidateChainWithoutEndpoints(t *testing.T) {
+	t.Parallel()
+
 	chain := Chain{
 		Name:         "chain",
 		LCDEndpoints: []string{},
@@ -26,6 +30,8 @@ func TestValidateChainWithoutEndpoints(t *testing.T) {
 }
 
 func TestValidateChainWithoutWallets(t *testing.T) {
+	t.Parallel()
+
 	chain := Chain{
 		Name:         "chain",
 		LCDEndpoints: []string{"endpoint"},
@@ -37,6 +43,8 @@ func TestValidateChainWithoutWallets(t *testing.T) {
 }
 
 func TestValidateChainWithValidConfig(t *testing.T) {
+	t.Parallel()
+
 	chain := Chain{
 		Name:         "chain",
 		LCDEndpoints: []string{"endpoint"},
@@ -48,6 +56,8 @@ func TestValidateChainWithValidConfig(t *testing.T) {
 }
 
 func TestChainGetNameWithoutPrettyName(t *testing.T) {
+	t.Parallel()
+
 	chain := Chain{
 		Name:       "chain",
 		PrettyName: "",
@@ -58,6 +68,8 @@ func TestChainGetNameWithoutPrettyName(t *testing.T) {
 }
 
 func TestChainGetNameWithPrettyName(t *testing.T) {
+	t.Parallel()
+
 	chain := Chain{
 		Name:       "chain",
 		PrettyName: "chain-pretty",
@@ -68,6 +80,8 @@ func TestChainGetNameWithPrettyName(t *testing.T) {
 }
 
 func TestValidateConfigNoChains(t *testing.T) {
+	t.Parallel()
+
 	config := Config{
 		Chains: []Chain{},
 	}
@@ -76,6 +90,8 @@ func TestValidateConfigNoChains(t *testing.T) {
 }
 
 func TestValidateConfigInvalidChain(t *testing.T) {
+	t.Parallel()
+
 	config := Config{
 		Chains: []Chain{
 			{
@@ -88,6 +104,8 @@ func TestValidateConfigInvalidChain(t *testing.T) {
 }
 
 func TestValidateConfigValidChain(t *testing.T) {
+	t.Parallel()
+
 	config := Config{
 		Chains: []Chain{
 			{
@@ -102,6 +120,8 @@ func TestValidateConfigValidChain(t *testing.T) {
 }
 
 func TestFindChainByNameIfPresent(t *testing.T) {
+	t.Parallel()
+
 	chains := Chains{
 		{Name: "chain1"},
 		{Name: "chain2"},
@@ -112,6 +132,8 @@ func TestFindChainByNameIfPresent(t *testing.T) {
 }
 
 func TestFindChainByNameIfNotPresent(t *testing.T) {
+	t.Parallel()
+
 	chains := Chains{
 		{Name: "chain1"},
 		{Name: "chain2"},
@@ -122,6 +144,8 @@ func TestFindChainByNameIfNotPresent(t *testing.T) {
 }
 
 func TestGetKeplrLink(t *testing.T) {
+	t.Parallel()
+
 	chain := Chain{
 		KeplrName: "chain",
 	}

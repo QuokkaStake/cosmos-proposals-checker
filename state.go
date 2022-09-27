@@ -68,17 +68,17 @@ func (s *State) SetChainProposalsError(chain string, err error) {
 	chainInfo.ProposalsError = err.Error()
 }
 
-func (s State) GetVoteAndProposal(chain, proposalId, wallet string) (ProposalVote, Proposal, bool) {
+func (s State) GetVoteAndProposal(chain, proposalID, wallet string) (ProposalVote, Proposal, bool) {
 	if _, ok := s.ChainInfos[chain]; !ok {
 		return ProposalVote{}, Proposal{}, false
 	}
 
-	if _, ok := s.ChainInfos[chain].ProposalVotes[proposalId]; !ok {
+	if _, ok := s.ChainInfos[chain].ProposalVotes[proposalID]; !ok {
 		return ProposalVote{}, Proposal{}, false
 	}
 
-	vote, found := s.ChainInfos[chain].ProposalVotes[proposalId].Votes[wallet]
-	proposal := s.ChainInfos[chain].Proposals[proposalId]
+	vote, found := s.ChainInfos[chain].ProposalVotes[proposalID].Votes[wallet]
+	proposal := s.ChainInfos[chain].Proposals[proposalID]
 	return vote, proposal, found
 }
 

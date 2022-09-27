@@ -47,21 +47,21 @@ func (g *ReportGenerator) GenerateReport(oldState, newState State) Report {
 			continue
 		}
 
-		for proposalId, proposalVotes := range chainInfo.ProposalVotes {
+		for proposalID, proposalVotes := range chainInfo.ProposalVotes {
 			for wallet := range proposalVotes.Votes {
 				g.Logger.Trace().
 					Str("name", chainName).
-					Str("proposal", proposalId).
+					Str("proposal", proposalID).
 					Str("wallet", wallet).
 					Msg("Generating report for a wallet vote")
 
-				oldVote, _, _ := oldState.GetVoteAndProposal(chainName, proposalId, wallet)
-				newVote, proposal, _ := newState.GetVoteAndProposal(chainName, proposalId, wallet)
+				oldVote, _, _ := oldState.GetVoteAndProposal(chainName, proposalID, wallet)
+				newVote, proposal, _ := newState.GetVoteAndProposal(chainName, proposalID, wallet)
 
 				entry := ReportEntry{
 					Chain:                  *g.Chains.FindByName(chainName),
 					Wallet:                 wallet,
-					ProposalID:             proposalId,
+					ProposalID:             proposalID,
 					ProposalTitle:          proposal.Content.Title,
 					ProposalDescription:    proposal.Content.Description,
 					ProposalVoteEndingTime: proposal.VotingEndTime,
@@ -71,7 +71,7 @@ func (g *ReportGenerator) GenerateReport(oldState, newState State) Report {
 				if newVote.IsError() {
 					g.Logger.Debug().
 						Str("chain", chainName).
-						Str("proposal", proposalId).
+						Str("proposal", proposalID).
 						Str("wallet", wallet).
 						Msg("Error querying for vote - sending an alert")
 					entry.Type = VoteQueryError
@@ -85,7 +85,7 @@ func (g *ReportGenerator) GenerateReport(oldState, newState State) Report {
 				if !newVote.HasVoted() {
 					g.Logger.Debug().
 						Str("chain", chainName).
-						Str("proposal", proposalId).
+						Str("proposal", proposalID).
 						Str("wallet", wallet).
 						Msg("Wallet hasn't voted now - sending an alert")
 					entry.Type = NotVoted

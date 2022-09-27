@@ -8,6 +8,8 @@ import (
 )
 
 func TestSetVoteWithoutChainInfo(t *testing.T) {
+	t.Parallel()
+
 	state := NewState()
 	_, _, found := state.GetVoteAndProposal("chain", "proposal", "wallet")
 	assert.Equal(t, found, false, "Vote should not be presented!")
@@ -27,6 +29,8 @@ func TestSetVoteWithoutChainInfo(t *testing.T) {
 }
 
 func TestSetProposalErrorWithoutChainInfo(t *testing.T) {
+	t.Parallel()
+
 	state := NewState()
 	state.SetChainProposalsError("test", errors.New("test error"))
 
@@ -38,6 +42,8 @@ func TestSetProposalErrorWithoutChainInfo(t *testing.T) {
 }
 
 func TestSetProposalErrorWithChainInfo(t *testing.T) {
+	t.Parallel()
+
 	state := State{
 		ChainInfos: map[string]*ChainInfo{
 			"test": {},
@@ -57,6 +63,8 @@ func TestSetProposalErrorWithChainInfo(t *testing.T) {
 }
 
 func TestGetVoteWithoutChainInfo(t *testing.T) {
+	t.Parallel()
+
 	state := State{}
 
 	_, _, found := state.GetVoteAndProposal("chain", "proposal", "wallet")
@@ -64,6 +72,8 @@ func TestGetVoteWithoutChainInfo(t *testing.T) {
 }
 
 func TestGetVoteWithChainInfo(t *testing.T) {
+	t.Parallel()
+
 	state := State{
 		ChainInfos: map[string]*ChainInfo{
 			"chain": {},
@@ -75,6 +85,8 @@ func TestGetVoteWithChainInfo(t *testing.T) {
 }
 
 func TestGetVoteWithWalletVoteNotPresent(t *testing.T) {
+	t.Parallel()
+
 	state := State{
 		ChainInfos: map[string]*ChainInfo{
 			"chain": {
@@ -90,6 +102,8 @@ func TestGetVoteWithWalletVoteNotPresent(t *testing.T) {
 }
 
 func TestGetVoteWithWalletVotePresent(t *testing.T) {
+	t.Parallel()
+
 	state := State{
 		ChainInfos: map[string]*ChainInfo{
 			"chain": {
@@ -109,6 +123,8 @@ func TestGetVoteWithWalletVotePresent(t *testing.T) {
 }
 
 func TestHasVotedWithoutChainInfo(t *testing.T) {
+	t.Parallel()
+
 	state := State{}
 
 	voted := state.HasVoted("chain", "proposal", "wallet")
@@ -116,6 +132,8 @@ func TestHasVotedWithoutChainInfo(t *testing.T) {
 }
 
 func TestHasVotedWithChainInfo(t *testing.T) {
+	t.Parallel()
+
 	state := State{
 		ChainInfos: map[string]*ChainInfo{
 			"chain": {},
@@ -127,6 +145,8 @@ func TestHasVotedWithChainInfo(t *testing.T) {
 }
 
 func TestHasVotedWithWalletVoteIntoNotPresent(t *testing.T) {
+	t.Parallel()
+
 	state := State{
 		ChainInfos: map[string]*ChainInfo{
 			"chain": {
@@ -142,6 +162,8 @@ func TestHasVotedWithWalletVoteIntoNotPresent(t *testing.T) {
 }
 
 func TestHasVotedWithWalletVoteInfoPresent(t *testing.T) {
+	t.Parallel()
+
 	state := State{
 		ChainInfos: map[string]*ChainInfo{
 			"chain": {
@@ -161,6 +183,8 @@ func TestHasVotedWithWalletVoteInfoPresent(t *testing.T) {
 }
 
 func TestHasVotedWithWalletVotePresent(t *testing.T) {
+	t.Parallel()
+
 	state := State{
 		ChainInfos: map[string]*ChainInfo{
 			"chain": {
