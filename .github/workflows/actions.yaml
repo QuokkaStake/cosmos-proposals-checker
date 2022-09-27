@@ -38,7 +38,7 @@ jobs:
         with:
           go-version: '1.18.2'
       - name: Run tests
-        run: go test -coverprofile cover.out *.go -v
+        run: go test -coverprofile coverage.txt -v
       - name: Download uploader
         run: curl -Os https://uploader.codecov.io/latest/linux/codecov
       - name: Make uploader executable
