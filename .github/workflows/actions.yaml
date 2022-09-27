@@ -30,3 +30,13 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           args: --timeout 300s
+  codecov:
+    name: codecov
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download uploader
+        run: curl -Os https://uploader.codecov.io/latest/linux/codecov
+      - name: Make uploader executable
+        run: chmod +x codecov
+      - name: Run uploader
+        run: ./codecov
