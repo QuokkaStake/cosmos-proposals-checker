@@ -131,6 +131,10 @@ func (r PagerDutyReporter) SendReport(report Report) error {
 	var err error
 
 	for _, entry := range report.Entries {
+		if !entry.IsVoteOrNotVoted() {
+			continue
+		}
+
 		alert := r.NewPagerDutyAlertFromReportEntry(entry)
 
 		if alertErr := r.SendAlert(alert); alertErr != nil {

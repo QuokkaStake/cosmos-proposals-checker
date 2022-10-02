@@ -28,8 +28,13 @@ type Vote struct {
 }
 
 type VoteRPCResponse struct {
-	Code int64 `json:"code"`
-	Vote *Vote `json:"vote"`
+	Code    int64  `json:"code"`
+	Message string `json:"message"`
+	Vote    *Vote  `json:"vote"`
+}
+
+func (v VoteRPCResponse) IsError() bool {
+	return v.Code != 0
 }
 
 type Report struct {
@@ -40,6 +45,16 @@ func (r *Report) Empty() bool {
 	return len(r.Entries) == 0
 }
 
+type ReportEntryType int
+
+const (
+	NotVoted ReportEntryType = iota
+	Voted
+	Revoted
+	ProposalQueryError
+	VoteQueryError
+)
+
 type ReportEntry struct {
 	Chain                  Chain
 	Wallet                 string
@@ -47,11 +62,21 @@ type ReportEntry struct {
 	ProposalTitle          string
 	ProposalDescription    string
 	ProposalVoteEndingTime time.Time
-	Vote                   string
+	Type                   ReportEntryType
+	Value                  string
+	OldValue               string
 }
 
 func (e *ReportEntry) HasVoted() bool {
-	return e.Vote != ""
+	return e.Value != ""
+}
+
+func (e *ReportEntry) HasRevoted() bool {
+	return e.Value != "" && e.OldValue != ""
+}
+
+func (e *ReportEntry) IsVoteOrNotVoted() bool {
+	return e.Type == NotVoted || e.Type == Voted
 }
 
 type Reporter interface {

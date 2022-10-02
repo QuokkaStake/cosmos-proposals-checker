@@ -1,14 +1,14 @@
 package main
 
 import (
-	"fmt"
+	"time"
 
 	"github.com/rs/zerolog"
 )
 
 type ReportGenerator struct {
 	StateManager *StateManager
-	Chains       []Chain
+	Chains       Chains
 	RPC          *RPC
 	Logger       zerolog.Logger
 }
@@ -16,7 +16,7 @@ type ReportGenerator struct {
 func NewReportGenerator(
 	manager *StateManager,
 	logger *zerolog.Logger,
-	chains []Chain,
+	chains Chains,
 ) *ReportGenerator {
 	return &ReportGenerator{
 		StateManager: manager,
@@ -25,115 +25,109 @@ func NewReportGenerator(
 	}
 }
 
-func (g *ReportGenerator) GenerateReport() Report {
-	votesMap := make(map[string]map[string]map[string]*Vote)
-	proposalsMap := make(map[string][]Proposal)
+func (g *ReportGenerator) GenerateReport(oldState, newState State) Report {
+	entries := []ReportEntry{}
 
-	for _, chain := range g.Chains {
-		votesMap[chain.Name] = make(map[string]map[string]*Vote)
-
-		rpc := NewRPC(chain.LCDEndpoints, g.Logger)
-
-		g.Logger.Info().Str("name", chain.Name).Msg("Processing a chain")
-		proposals, err := rpc.GetAllProposals()
-		if err != nil {
-			g.Logger.Warn().Err(err).Msg("Error processing proposals")
+	for chainName, chainInfo := range newState.ChainInfos {
+		if chainInfo.HasProposalsError() {
+			g.Logger.Debug().
+				Str("chain", chainName).
+				Msg("Error querying for proposals - sending an alert")
+			entry := ReportEntry{
+				Chain:                  *g.Chains.FindByName(chainName),
+				Wallet:                 "",
+				ProposalID:             "",
+				ProposalTitle:          "",
+				ProposalDescription:    "",
+				ProposalVoteEndingTime: time.Now(),
+				Type:                   ProposalQueryError,
+				Value:                  chainInfo.ProposalsError,
+			}
+			entries = append(entries, entry)
 			continue
 		}
 
-		g.Logger.Info().Int("len", len(proposals)).Msg("Got proposals")
-		proposalsMap[chain.Name] = proposals
+		for proposalID, proposalVotes := range chainInfo.ProposalVotes {
+			for wallet := range proposalVotes.Votes {
+				g.Logger.Trace().
+					Str("name", chainName).
+					Str("proposal", proposalID).
+					Str("wallet", wallet).
+					Msg("Generating report for a wallet vote")
 
-		for _, proposal := range proposals {
-			for _, wallet := range chain.Wallets {
-				if g.StateManager.HasVotedBefore(chain.Name, proposal.ProposalID, wallet) {
-					g.Logger.Trace().
-						Str("proposal", proposal.ProposalID).
+				oldVote, _, _ := oldState.GetVoteAndProposal(chainName, proposalID, wallet)
+				newVote, proposal, _ := newState.GetVoteAndProposal(chainName, proposalID, wallet)
+
+				entry := ReportEntry{
+					Chain:                  *g.Chains.FindByName(chainName),
+					Wallet:                 wallet,
+					ProposalID:             proposalID,
+					ProposalTitle:          proposal.Content.Title,
+					ProposalDescription:    proposal.Content.Description,
+					ProposalVoteEndingTime: proposal.VotingEndTime,
+				}
+
+				// Error querying for vote - need to notify via Telegram.
+				if newVote.IsError() {
+					g.Logger.Debug().
+						Str("chain", chainName).
+						Str("proposal", proposalID).
 						Str("wallet", wallet).
-						Msg("Wallet has already voted, not checking again,")
-					g.StateManager.SetVote(
-						chain.Name,
-						proposal.ProposalID,
-						wallet,
-						g.StateManager.GetVoteBefore(chain.Name, proposal.ProposalID, wallet),
-					)
+						Msg("Error querying for vote - sending an alert")
+					entry.Type = VoteQueryError
+					entry.Value = newVote.Error
+
+					entries = append(entries, entry)
 					continue
 				}
 
-				g.Logger.Info().
-					Str("proposal", proposal.ProposalID).
-					Str("wallet", wallet).
-					Msg("Checking if a wallet had voted")
-
-				vote, err := rpc.GetVote(proposal.ProposalID, wallet)
-				if err != nil {
-					g.Logger.Warn().Err(err).Msg("Error processing vote")
-				}
-
-				g.Logger.Info().Str("result", fmt.Sprintf("%+v", vote)).Msg("Got vote")
-				g.StateManager.SetVote(chain.Name, proposal.ProposalID, wallet, vote.Vote)
-			}
-		}
-	}
-
-	entries := []ReportEntry{}
-
-	for _, chain := range g.Chains {
-		for _, proposal := range proposalsMap[chain.Name] {
-			for _, wallet := range chain.Wallets {
-				votedNow := g.StateManager.HasVotedNow(chain.Name, proposal.ProposalID, wallet)
-				votedBefore := g.StateManager.HasVotedBefore(chain.Name, proposal.ProposalID, wallet)
-
 				// Hasn't voted for this proposal - need to notify.
-				if !votedNow {
+				if !newVote.HasVoted() {
 					g.Logger.Debug().
-						Str("chain", chain.Name).
-						Str("proposal", proposal.ProposalID).
+						Str("chain", chainName).
+						Str("proposal", proposalID).
 						Str("wallet", wallet).
 						Msg("Wallet hasn't voted now - sending an alert")
-					entries = append(entries, ReportEntry{
-						Chain:                  chain,
-						Wallet:                 wallet,
-						ProposalID:             proposal.ProposalID,
-						ProposalTitle:          proposal.Content.Title,
-						ProposalDescription:    proposal.Content.Description,
-						ProposalVoteEndingTime: proposal.VotingEndTime,
-					})
+					entry.Type = NotVoted
+					entries = append(entries, entry)
+					continue
 				}
 
 				// Hasn't voted before but voted now - need to close alert/notify about new vote.
-				if votedNow && !votedBefore {
-					vote := g.StateManager.GetVote(chain.Name, proposal.ProposalID, wallet)
-					if vote == nil {
-						g.Logger.Info().
-							Str("chain", chain.Name).
-							Str("proposal", proposal.ProposalID).
-							Str("wallet", wallet).
-							Msg("No vote found while there should be one")
-						continue
-					}
+				if newVote.HasVoted() && !oldVote.HasVoted() {
+					vote := *newVote.Vote
 
 					g.Logger.Debug().
-						Str("chain", chain.Name).
+						Str("chain", chainName).
 						Str("proposal", proposal.ProposalID).
 						Str("wallet", wallet).
 						Msg("Wallet hasn't voted before but voted now - closing an alert")
 
-					entries = append(entries, ReportEntry{
-						Chain:                  chain,
-						Wallet:                 wallet,
-						ProposalID:             proposal.ProposalID,
-						ProposalTitle:          proposal.Content.Title,
-						ProposalDescription:    proposal.Content.Description,
-						ProposalVoteEndingTime: proposal.VotingEndTime,
-						Vote:                   vote.Option,
-					})
+					entry.Type = Voted
+					entry.Value = vote.Option
+
+					entries = append(entries, entry)
+					continue
+				}
+
+				// Changed its vote - only notify via Telegram.
+				if newVote.HasVoted() && oldVote.HasVoted() && newVote.Vote.Option != oldVote.Vote.Option {
+					g.Logger.Debug().
+						Str("chain", chainName).
+						Str("proposal", proposal.ProposalID).
+						Str("wallet", wallet).
+						Msg("Wallet changed its vote - sending an alert")
+					entry.Type = Revoted
+					entry.Value = newVote.Vote.Option
+					entry.OldValue = oldVote.Vote.Option
+
+					entries = append(entries, entry)
 				}
 			}
 		}
 	}
 
-	g.StateManager.CommitNewState()
+	g.StateManager.CommitState(newState)
 
 	return Report{Entries: entries}
 }

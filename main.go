@@ -27,6 +27,7 @@ func Execute(configPath string) {
 	mutesManager.Load()
 
 	reportGenerator := NewReportGenerator(stateManager, log, config.Chains)
+	stateGenerator := NewStateGenerator(log, config.Chains)
 
 	reporters := []Reporter{
 		NewPagerDutyReporter(config.PagerDutyConfig, log),
@@ -41,7 +42,8 @@ func Execute(configPath string) {
 	}
 
 	for {
-		report := reportGenerator.GenerateReport()
+		newState := stateGenerator.GetState(stateManager.State)
+		report := reportGenerator.GenerateReport(stateManager.State, newState)
 
 		if report.Empty() {
 			log.Debug().Msg("Empty report, not sending.")

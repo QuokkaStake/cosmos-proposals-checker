@@ -68,6 +68,18 @@ func (c *Chain) GetExplorerProposalsLinks(proposalID string) []ExplorerLink {
 	return links
 }
 
+type Chains []Chain
+
+func (c Chains) FindByName(name string) *Chain {
+	for _, chain := range c {
+		if chain.Name == name {
+			return &chain
+		}
+	}
+
+	return nil
+}
+
 type Config struct {
 	PagerDutyConfig PagerDutyConfig `toml:"pagerduty"`
 	TelegramConfig  TelegramConfig  `toml:"telegram"`

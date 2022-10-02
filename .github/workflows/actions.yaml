@@ -30,3 +30,20 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           args: --timeout 300s
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.18.2'
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: Run tests
+        run: go test -coverprofile coverage.txt -v *.go
+      - name: Download uploader
+        run: curl -Os https://uploader.codecov.io/latest/linux/codecov
+      - name: Make uploader executable
+        run: chmod +x codecov
+      - name: Run uploader
+        run: ./codecov
