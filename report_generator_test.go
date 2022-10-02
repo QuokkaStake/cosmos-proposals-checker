@@ -6,12 +6,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var (
-	stateManager = NewStateManager("./state.json", GetDefaultLogger())
-)
-
 func TestReportGeneratorWithProposalError(t *testing.T) {
 	t.Parallel()
+
+	stateManager := NewStateManager("./state.json", GetDefaultLogger())
 
 	oldState := NewState()
 	newState := State{
@@ -34,6 +32,8 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 
 func TestReportGeneratorWithVoteError(t *testing.T) {
 	t.Parallel()
+
+	stateManager := NewStateManager("./state.json", GetDefaultLogger())
 
 	oldState := NewState()
 	newState := State{
@@ -70,6 +70,8 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 func TestReportGeneratorWithNotVoted(t *testing.T) {
 	t.Parallel()
 
+	stateManager := NewStateManager("./state.json", GetDefaultLogger())
+
 	oldState := NewState()
 	newState := State{
 		ChainInfos: map[string]*ChainInfo{
@@ -102,6 +104,8 @@ func TestReportGeneratorWithNotVoted(t *testing.T) {
 
 func TestReportGeneratorWithVoted(t *testing.T) {
 	t.Parallel()
+
+	stateManager := NewStateManager("./state.json", GetDefaultLogger())
 
 	oldState := State{
 		ChainInfos: map[string]*ChainInfo{
@@ -156,6 +160,8 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 
 func TestReportGeneratorWithRevoted(t *testing.T) {
 	t.Parallel()
+
+	stateManager := NewStateManager("./state.json", GetDefaultLogger())
 
 	oldState := State{
 		ChainInfos: map[string]*ChainInfo{
