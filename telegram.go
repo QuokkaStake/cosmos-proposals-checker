@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
+	"embed"
 	"fmt"
+	"html/template"
 	"strings"
 	"time"
 
@@ -16,6 +19,7 @@ type TelegramReporter struct {
 
 	TelegramBot *tele.Bot
 	Logger      zerolog.Logger
+	Templates   map[ReportEntryType]*template.Template
 }
 
 const (
@@ -23,12 +27,16 @@ const (
 	AuthorDisclaimer = "\nSent by <a href='https://github.com/freak12techno/cosmos-proposals-checker'>cosmos-proposals-checker.</a>"
 )
 
+//go:embed templates/*
+var templatesFs embed.FS
+
 func NewTelegramReporter(config TelegramConfig, mutesManager *MutesManager, logger *zerolog.Logger) *TelegramReporter {
 	return &TelegramReporter{
 		TelegramToken: config.TelegramToken,
 		TelegramChat:  config.TelegramChat,
 		MutesManager:  mutesManager,
 		Logger:        logger.With().Str("component", "telegram_reporter").Logger(),
+		Templates:     make(map[ReportEntryType]*template.Template, 0),
 	}
 }
 
@@ -61,55 +69,91 @@ func (reporter TelegramReporter) Enabled() bool {
 	return reporter.TelegramToken != "" && reporter.TelegramChat != 0
 }
 
-func (reporter *TelegramReporter) SerializeReportEntry(e ReportEntry) string {
-	if e.Type == ProposalQueryError {
-		return reporter.SerializeProposalsError(e)
-	}
-	if e.Type == VoteQueryError {
-		return reporter.SerializeVoteError(e)
+func (reporter TelegramReporter) GetTemplate(t ReportEntryType) (*template.Template, error) {
+	if template, ok := reporter.Templates[t]; ok {
+		reporter.Logger.Trace().Str("type", string(t)).Msg("Using cached template")
+		return template, nil
 	}
 
-	var sb strings.Builder
+	reporter.Logger.Trace().Str("type", string(t)).Msg("Loading template")
 
-	messageText := "🔴 <strong>Wallet %s hasn't voted on proposal %s on %s</strong>\n%s\n\n"
-	if e.HasRevoted() {
-		messageText = "↔️ <strong>Wallet %s hasn changed its vote on proposal %s on %s</strong>\n%s\n\n"
-	} else if e.HasVoted() {
-		messageText = "✅ <strong>Wallet %s has voted on proposal %s on %s</strong>\n%s\n\n"
+	filename := fmt.Sprintf("templates/telegram/%s.html", t)
+	template, err := template.ParseFS(templatesFs, filename)
+	if err != nil {
+		return nil, err
 	}
 
-	sb.WriteString(fmt.Sprintf(
-		messageText,
-		e.Wallet,
-		e.ProposalID,
-		e.Chain.GetName(),
-		e.ProposalTitle,
-	))
+	reporter.Templates[t] = template
 
-	if e.HasVoted() {
-		sb.WriteString(fmt.Sprintf(
-			"<strong>Vote: </strong>%s\n",
-			e.Value,
-		))
-	}
-	if e.HasRevoted() {
-		sb.WriteString(fmt.Sprintf(
-			"<strong>Old vote: </strong>%s\n",
-			e.OldValue,
-		))
-	}
-
-	sb.WriteString(fmt.Sprintf(
-		"Voting ends at: %s (in %s)\n\n",
-		e.ProposalVoteEndingTime.Format(time.RFC3339Nano),
-		time.Until(e.ProposalVoteEndingTime).Round(time.Second),
-	))
-
-	sb.WriteString(reporter.SerializeLinks(e))
-	sb.WriteString(AuthorDisclaimer)
-
-	return sb.String()
+	return template, nil
 }
+
+func (reporter *TelegramReporter) SerializeReportEntry(e ReportEntry) (string, error) {
+	template, err := reporter.GetTemplate(e.Type)
+	if err != nil {
+		reporter.Logger.Error().Err(err).Str("type", string(e.Type)).Msg("Error loading template")
+		return "", err
+	}
+
+	var buffer bytes.Buffer
+	err = template.Execute(&buffer, e)
+	if err != nil {
+		reporter.Logger.Error().Err(err).Str("type", string(e.Type)).Msg("Error rendering template")
+		return "", err
+	}
+
+	return buffer.String(), nil
+}
+
+// func (reporter *TelegramReporter) SerializeReportEntry(e ReportEntry) string {
+// 	if e.Type == ProposalQueryError {
+// 		return reporter.SerializeProposalsError(e)
+// 	}
+// 	if e.Type == VoteQueryError {
+// 		return reporter.SerializeVoteError(e)
+// 	}
+
+// 	var sb strings.Builder
+
+// 	messageText := "🔴 <strong>Wallet %s hasn't voted on proposal %s on %s</strong>\n%s\n\n"
+// 	if e.HasRevoted() {
+// 		messageText = "↔️ <strong>Wallet %s hasn changed its vote on proposal %s on %s</strong>\n%s\n\n"
+// 	} else if e.HasVoted() {
+// 		messageText = "✅ <strong>Wallet %s has voted on proposal %s on %s</strong>\n%s\n\n"
+// 	}
+
+// 	sb.WriteString(fmt.Sprintf(
+// 		messageText,
+// 		e.Wallet,
+// 		e.ProposalID,
+// 		e.Chain.GetName(),
+// 		e.ProposalTitle,
+// 	))
+
+// 	if e.HasVoted() {
+// 		sb.WriteString(fmt.Sprintf(
+// 			"<strong>Vote: </strong>%s\n",
+// 			e.Value,
+// 		))
+// 	}
+// 	if e.HasRevoted() {
+// 		sb.WriteString(fmt.Sprintf(
+// 			"<strong>Old vote: </strong>%s\n",
+// 			e.OldValue,
+// 		))
+// 	}
+
+// 	sb.WriteString(fmt.Sprintf(
+// 		"Voting ends at: %s (in %s)\n\n",
+// 		e.ProposalVoteEndingTime.Format(time.RFC3339Nano),
+// 		time.Until(e.ProposalVoteEndingTime).Round(time.Second),
+// 	))
+
+// 	sb.WriteString(reporter.SerializeLinks(e))
+// 	sb.WriteString(AuthorDisclaimer)
+
+// 	return sb.String()
+// }
 
 func (reporter TelegramReporter) SerializeLinks(e ReportEntry) string {
 	var sb strings.Builder
@@ -133,23 +177,6 @@ func (reporter TelegramReporter) SerializeLinks(e ReportEntry) string {
 	return sb.String()
 }
 
-func (reporter TelegramReporter) SerializeProposalsError(e ReportEntry) string {
-	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("❌ There was an error querying proposals on %s.\n", e.Chain.GetName()))
-	sb.WriteString(fmt.Sprintf("<strong>Error text: </strong>%s.\n", e.Value))
-	sb.WriteString(AuthorDisclaimer)
-	return sb.String()
-}
-
-func (reporter TelegramReporter) SerializeVoteError(e ReportEntry) string {
-	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("❌ There was an error querying proposal on %s.\n", e.Chain.GetName()))
-	sb.WriteString(fmt.Sprintf("<strong>Proposal ID: </strong>%s.\n", e.ProposalID))
-	sb.WriteString(fmt.Sprintf("<strong>Error text: </strong>%s.\n", e.Value))
-	sb.WriteString(AuthorDisclaimer)
-	return sb.String()
-}
-
 func (reporter TelegramReporter) SendReport(report Report) error {
 	for _, entry := range report.Entries {
 		if !entry.HasVoted() && reporter.MutesManager.IsMuted(entry.Chain.Name, entry.ProposalID) {
@@ -160,9 +187,13 @@ func (reporter TelegramReporter) SendReport(report Report) error {
 			continue
 		}
 
-		serializedEntry := reporter.SerializeReportEntry(entry)
+		serializedEntry, err := reporter.SerializeReportEntry(entry)
+		if err != nil {
+			reporter.Logger.Err(err).Msg("Could not serialize report entry")
+			return err
+		}
 
-		_, err := reporter.TelegramBot.Send(
+		_, err = reporter.TelegramBot.Send(
 			&tele.User{
 				ID: reporter.TelegramChat,
 			},

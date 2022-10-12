@@ -34,7 +34,7 @@ func (c *Chain) Validate() error {
 	return nil
 }
 
-func (c *Chain) GetName() string {
+func (c Chain) GetName() string {
 	if c.PrettyName != "" {
 		return c.PrettyName
 	}

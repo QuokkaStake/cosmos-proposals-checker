@@ -45,14 +45,14 @@ func (r *Report) Empty() bool {
 	return len(r.Entries) == 0
 }
 
-type ReportEntryType int
+type ReportEntryType string
 
 const (
-	NotVoted ReportEntryType = iota
-	Voted
-	Revoted
-	ProposalQueryError
-	VoteQueryError
+	NotVoted           ReportEntryType = "not_voted"
+	Voted              ReportEntryType = "voted"
+	Revoted            ReportEntryType = "revoted"
+	ProposalQueryError ReportEntryType = "proposal_query_error"
+	VoteQueryError     ReportEntryType = "vote_query_error"
 )
 
 type ReportEntry struct {
