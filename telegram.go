@@ -104,78 +104,6 @@ func (reporter *TelegramReporter) SerializeReportEntry(e ReportEntry) (string, e
 	return buffer.String(), nil
 }
 
-// func (reporter *TelegramReporter) SerializeReportEntry(e ReportEntry) string {
-// 	if e.Type == ProposalQueryError {
-// 		return reporter.SerializeProposalsError(e)
-// 	}
-// 	if e.Type == VoteQueryError {
-// 		return reporter.SerializeVoteError(e)
-// 	}
-
-// 	var sb strings.Builder
-
-// 	messageText := "🔴 <strong>Wallet %s hasn't voted on proposal %s on %s</strong>\n%s\n\n"
-// 	if e.HasRevoted() {
-// 		messageText = "↔️ <strong>Wallet %s hasn changed its vote on proposal %s on %s</strong>\n%s\n\n"
-// 	} else if e.HasVoted() {
-// 		messageText = "✅ <strong>Wallet %s has voted on proposal %s on %s</strong>\n%s\n\n"
-// 	}
-
-// 	sb.WriteString(fmt.Sprintf(
-// 		messageText,
-// 		e.Wallet,
-// 		e.ProposalID,
-// 		e.Chain.GetName(),
-// 		e.ProposalTitle,
-// 	))
-
-// 	if e.HasVoted() {
-// 		sb.WriteString(fmt.Sprintf(
-// 			"<strong>Vote: </strong>%s\n",
-// 			e.Value,
-// 		))
-// 	}
-// 	if e.HasRevoted() {
-// 		sb.WriteString(fmt.Sprintf(
-// 			"<strong>Old vote: </strong>%s\n",
-// 			e.OldValue,
-// 		))
-// 	}
-
-// 	sb.WriteString(fmt.Sprintf(
-// 		"Voting ends at: %s (in %s)\n\n",
-// 		e.ProposalVoteEndingTime.Format(time.RFC3339Nano),
-// 		time.Until(e.ProposalVoteEndingTime).Round(time.Second),
-// 	))
-
-// 	sb.WriteString(reporter.SerializeLinks(e))
-// 	sb.WriteString(AuthorDisclaimer)
-
-// 	return sb.String()
-// }
-
-func (reporter TelegramReporter) SerializeLinks(e ReportEntry) string {
-	var sb strings.Builder
-
-	if e.Chain.KeplrName != "" {
-		sb.WriteString(fmt.Sprintf(
-			"<a href='%s'>Keplr</a>\n",
-			e.Chain.GetKeplrLink(e.ProposalID),
-		))
-	}
-
-	explorerLinks := e.Chain.GetExplorerProposalsLinks(e.ProposalID)
-	for _, link := range explorerLinks {
-		sb.WriteString(fmt.Sprintf(
-			"<a href='%s'>%s</a>\n",
-			link.Link,
-			link.Name,
-		))
-	}
-
-	return sb.String()
-}
-
 func (reporter TelegramReporter) SendReport(report Report) error {
 	for _, entry := range report.Entries {
 		if !entry.HasVoted() && reporter.MutesManager.IsMuted(entry.Chain.Name, entry.ProposalID) {
@@ -270,18 +198,14 @@ func (reporter *TelegramReporter) HandleHelp(c tele.Context) error {
 		Str("text", c.Text()).
 		Msg("Got help query")
 
-	var sb strings.Builder
-	sb.WriteString("<strong>cosmos-proposals-checker</strong>\n\n")
-	sb.WriteString("Notifies you about the proposals your wallets hasn't voted upon.\n")
-	sb.WriteString("Can understand the following commands:\n")
-	sb.WriteString("- /proposals_mute &lt;duration&gt; &lt;chain&gt; &lt;proposal ID&gt; - mute notifications for a specific proposal\n")
-	sb.WriteString("- /proposals_mutes - display the active proposals mutes list\n")
-	sb.WriteString("- /help - display this command\n")
-	sb.WriteString("Created by <a href=\"https://freak12techno.github.io\">freak12techno</a> with ❤️.\n")
-	sb.WriteString("This bot is open-sourced, you can get the source code at https://github.com/freak12techno/cosmos-proposals-checker.\n\n")
-	sb.WriteString("If you like what we're doing, consider <a href=\"https://freak12techno.github.io/validators\">staking with us</a>!\n")
+	template, _ := reporter.GetTemplate("help")
+	var buffer bytes.Buffer
+	if err := template.Execute(&buffer, nil); err != nil {
+		reporter.Logger.Error().Err(err).Msg("Error rendering telp template")
+		return err
+	}
 
-	return reporter.BotReply(c, sb.String())
+	return reporter.BotReply(c, buffer.String())
 }
 
 func (reporter *TelegramReporter) BotReply(c tele.Context, msg string) error {
