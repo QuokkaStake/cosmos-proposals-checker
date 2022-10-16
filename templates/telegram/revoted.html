@@ -1,0 +1,11 @@
+↔️ <strong>Wallet {{ .Wallet }} has changed its vote on proposal {{ .ProposalID }} on {{ .Chain.GetName }}</strong>
+{{ .ProposalTitle }}
+
+Vote: {{ .GetVote }}
+Old vote: {{ .GetOldVote }}
+Voting ends at: {{ .GetProposalTime }} (in {{ .GetProposalTimeLeft }})
+
+{{ if .Chain.KeplrName }}<a href='{{ .Chain.GetKeplrLink .ProposalID }}'>Keplr</a>{{ end }}
+{{ range .Chain.GetExplorerProposalsLinks .ProposalID }}<a href='{{ .Link }} '>{{ .Name }}</a>
+{{ end }}
+Sent by <a href='https://github.com/freak12techno/cosmos-proposals-checker'>cosmos-proposals-checker.</a>

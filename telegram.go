@@ -23,8 +23,7 @@ type TelegramReporter struct {
 }
 
 const (
-	MaxMessageSize   = 4096
-	AuthorDisclaimer = "\nSent by <a href='https://github.com/freak12techno/cosmos-proposals-checker'>cosmos-proposals-checker.</a>"
+	MaxMessageSize = 4096
 )
 
 //go:embed templates/*

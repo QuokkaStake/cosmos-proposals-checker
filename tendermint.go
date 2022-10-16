@@ -63,8 +63,6 @@ func (rpc *RPC) GetVote(proposal, voter string) (*VoteRPCResponse, error) {
 		return nil, err
 	}
 
-	fmt.Printf("")
-
 	if vote.IsError() && !strings.Contains(vote.Message, "not found") {
 		return nil, errors.New(vote.Message)
 	}
