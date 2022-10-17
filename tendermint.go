@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -62,7 +63,7 @@ func (rpc *RPC) GetVote(proposal, voter string) (*VoteRPCResponse, error) {
 		return nil, err
 	}
 
-	if vote.IsError() && vote.Code != 3 {
+	if vote.IsError() && !strings.Contains(vote.Message, "not found") {
 		return nil, errors.New(vote.Message)
 	}
 

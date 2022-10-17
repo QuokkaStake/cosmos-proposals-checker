@@ -34,7 +34,7 @@ func (c *Chain) Validate() error {
 	return nil
 }
 
-func (c *Chain) GetName() string {
+func (c Chain) GetName() string {
 	if c.PrettyName != "" {
 		return c.PrettyName
 	}
@@ -42,11 +42,11 @@ func (c *Chain) GetName() string {
 	return c.Name
 }
 
-func (c *Chain) GetKeplrLink(proposalID string) string {
+func (c Chain) GetKeplrLink(proposalID string) string {
 	return fmt.Sprintf("https://wallet.keplr.app/#/%s/governance?detailId=%s", c.KeplrName, proposalID)
 }
 
-func (c *Chain) GetExplorerProposalsLinks(proposalID string) []ExplorerLink {
+func (c Chain) GetExplorerProposalsLinks(proposalID string) []ExplorerLink {
 	if c.MintscanPrefix == "" {
 		return []ExplorerLink{}
 	}

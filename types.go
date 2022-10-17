@@ -45,14 +45,14 @@ func (r *Report) Empty() bool {
 	return len(r.Entries) == 0
 }
 
-type ReportEntryType int
+type ReportEntryType string
 
 const (
-	NotVoted ReportEntryType = iota
-	Voted
-	Revoted
-	ProposalQueryError
-	VoteQueryError
+	NotVoted           ReportEntryType = "not_voted"
+	Voted              ReportEntryType = "voted"
+	Revoted            ReportEntryType = "revoted"
+	ProposalQueryError ReportEntryType = "proposal_query_error"
+	VoteQueryError     ReportEntryType = "vote_query_error"
 )
 
 type ReportEntry struct {
@@ -67,16 +67,47 @@ type ReportEntry struct {
 	OldValue               string
 }
 
-func (e *ReportEntry) HasVoted() bool {
+func (e ReportEntry) HasVoted() bool {
 	return e.Value != ""
 }
 
-func (e *ReportEntry) HasRevoted() bool {
+func (e ReportEntry) HasRevoted() bool {
 	return e.Value != "" && e.OldValue != ""
 }
 
-func (e *ReportEntry) IsVoteOrNotVoted() bool {
+func (e ReportEntry) IsVoteOrNotVoted() bool {
 	return e.Type == NotVoted || e.Type == Voted
+}
+
+func (e ReportEntry) GetProposalTime() string {
+	return e.ProposalVoteEndingTime.Format(time.RFC3339Nano)
+}
+
+func (e ReportEntry) GetProposalTimeLeft() string {
+	return time.Until(e.ProposalVoteEndingTime).Round(time.Second).String()
+}
+
+func (e ReportEntry) GetVote() string {
+	return ResolveVote(e.Value)
+}
+
+func (e ReportEntry) GetOldVote() string {
+	return ResolveVote(e.OldValue)
+}
+
+func ResolveVote(value string) string {
+	votes := map[string]string{
+		"VOTE_OPTION_YES":          "Yes",
+		"VOTE_OPTION_ABSTAIN":      "Abstain",
+		"VOTE_OPTION_NO":           "No",
+		"VOTE_OPTION_NO_WITH_VETO": "No with veto",
+	}
+
+	if vote, ok := votes[value]; ok && vote != "" {
+		return vote
+	}
+
+	return value
 }
 
 type Reporter interface {
