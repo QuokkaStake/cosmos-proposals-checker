@@ -90,6 +90,7 @@ Go to @BotFather in Telegram and create a bot. After that, there are two options
 
 To have fancy commands auto-suggestion, go to @BotFather again, select your bot -> Edit bot -> Edit description and paste the following:
 ```
+proposals - List proposals and wallets' votes on them
 proposals_mute - Mutes a proposal
 proposals_mutes - List active proposal mutes
 help - Displays help
