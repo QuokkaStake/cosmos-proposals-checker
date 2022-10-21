@@ -13,9 +13,10 @@ import (
 )
 
 type TelegramReporter struct {
-	TelegramToken string
-	TelegramChat  int64
-	MutesManager  *MutesManager
+	TelegramToken  string
+	TelegramChat   int64
+	MutesManager   *MutesManager
+	StateGenerator *StateGenerator
 
 	TelegramBot *tele.Bot
 	Logger      zerolog.Logger
@@ -29,13 +30,18 @@ const (
 //go:embed templates/*
 var templatesFs embed.FS
 
-func NewTelegramReporter(config TelegramConfig, mutesManager *MutesManager, logger *zerolog.Logger) *TelegramReporter {
+func NewTelegramReporter(
+	config TelegramConfig,
+	mutesManager *MutesManager,
+	stateGenerator *StateGenerator,
+	logger *zerolog.Logger) *TelegramReporter {
 	return &TelegramReporter{
-		TelegramToken: config.TelegramToken,
-		TelegramChat:  config.TelegramChat,
-		MutesManager:  mutesManager,
-		Logger:        logger.With().Str("component", "telegram_reporter").Logger(),
-		Templates:     make(map[ReportEntryType]*template.Template, 0),
+		TelegramToken:  config.TelegramToken,
+		TelegramChat:   config.TelegramChat,
+		MutesManager:   mutesManager,
+		StateGenerator: stateGenerator,
+		Logger:         logger.With().Str("component", "telegram_reporter").Logger(),
+		Templates:      make(map[ReportEntryType]*template.Template, 0),
 	}
 }
 
@@ -59,6 +65,7 @@ func (reporter *TelegramReporter) Init() {
 	bot.Handle("/help", reporter.HandleHelp)
 	bot.Handle("/proposals_mute", reporter.HandleAddMute)
 	bot.Handle("/proposals_mutes", reporter.HandleListMutes)
+	bot.Handle("/proposals", reporter.HandleProposals)
 
 	reporter.TelegramBot = bot
 	go reporter.TelegramBot.Start()
@@ -190,6 +197,23 @@ func (reporter *TelegramReporter) HandleListMutes(c tele.Context) error {
 	}
 
 	return reporter.BotReply(c, sb.String())
+}
+
+func (reporter *TelegramReporter) HandleProposals(c tele.Context) error {
+	reporter.Logger.Info().
+		Str("sender", c.Sender().Username).
+		Str("text", c.Text()).
+		Msg("Got proposals list query")
+
+	state := reporter.StateGenerator.GetState(NewState())
+	template, _ := reporter.GetTemplate("proposals")
+	var buffer bytes.Buffer
+	if err := template.Execute(&buffer, state); err != nil {
+		reporter.Logger.Error().Err(err).Msg("Error rendering votes template")
+		return err
+	}
+
+	return reporter.BotReply(c, buffer.String())
 }
 
 func (reporter *TelegramReporter) HandleHelp(c tele.Context) error {

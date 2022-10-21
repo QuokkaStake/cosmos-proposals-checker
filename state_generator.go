@@ -27,7 +27,7 @@ func (g *StateGenerator) GetState(oldState State) State {
 		proposals, err := rpc.GetAllProposals()
 		if err != nil {
 			g.Logger.Warn().Err(err).Msg("Error processing proposals")
-			state.SetChainProposalsError(chain.Name, err)
+			state.SetChainProposalsError(chain, err)
 			continue
 		}
 
@@ -57,7 +57,7 @@ func (g *StateGenerator) GetState(oldState State) State {
 						Msg("Wallet has voted and there's no vote in the new state - using old vote")
 
 					state.SetVote(
-						chain.Name,
+						chain,
 						proposal,
 						wallet,
 						oldVote,
@@ -75,7 +75,7 @@ func (g *StateGenerator) GetState(oldState State) State {
 				}
 
 				state.SetVote(
-					chain.Name,
+					chain,
 					proposal,
 					wallet,
 					proposalVote,

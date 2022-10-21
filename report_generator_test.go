@@ -13,7 +13,7 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 
 	oldState := NewState()
 	newState := State{
-		ChainInfos: map[string]*ChainInfo{
+		ChainInfos: map[string]ChainInfo{
 			"chain": {
 				ProposalsError: "test error",
 			},
@@ -37,15 +37,13 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 
 	oldState := NewState()
 	newState := State{
-		ChainInfos: map[string]*ChainInfo{
+		ChainInfos: map[string]ChainInfo{
 			"chain": {
-				Proposals: map[string]Proposal{
-					"proposal": {
-						Content: &ProposalContent{},
-					},
-				},
 				ProposalVotes: map[string]WalletVotes{
 					"proposal": {
+						Proposal: Proposal{
+							Content: &ProposalContent{},
+						},
 						Votes: map[string]ProposalVote{
 							"wallet": {
 								Error: "test error",
@@ -74,15 +72,13 @@ func TestReportGeneratorWithNotVoted(t *testing.T) {
 
 	oldState := NewState()
 	newState := State{
-		ChainInfos: map[string]*ChainInfo{
+		ChainInfos: map[string]ChainInfo{
 			"chain": {
-				Proposals: map[string]Proposal{
-					"proposal": {
-						Content: &ProposalContent{},
-					},
-				},
 				ProposalVotes: map[string]WalletVotes{
 					"proposal": {
+						Proposal: Proposal{
+							Content: &ProposalContent{},
+						},
 						Votes: map[string]ProposalVote{
 							"wallet": {},
 						},
@@ -108,15 +104,13 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 	stateManager := NewStateManager("./state.json", GetDefaultLogger())
 
 	oldState := State{
-		ChainInfos: map[string]*ChainInfo{
+		ChainInfos: map[string]ChainInfo{
 			"chain": {
-				Proposals: map[string]Proposal{
-					"proposal": {
-						Content: &ProposalContent{},
-					},
-				},
 				ProposalVotes: map[string]WalletVotes{
 					"proposal": {
+						Proposal: Proposal{
+							Content: &ProposalContent{},
+						},
 						Votes: map[string]ProposalVote{
 							"wallet": {},
 						},
@@ -126,15 +120,13 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 		},
 	}
 	newState := State{
-		ChainInfos: map[string]*ChainInfo{
+		ChainInfos: map[string]ChainInfo{
 			"chain": {
-				Proposals: map[string]Proposal{
-					"proposal": {
-						Content: &ProposalContent{},
-					},
-				},
 				ProposalVotes: map[string]WalletVotes{
 					"proposal": {
+						Proposal: Proposal{
+							Content: &ProposalContent{},
+						},
 						Votes: map[string]ProposalVote{
 							"wallet": {
 								Vote: &Vote{
@@ -164,15 +156,13 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 	stateManager := NewStateManager("./state.json", GetDefaultLogger())
 
 	oldState := State{
-		ChainInfos: map[string]*ChainInfo{
+		ChainInfos: map[string]ChainInfo{
 			"chain": {
-				Proposals: map[string]Proposal{
-					"proposal": {
-						Content: &ProposalContent{},
-					},
-				},
 				ProposalVotes: map[string]WalletVotes{
 					"proposal": {
+						Proposal: Proposal{
+							Content: &ProposalContent{},
+						},
 						Votes: map[string]ProposalVote{
 							"wallet": {
 								Vote: &Vote{
@@ -186,15 +176,13 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 		},
 	}
 	newState := State{
-		ChainInfos: map[string]*ChainInfo{
+		ChainInfos: map[string]ChainInfo{
 			"chain": {
-				Proposals: map[string]Proposal{
-					"proposal": {
-						Content: &ProposalContent{},
-					},
-				},
 				ProposalVotes: map[string]WalletVotes{
 					"proposal": {
+						Proposal: Proposal{
+							Content: &ProposalContent{},
+						},
 						Votes: map[string]ProposalVote{
 							"wallet": {
 								Vote: &Vote{

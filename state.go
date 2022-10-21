@@ -14,58 +14,53 @@ func (v ProposalVote) IsError() bool {
 }
 
 type WalletVotes struct {
-	Votes map[string]ProposalVote
+	Proposal Proposal
+	Votes    map[string]ProposalVote
 }
 
 type ChainInfo struct {
-	Proposals      map[string]Proposal
+	Chain          Chain
 	ProposalVotes  map[string]WalletVotes
 	ProposalsError string
 }
 
-func (c *ChainInfo) HasProposalsError() bool {
+func (c ChainInfo) HasProposalsError() bool {
 	return c.ProposalsError != ""
 }
 
 type State struct {
-	ChainInfos map[string]*ChainInfo
+	ChainInfos map[string]ChainInfo
 }
 
 func NewState() State {
 	return State{
-		ChainInfos: make(map[string]*ChainInfo),
+		ChainInfos: make(map[string]ChainInfo),
 	}
 }
 
-func (s *State) SetVote(chain string, proposal Proposal, wallet string, vote ProposalVote) {
-	if _, ok := s.ChainInfos[chain]; !ok {
-		s.ChainInfos[chain] = &ChainInfo{
-			Proposals:     make(map[string]Proposal),
+func (s *State) SetVote(chain Chain, proposal Proposal, wallet string, vote ProposalVote) {
+	if _, ok := s.ChainInfos[chain.Name]; !ok {
+		s.ChainInfos[chain.Name] = ChainInfo{
+			Chain:         chain,
 			ProposalVotes: make(map[string]WalletVotes),
 		}
 	}
 
-	s.ChainInfos[chain].Proposals[proposal.ProposalID] = proposal
-
-	if _, ok := s.ChainInfos[chain].ProposalVotes[proposal.ProposalID]; !ok {
-		s.ChainInfos[chain].ProposalVotes[proposal.ProposalID] = WalletVotes{
-			Votes: make(map[string]ProposalVote),
+	if _, ok := s.ChainInfos[chain.Name].ProposalVotes[proposal.ProposalID]; !ok {
+		s.ChainInfos[chain.Name].ProposalVotes[proposal.ProposalID] = WalletVotes{
+			Proposal: proposal,
+			Votes:    make(map[string]ProposalVote),
 		}
 	}
 
-	s.ChainInfos[chain].ProposalVotes[proposal.ProposalID].Votes[wallet] = vote
+	s.ChainInfos[chain.Name].ProposalVotes[proposal.ProposalID].Votes[wallet] = vote
 }
 
-func (s *State) SetChainProposalsError(chain string, err error) {
-	if _, ok := s.ChainInfos[chain]; !ok {
-		s.ChainInfos[chain] = &ChainInfo{
-			Proposals:     make(map[string]Proposal),
-			ProposalVotes: make(map[string]WalletVotes),
-		}
+func (s *State) SetChainProposalsError(chain Chain, err error) {
+	s.ChainInfos[chain.Name] = ChainInfo{
+		Chain:          chain,
+		ProposalsError: err.Error(),
 	}
-
-	chainInfo := s.ChainInfos[chain]
-	chainInfo.ProposalsError = err.Error()
 }
 
 func (s State) GetVoteAndProposal(chain, proposalID, wallet string) (ProposalVote, Proposal, bool) {
@@ -77,9 +72,13 @@ func (s State) GetVoteAndProposal(chain, proposalID, wallet string) (ProposalVot
 		return ProposalVote{}, Proposal{}, false
 	}
 
-	vote, found := s.ChainInfos[chain].ProposalVotes[proposalID].Votes[wallet]
-	proposal := s.ChainInfos[chain].Proposals[proposalID]
-	return vote, proposal, found
+	proposalVotes, found := s.ChainInfos[chain].ProposalVotes[proposalID]
+	if !found {
+		return ProposalVote{}, Proposal{}, false
+	}
+
+	vote, found := proposalVotes.Votes[wallet]
+	return vote, proposalVotes.Proposal, found
 }
 
 func (s State) HasVoted(chain, proposal, wallet string) bool {

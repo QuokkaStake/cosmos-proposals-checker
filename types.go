@@ -27,6 +27,10 @@ type Vote struct {
 	Option     string `json:"option"`
 }
 
+func (v Vote) ResolveVote() string {
+	return ResolveVote(v.Option)
+}
+
 type VoteRPCResponse struct {
 	Code    int64  `json:"code"`
 	Message string `json:"message"`
