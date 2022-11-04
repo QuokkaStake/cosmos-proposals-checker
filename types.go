@@ -151,6 +151,10 @@ func (m *Mutes) IsMuted(chain string, proposalID string) bool {
 	return false
 }
 
+func (m Mute) GetExpirationTime() string {
+	return m.Expires.Format(time.RFC3339Nano)
+}
+
 func (m *Mutes) AddMute(mute Mute) {
 	for index, muteInRange := range m.Mutes {
 		if mute.Chain == muteInRange.Chain && mute.ProposalID == muteInRange.ProposalID {
