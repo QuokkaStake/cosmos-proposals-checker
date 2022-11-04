@@ -186,30 +186,6 @@ func (reporter *TelegramReporter) HandleListMutes(c tele.Context) error {
 	}
 
 	return reporter.BotReply(c, buffer.String())
-
-	// var sb strings.Builder
-	// sb.WriteString("<strong>Active mutes:</strong>\n\n")
-
-	// mutesCount := 0
-
-	// for _, mute := range reporter.MutesManager.Mutes.Mutes {
-	// 	if mute.IsExpired() {
-	// 		continue
-	// 	}
-
-	// 	mutesCount++
-
-	// 	sb.WriteString(fmt.Sprintf(
-	// 		"<strong>Chain: </strong>%s\n<strong>Proposal ID: </strong>%s\n<strong>Expires: </strong>%s\n\n",
-	// 		mute.Chain, mute.ProposalID, mute.Expires,
-	// 	))
-	// }
-
-	// if mutesCount == 0 {
-	// 	sb.WriteString("No active mutes.")
-	// }
-
-	// return reporter.BotReply(c, sb.String())
 }
 
 func (reporter *TelegramReporter) HandleProposals(c tele.Context) error {
