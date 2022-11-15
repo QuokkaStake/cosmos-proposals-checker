@@ -3,6 +3,8 @@ No active mutes.
 {{- end }}
 {{ range . }}
 <strong>Chain: </strong>{{ .Chain }}
+{{- if .ProposalID }}
 <strong>Proposal ID: </strong>{{ .ProposalID }}
+{{- end }}
 <strong>Expires: </strong>{{ .GetExpirationTime }}
 {{ end }}

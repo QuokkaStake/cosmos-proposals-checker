@@ -141,9 +141,22 @@ func (m *Mute) IsExpired() bool {
 	return m.Expires.Before(time.Now())
 }
 
+func (m *Mute) Matches(chain string, proposalID string) bool {
+	if m.Chain != chain {
+		return false
+	}
+
+	// whole chain is muted
+	if m.ProposalID == "" {
+		return true
+	}
+
+	return m.ProposalID == proposalID
+}
+
 func (m *Mutes) IsMuted(chain string, proposalID string) bool {
 	for _, mute := range m.Mutes {
-		if mute.Chain == chain && mute.ProposalID == proposalID {
+		if mute.Matches(chain, proposalID) {
 			return !mute.IsExpired()
 		}
 	}
@@ -156,23 +169,26 @@ func (m Mute) GetExpirationTime() string {
 }
 
 func (m *Mutes) AddMute(mute Mute) {
-	for index, muteInRange := range m.Mutes {
-		if mute.Chain == muteInRange.Chain && mute.ProposalID == muteInRange.ProposalID {
-			m.Mutes[index] = mute
-			return
-		}
-	}
-
 	m.Mutes = append(m.Mutes, mute)
+	m.Mutes = Filter(m.Mutes, func(m Mute) bool {
+		return !m.IsExpired()
+	})
 }
 
 func (m *Mutes) DeleteMute(chain string, proposalID string) bool {
 	for index, mute := range m.Mutes {
 		if mute.Chain == chain && mute.ProposalID == proposalID {
 			m.Mutes = append(m.Mutes[:index], m.Mutes[index+1:]...)
+			m.Mutes = Filter(m.Mutes, func(m Mute) bool {
+				return !m.IsExpired()
+			})
 			return true
 		}
 	}
+
+	m.Mutes = Filter(m.Mutes, func(m Mute) bool {
+		return !m.IsExpired()
+	})
 
 	return false
 }
