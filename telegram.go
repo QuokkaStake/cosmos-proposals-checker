@@ -160,11 +160,19 @@ func (reporter *TelegramReporter) HandleAddMute(c tele.Context) error {
 	}
 
 	reporter.MutesManager.AddMute(mute)
+	if mute.ProposalID != "" {
+		return reporter.BotReply(c, fmt.Sprintf(
+			"Notification for proposal #%s on %s are muted till %s.",
+			mute.ProposalID,
+			mute.Chain,
+			mute.GetExpirationTime(),
+		))
+	}
+
 	return reporter.BotReply(c, fmt.Sprintf(
-		"Notification for proposal #%s on %s are muted till %s.",
-		mute.ProposalID,
+		"Notification for all proposals on %s are muted till %s.",
 		mute.Chain,
-		mute.Expires.Format(time.RFC1123),
+		mute.GetExpirationTime(),
 	))
 }
 
@@ -249,12 +257,16 @@ func (reporter *TelegramReporter) BotReply(c tele.Context, msg string) error {
 
 func ParseMuteOptions(query string, c tele.Context) (Mute, string) {
 	args := strings.Split(query, " ")
-	if len(args) <= 3 {
-		return Mute{}, "Usage: /proposals_mute <duration> <chain> <proposal>"
+	if len(args) <= 2 {
+		return Mute{}, "Usage: /proposals_mute <duration> <chain> [<proposal>]"
 	}
 
 	_, args = args[0], args[1:] // removing first argument as it's always /proposals_mute
-	durationString, chain, proposalID := args[0], args[1], args[2]
+	durationString, chain := args[0], args[1]
+	proposalID := ""
+	if len(args) >= 3 {
+		proposalID = args[2]
+	}
 
 	duration, err := time.ParseDuration(durationString)
 	if err != nil {
