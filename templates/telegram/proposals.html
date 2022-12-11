@@ -1,4 +1,5 @@
 {{ range .ChainInfos }}
+{{ $chain := .Chain }}
 <strong>{{ .Chain.GetName }}</strong>
 {{- if .HasProposalsError }}
 ❌ Error quering for proposals: {{ .ProposalsError }}
@@ -7,11 +8,11 @@
 Proposal #{{ .Proposal.ProposalID }}: {{ .Proposal.Content.Title }}
 {{- range $wallet, $vote := .Votes }}
 {{- if $vote.IsError }}
-❌ Wallet {{ $wallet }} - error querying: {{ $vote.Error }}
+❌ Wallet {{ $chain.GetWalletLink $wallet }} - error querying: {{ $vote.Error }}
 {{- else if $vote.HasVoted }}
-✅ Wallet {{ $wallet }} - voted: {{ $vote.Vote.ResolveVote }}
+✅ Wallet {{ $chain.GetWalletLink $wallet }} - voted: {{ $vote.Vote.ResolveVote }}
 {{- else }}
-🔴 Wallet {{ $wallet }} - not voted
+🔴 Wallet {{ $chain.GetWalletLink $wallet }} - not voted
 {{- end }}
 {{- end }}
 {{ end }}

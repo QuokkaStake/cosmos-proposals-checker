@@ -74,7 +74,7 @@ func (r *PagerDutyReporter) NewPagerDutyAlertFromReportEntry(e ReportEntry) Page
 	explorerLinks := e.Chain.GetExplorerProposalsLinks(e.ProposalID)
 	for _, link := range explorerLinks {
 		links = append(links, PagerDutyLink{
-			Href: link.Link,
+			Href: link.Href,
 			Text: link.Name,
 		})
 	}

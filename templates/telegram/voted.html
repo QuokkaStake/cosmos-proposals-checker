@@ -1,4 +1,4 @@
-✅ <strong>Wallet {{ .Wallet }} has voted on proposal {{ .ProposalID }} on {{ .Chain.GetName }}</strong>
+✅ <strong>Wallet {{ .Chain.GetWalletLink .Wallet }} has voted on proposal {{ .ProposalID }} on {{ .Chain.GetName }}</strong>
 {{ .ProposalTitle }}
 
 Vote: {{ .GetVote }}
