@@ -143,18 +143,29 @@ func TestFindChainByNameIfNotPresent(t *testing.T) {
 	assert.Nil(t, chain, "Chain should not be presented!")
 }
 
-func TestGetKeplrLink(t *testing.T) {
+func TestGetLinksEmpty(t *testing.T) {
+	t.Parallel()
+
+	chain := Chain{}
+	links := chain.GetExplorerProposalsLinks("test")
+
+	assert.Equal(t, len(links), 0, "Expected 0 links")
+}
+
+func TestGetLinksPresent(t *testing.T) {
 	t.Parallel()
 
 	chain := Chain{
 		KeplrName: "chain",
+		Explorer: &Explorer{
+			ProposalLinkPattern: "example.com/proposal/%s",
+		},
 	}
+	links := chain.GetExplorerProposalsLinks("test")
 
-	link := chain.GetKeplrLink("proposal")
-	assert.Equal(
-		t,
-		link,
-		"https://wallet.keplr.app/#/chain/governance?detailId=proposal",
-		"Chain Keplr link is wrong!",
-	)
+	assert.Equal(t, len(links), 2, "Expected 2 links")
+	assert.Equal(t, links[0].Name, "Keplr", "Expected Keplr link")
+	assert.Equal(t, links[0].Href, "https://wallet.keplr.app/#/chain/governance?detailId=test", "Wrong Keplr link")
+	assert.Equal(t, links[1].Name, "Explorer", "Expected Explorer link")
+	assert.Equal(t, links[1].Href, "example.com/proposal/test", "Wrong explorer link")
 }

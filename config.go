@@ -48,21 +48,24 @@ func (c Chain) GetName() string {
 	return c.Name
 }
 
-func (c Chain) GetKeplrLink(proposalID string) string {
-	return fmt.Sprintf("https://wallet.keplr.app/#/%s/governance?detailId=%s", c.KeplrName, proposalID)
-}
-
 func (c Chain) GetExplorerProposalsLinks(proposalID string) []Link {
-	if c.Explorer == nil || c.Explorer.ProposalLinkPattern == "" {
-		return []Link{}
+	links := []Link{}
+
+	if c.KeplrName != "" {
+		links = append(links, Link{
+			Name: "Keplr",
+			Href: fmt.Sprintf("https://wallet.keplr.app/#/%s/governance?detailId=%s", c.KeplrName, proposalID),
+		})
 	}
 
-	return []Link{
-		{
+	if c.Explorer != nil && c.Explorer.ProposalLinkPattern != "" {
+		links = append(links, Link{
 			Name: "Explorer",
 			Href: fmt.Sprintf(c.Explorer.ProposalLinkPattern, proposalID),
-		},
+		})
 	}
+
+	return links
 }
 
 func (c Chain) GetWalletLink(wallet string) template.HTML {
