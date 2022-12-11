@@ -83,7 +83,7 @@ func TestValidateConfigNoChains(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
-		Chains: []Chain{},
+		Chains: []*Chain{},
 	}
 	err := config.Validate()
 	assert.NotEqual(t, err, nil, "Error should be presented!")
@@ -93,7 +93,7 @@ func TestValidateConfigInvalidChain(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
-		Chains: []Chain{
+		Chains: []*Chain{
 			{
 				Name: "",
 			},
@@ -107,7 +107,7 @@ func TestValidateConfigValidChain(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
-		Chains: []Chain{
+		Chains: []*Chain{
 			{
 				Name:         "chain",
 				LCDEndpoints: []string{"endpoint"},

@@ -2,20 +2,26 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"os"
 
 	"github.com/BurntSushi/toml"
 	"github.com/mcuadros/go-defaults"
 )
 
+type Explorer struct {
+	ProposalLinkPattern string `toml:"proposal-link-pattern"`
+	WalletLinkPattern   string `toml:"wallet-link-pattern"`
+}
+
 type Chain struct {
-	Name                string   `toml:"name"`
-	PrettyName          string   `toml:"pretty-name"`
-	KeplrName           string   `toml:"keplr-name"`
-	LCDEndpoints        []string `toml:"lcd-endpoints"`
-	Wallets             []string `toml:"wallets"`
-	MintscanPrefix      string   `toml:"mintscan-prefix"`
-	ExplorerLinkPattern string   `toml:"explorer-link-pattern"`
+	Name           string    `toml:"name"`
+	PrettyName     string    `toml:"pretty-name"`
+	KeplrName      string    `toml:"keplr-name"`
+	LCDEndpoints   []string  `toml:"lcd-endpoints"`
+	Wallets        []string  `toml:"wallets"`
+	MintscanPrefix string    `toml:"mintscan-prefix"`
+	Explorer       *Explorer `toml:"explorer"`
 }
 
 func (c *Chain) Validate() error {
@@ -46,34 +52,34 @@ func (c Chain) GetKeplrLink(proposalID string) string {
 	return fmt.Sprintf("https://wallet.keplr.app/#/%s/governance?detailId=%s", c.KeplrName, proposalID)
 }
 
-func (c Chain) GetExplorerProposalsLinks(proposalID string) []ExplorerLink {
-	if c.MintscanPrefix == "" {
-		return []ExplorerLink{}
+func (c Chain) GetExplorerProposalsLinks(proposalID string) []Link {
+	if c.Explorer == nil || c.Explorer.ProposalLinkPattern == "" {
+		return []Link{}
 	}
 
-	links := []ExplorerLink{
+	return []Link{
 		{
-			Name: "Mintscan",
-			Link: fmt.Sprintf("https://mintscan.io/%s/proposals/%s", c.MintscanPrefix, proposalID),
+			Name: "Explorer",
+			Href: fmt.Sprintf(c.Explorer.ProposalLinkPattern, proposalID),
 		},
 	}
-
-	if c.ExplorerLinkPattern != "" {
-		links = append(links, ExplorerLink{
-			Name: "Explorer",
-			Link: fmt.Sprintf(c.ExplorerLinkPattern, proposalID),
-		})
-	}
-
-	return links
 }
 
-type Chains []Chain
+func (c Chain) GetWalletLink(wallet string) template.HTML {
+	if c.Explorer == nil || c.Explorer.WalletLinkPattern == "" {
+		return template.HTML(wallet)
+	}
+
+	link := fmt.Sprintf(c.Explorer.WalletLinkPattern, wallet)
+	return template.HTML(fmt.Sprintf("<a href='%s'>%s</a>", link, wallet))
+}
+
+type Chains []*Chain
 
 func (c Chains) FindByName(name string) *Chain {
 	for _, chain := range c {
 		if chain.Name == name {
-			return &chain
+			return chain
 		}
 	}
 
@@ -86,7 +92,7 @@ type Config struct {
 	LogConfig       LogConfig       `toml:"log"`
 	StatePath       string          `toml:"state-path"`
 	MutesPath       string          `toml:"mutes-path"`
-	Chains          []Chain         `toml:"chains"`
+	Chains          Chains          `toml:"chains"`
 	Interval        int64           `toml:"interval" default:"3600"`
 }
 
@@ -127,11 +133,21 @@ func GetConfig(path string) (*Config, error) {
 
 	configString := string(configBytes)
 
-	configStruct := Config{}
-	if _, err = toml.Decode(configString, &configStruct); err != nil {
+	configStruct := &Config{}
+	if _, err = toml.Decode(configString, configStruct); err != nil {
 		return nil, err
 	}
 
-	defaults.SetDefaults(&configStruct)
-	return &configStruct, nil
+	defaults.SetDefaults(configStruct)
+
+	for _, chain := range configStruct.Chains {
+		if chain.MintscanPrefix != "" {
+			chain.Explorer = &Explorer{
+				ProposalLinkPattern: fmt.Sprintf("https://mintscan.io/%s/proposals/%%s", chain.MintscanPrefix),
+				WalletLinkPattern:   fmt.Sprintf("https://mintscan.io/%s/account/%%s", chain.MintscanPrefix),
+			}
+		}
+	}
+
+	return configStruct, nil
 }

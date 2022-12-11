@@ -21,12 +21,8 @@ name = "bitsong"
 pretty-name = "Bitsong"
 # Chain name in Keplr wallet, to generate links to a proposal. Optional.
 keplr-name = "bitsong"
-# Mintscan prefix, to generate links to a proposal. Optional.
+# Mintscan prefix, to generate links to a proposal/wallet. Optional.
 mintscan-prefix = "bitsong"
-# A pattern for proposal link for explorer, if there's no Mintscan support
-# for the chain, but there is a custom explorer. %s is replaced by the proposal ID.
-# Also optional.
-explorer-link-pattern = "https://explorebitsong.com/bitsong/proposals/%s"
 # List of LCD endpoints to get data from. At least 1 is required. You can use
 # multiple LCD endpoints, in case a single one fails.
 lcd-endpoints = ["https://lcd-bitsong-app.cosmostation.io"]
@@ -34,6 +30,14 @@ lcd-endpoints = ["https://lcd-bitsong-app.cosmostation.io"]
 wallets = [
     "bitsong14rvn7anf22e00vj5x3al4w50ns78s7n4t8yxcy"
 ]
+# Custom explorer links patterns. They are overridden if mintscan-prefix is specified.
+[chains.explorer]
+# A pattern for proposal link for explorer, if there's no Mintscan support
+# for the chain, but there is a custom explorer. %s is replaced by the proposal ID.
+# Also optional.
+proposal-link-pattern = "https://mintscan.io/bitsong/proposals/%s"
+# A pattern for wallet links for the explorer. Also optional.
+wallet-link-pattern = "https://mintscan.io/bitsong/account/%s"
 
 [[chains]]
 name = "sentinel"

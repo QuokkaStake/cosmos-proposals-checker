@@ -21,7 +21,7 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 	}
 
 	generator := NewReportGenerator(stateManager, GetDefaultLogger(), Chains{
-		Chain{Name: "chain"},
+		&Chain{Name: "chain"},
 	})
 
 	report := generator.GenerateReport(oldState, newState)
@@ -56,7 +56,7 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 	}
 
 	generator := NewReportGenerator(stateManager, GetDefaultLogger(), Chains{
-		Chain{Name: "chain"},
+		&Chain{Name: "chain"},
 	})
 
 	report := generator.GenerateReport(oldState, newState)
@@ -89,7 +89,7 @@ func TestReportGeneratorWithNotVoted(t *testing.T) {
 	}
 
 	generator := NewReportGenerator(stateManager, GetDefaultLogger(), Chains{
-		Chain{Name: "chain"},
+		&Chain{Name: "chain"},
 	})
 
 	report := generator.GenerateReport(oldState, newState)
@@ -141,7 +141,7 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 	}
 
 	generator := NewReportGenerator(stateManager, GetDefaultLogger(), Chains{
-		Chain{Name: "chain"},
+		&Chain{Name: "chain"},
 	})
 
 	report := generator.GenerateReport(oldState, newState)
@@ -197,7 +197,7 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 	}
 
 	generator := NewReportGenerator(stateManager, GetDefaultLogger(), Chains{
-		Chain{Name: "chain"},
+		&Chain{Name: "chain"},
 	})
 
 	report := generator.GenerateReport(oldState, newState)

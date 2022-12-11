@@ -6,10 +6,10 @@ import (
 
 type StateGenerator struct {
 	Logger zerolog.Logger
-	Chains []Chain
+	Chains Chains
 }
 
-func NewStateGenerator(logger *zerolog.Logger, chains []Chain) *StateGenerator {
+func NewStateGenerator(logger *zerolog.Logger, chains Chains) *StateGenerator {
 	return &StateGenerator{
 		Logger: logger.With().Str("component", "state_generator").Logger(),
 		Chains: chains,
@@ -27,7 +27,7 @@ func (g *StateGenerator) GetState(oldState State) State {
 		proposals, err := rpc.GetAllProposals()
 		if err != nil {
 			g.Logger.Warn().Err(err).Msg("Error processing proposals")
-			state.SetChainProposalsError(chain, err)
+			state.SetChainProposalsError(*chain, err)
 			continue
 		}
 
@@ -57,7 +57,7 @@ func (g *StateGenerator) GetState(oldState State) State {
 						Msg("Wallet has voted and there's no vote in the new state - using old vote")
 
 					state.SetVote(
-						chain,
+						*chain,
 						proposal,
 						wallet,
 						oldVote,
@@ -75,7 +75,7 @@ func (g *StateGenerator) GetState(oldState State) State {
 				}
 
 				state.SetVote(
-					chain,
+					*chain,
 					proposal,
 					wallet,
 					proposalVote,

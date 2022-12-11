@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -121,9 +122,17 @@ type Reporter interface {
 	Name() string
 }
 
-type ExplorerLink struct {
+type Link struct {
 	Name string
-	Link string
+	Href string
+}
+
+func (l Link) Serialize() string {
+	if l.Href == "" {
+		return l.Name
+	}
+
+	return fmt.Sprintf("<a href='%s'>%s</a>", l.Href, l.Name)
 }
 
 type Mute struct {
