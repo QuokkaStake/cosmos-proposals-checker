@@ -36,3 +36,4 @@ linters:
     - errorlint
     - gofumpt
     - noctx
+    - gosec
