@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"main/pkg/types"
 	"net/http"
 	"strings"
 	"time"
+
+	"main/pkg/types"
 
 	"github.com/rs/zerolog"
 )

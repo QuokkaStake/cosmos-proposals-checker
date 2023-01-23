@@ -20,7 +20,7 @@ jobs:
           go-version: '1.18.2'
       - run: go version
       - run: go mod download
-      - run: go vet
+      - run: go vet ./...
   golangci:
     name: lint
     runs-on: ubuntu-latest

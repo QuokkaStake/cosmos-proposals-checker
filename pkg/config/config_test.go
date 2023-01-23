@@ -1,8 +1,9 @@
 package config
 
 import (
-	configTypes "main/pkg/config/types"
 	"testing"
+
+	configTypes "main/pkg/config/types"
 
 	"github.com/stretchr/testify/assert"
 )

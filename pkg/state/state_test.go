@@ -2,9 +2,10 @@ package state
 
 import (
 	"errors"
+	"testing"
+
 	configTypes "main/pkg/config/types"
 	"main/pkg/types"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )

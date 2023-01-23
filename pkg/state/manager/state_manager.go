@@ -2,8 +2,9 @@ package manager
 
 import (
 	"encoding/json"
-	"main/pkg/state"
 	"os"
+
+	"main/pkg/state"
 
 	"github.com/rs/zerolog"
 )

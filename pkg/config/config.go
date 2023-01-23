@@ -2,8 +2,9 @@ package config
 
 import (
 	"fmt"
-	"main/pkg/config/types"
 	"os"
+
+	"main/pkg/config/types"
 
 	"github.com/BurntSushi/toml"
 	"github.com/mcuadros/go-defaults"

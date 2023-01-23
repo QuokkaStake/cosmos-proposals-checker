@@ -1,12 +1,13 @@
 package report
 
 import (
+	"testing"
+
 	configTypes "main/pkg/config/types"
 	"main/pkg/logger"
 	"main/pkg/state"
 	"main/pkg/state/manager"
 	"main/pkg/types"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )

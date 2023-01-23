@@ -1,10 +1,11 @@
 package reporters
 
 import (
+	"time"
+
 	configTypes "main/pkg/config/types"
 	"main/pkg/types"
 	"main/pkg/utils"
-	"time"
 )
 
 type Reporter interface {

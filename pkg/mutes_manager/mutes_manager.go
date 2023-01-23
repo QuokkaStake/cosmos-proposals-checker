@@ -1,9 +1,10 @@
-package mutes_manager
+package mutesmanager
 
 import (
 	"encoding/json"
-	"main/pkg/types"
 	"os"
+
+	"main/pkg/types"
 
 	"github.com/rs/zerolog"
 )

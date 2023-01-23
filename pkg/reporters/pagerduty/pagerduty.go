@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"main/pkg/config"
-	"main/pkg/reporters"
 	"net/http"
 	"os"
 	"time"
+
+	"main/pkg/config"
+	"main/pkg/reporters"
 
 	"github.com/rs/zerolog"
 )

@@ -1,8 +1,9 @@
 package types
 
 import (
-	"main/pkg/utils"
 	"time"
+
+	"main/pkg/utils"
 )
 
 type Mute struct {

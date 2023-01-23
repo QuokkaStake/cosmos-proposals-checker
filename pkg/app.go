@@ -1,16 +1,17 @@
 package pkg
 
 import (
+	"time"
+
 	configPkg "main/pkg/config"
 	"main/pkg/logger"
-	"main/pkg/mutes_manager"
+	mutesManager "main/pkg/mutes_manager"
 	reportPkg "main/pkg/report"
 	reportersPkg "main/pkg/reporters"
 	"main/pkg/reporters/pagerduty"
 	"main/pkg/reporters/telegram"
 	"main/pkg/state/generator"
 	"main/pkg/state/manager"
-	"time"
 )
 
 type App struct {
@@ -36,7 +37,7 @@ func (a *App) Start() {
 	stateManager := manager.NewStateManager(config.StatePath, log)
 	stateManager.Load()
 
-	mutesManager := mutes_manager.NewMutesManager(config.MutesPath, log)
+	mutesManager := mutesManager.NewMutesManager(config.MutesPath, log)
 	mutesManager.Load()
 
 	reportGenerator := reportPkg.NewReportGenerator(stateManager, log, config.Chains)

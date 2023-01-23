@@ -1,13 +1,14 @@
 package report
 
 import (
+	"time"
+
 	configTypes "main/pkg/config/types"
 	"main/pkg/reporters"
 	"main/pkg/state"
 	"main/pkg/state/manager"
 	"main/pkg/tendermint"
 	"main/pkg/types"
-	"time"
 
 	"github.com/rs/zerolog"
 )

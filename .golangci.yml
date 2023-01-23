@@ -37,3 +37,4 @@ linters:
     - gofumpt
     - noctx
     - gosec
+    - testpackage

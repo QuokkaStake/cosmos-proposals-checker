@@ -1,8 +1,9 @@
 package logger
 
 import (
-	"main/pkg/config"
 	"os"
+
+	"main/pkg/config"
 
 	"github.com/rs/zerolog"
 )

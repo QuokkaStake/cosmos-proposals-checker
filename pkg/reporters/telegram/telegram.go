@@ -4,16 +4,17 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"strings"
+	"time"
+
 	"main/pkg/config"
-	"main/pkg/mutes_manager"
+	mutesManager "main/pkg/mutes_manager"
 	"main/pkg/reporters"
 	"main/pkg/state"
 	"main/pkg/state/generator"
 	"main/pkg/types"
 	"main/pkg/utils"
 	"main/templates"
-	"strings"
-	"time"
 
 	"github.com/rs/zerolog"
 	tele "gopkg.in/telebot.v3"
@@ -22,7 +23,7 @@ import (
 type TelegramReporter struct {
 	TelegramToken  string
 	TelegramChat   int64
-	MutesManager   *mutes_manager.MutesManager
+	MutesManager   *mutesManager.MutesManager
 	StateGenerator *generator.StateGenerator
 
 	TelegramBot *tele.Bot
@@ -36,7 +37,7 @@ const (
 
 func NewTelegramReporter(
 	config config.TelegramConfig,
-	mutesManager *mutes_manager.MutesManager,
+	mutesManager *mutesManager.MutesManager,
 	stateGenerator *generator.StateGenerator,
 	logger *zerolog.Logger) *TelegramReporter {
 	return &TelegramReporter{
