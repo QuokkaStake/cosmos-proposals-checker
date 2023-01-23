@@ -1,4 +1,4 @@
-package main
+package tendermint
 
 import (
 	"encoding/json"
@@ -8,8 +8,12 @@ import (
 	"strings"
 	"time"
 
+	"main/pkg/types"
+
 	"github.com/rs/zerolog"
 )
+
+const PaginationLimit = 1000
 
 type RPC struct {
 	URLs   []string
@@ -23,8 +27,8 @@ func NewRPC(urls []string, logger zerolog.Logger) *RPC {
 	}
 }
 
-func (rpc *RPC) GetAllProposals() ([]Proposal, error) {
-	proposals := []Proposal{}
+func (rpc *RPC) GetAllProposals() ([]types.Proposal, error) {
+	proposals := []types.Proposal{}
 	offset := 0
 
 	for {
@@ -35,7 +39,7 @@ func (rpc *RPC) GetAllProposals() ([]Proposal, error) {
 			offset,
 		)
 
-		var batchProposals ProposalsRPCResponse
+		var batchProposals types.ProposalsRPCResponse
 		if err := rpc.Get(url, &batchProposals); err != nil {
 			return nil, err
 		}
@@ -51,14 +55,14 @@ func (rpc *RPC) GetAllProposals() ([]Proposal, error) {
 	return proposals, nil
 }
 
-func (rpc *RPC) GetVote(proposal, voter string) (*VoteRPCResponse, error) {
+func (rpc *RPC) GetVote(proposal, voter string) (*types.VoteRPCResponse, error) {
 	url := fmt.Sprintf(
 		"/cosmos/gov/v1beta1/proposals/%s/votes/%s",
 		proposal,
 		voter,
 	)
 
-	var vote VoteRPCResponse
+	var vote types.VoteRPCResponse
 	if err := rpc.Get(url, &vote); err != nil {
 		return nil, err
 	}
@@ -71,7 +75,9 @@ func (rpc *RPC) GetVote(proposal, voter string) (*VoteRPCResponse, error) {
 }
 
 func (rpc *RPC) Get(url string, target interface{}) error {
-	for _, lcd := range rpc.URLs {
+	errors := make([]error, len(rpc.URLs))
+
+	for index, lcd := range rpc.URLs {
 		fullURL := lcd + url
 		rpc.Logger.Trace().Str("url", fullURL).Msg("Trying making request to LCD")
 
@@ -85,10 +91,19 @@ func (rpc *RPC) Get(url string, target interface{}) error {
 		}
 
 		rpc.Logger.Warn().Str("url", fullURL).Err(err).Msg("LCD request failed")
+		errors[index] = err
 	}
 
 	rpc.Logger.Warn().Str("url", url).Msg("All LCD requests failed")
-	return fmt.Errorf("all LCD requests failed")
+
+	var sb strings.Builder
+
+	sb.WriteString("All LCD requests failed:\n")
+	for index, url := range rpc.URLs {
+		sb.WriteString(fmt.Sprintf("#%d: %s -> %s\n", index+1, url, errors[index]))
+	}
+
+	return fmt.Errorf(sb.String())
 }
 
 func (rpc *RPC) GetFull(url string, target interface{}) error {

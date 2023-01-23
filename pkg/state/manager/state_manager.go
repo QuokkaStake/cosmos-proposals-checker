@@ -1,8 +1,10 @@
-package main
+package manager
 
 import (
 	"encoding/json"
 	"os"
+
+	"main/pkg/state"
 
 	"github.com/rs/zerolog"
 )
@@ -10,14 +12,14 @@ import (
 type StateManager struct {
 	StatePath string
 	Logger    zerolog.Logger
-	State     State
+	State     state.State
 }
 
 func NewStateManager(path string, logger *zerolog.Logger) *StateManager {
 	return &StateManager{
 		StatePath: path,
 		Logger:    logger.With().Str("component", "state_manager").Logger(),
-		State:     NewState(),
+		State:     state.NewState(),
 	}
 }
 
@@ -28,14 +30,14 @@ func (m *StateManager) Load() {
 		return
 	}
 
-	var state State
-	if err = json.Unmarshal(content, &state); err != nil {
+	var s state.State
+	if err = json.Unmarshal(content, &s); err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not unmarshall state")
-		m.State = NewState()
+		m.State = state.NewState()
 		return
 	}
 
-	m.State = state
+	m.State = s
 }
 
 func (m *StateManager) Save() {
@@ -51,7 +53,7 @@ func (m *StateManager) Save() {
 	}
 }
 
-func (m *StateManager) CommitState(state State) {
+func (m *StateManager) CommitState(state state.State) {
 	m.State = state
 	m.Save()
 }

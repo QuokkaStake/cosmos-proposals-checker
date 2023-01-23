@@ -1,4 +1,4 @@
-package main
+package pagerduty
 
 import (
 	"bytes"
@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"main/pkg/config"
+	"main/pkg/reporters"
 
 	"github.com/rs/zerolog"
 )
@@ -45,7 +48,7 @@ type PagerDutyResponse struct {
 	Message string
 }
 
-func (r *PagerDutyReporter) NewPagerDutyAlertFromReportEntry(e ReportEntry) PagerDutyAlert {
+func (r *PagerDutyReporter) NewPagerDutyAlertFromReportEntry(e reporters.ReportEntry) PagerDutyAlert {
 	eventAction := "trigger"
 	if e.HasVoted() {
 		eventAction = "resolve"
@@ -101,7 +104,7 @@ func (r *PagerDutyReporter) NewPagerDutyAlertFromReportEntry(e ReportEntry) Page
 	}
 }
 
-func NewPagerDutyReporter(config PagerDutyConfig, logger *zerolog.Logger) PagerDutyReporter {
+func NewPagerDutyReporter(config config.PagerDutyConfig, logger *zerolog.Logger) PagerDutyReporter {
 	return PagerDutyReporter{
 		PagerDutyURL: config.PagerDutyURL,
 		APIKey:       config.APIKey,
@@ -120,7 +123,7 @@ func (r PagerDutyReporter) Name() string {
 	return "pagerduty-reporter"
 }
 
-func (r PagerDutyReporter) SendReport(report Report) error {
+func (r PagerDutyReporter) SendReport(report reporters.Report) error {
 	var err error
 
 	for _, entry := range report.Entries {

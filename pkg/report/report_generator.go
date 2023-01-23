@@ -1,22 +1,29 @@
-package main
+package report
 
 import (
 	"time"
+
+	configTypes "main/pkg/config/types"
+	"main/pkg/reporters"
+	"main/pkg/state"
+	"main/pkg/state/manager"
+	"main/pkg/tendermint"
+	"main/pkg/types"
 
 	"github.com/rs/zerolog"
 )
 
 type ReportGenerator struct {
-	StateManager *StateManager
-	Chains       Chains
-	RPC          *RPC
+	StateManager *manager.StateManager
+	Chains       configTypes.Chains
+	RPC          *tendermint.RPC
 	Logger       zerolog.Logger
 }
 
 func NewReportGenerator(
-	manager *StateManager,
+	manager *manager.StateManager,
 	logger *zerolog.Logger,
-	chains Chains,
+	chains configTypes.Chains,
 ) *ReportGenerator {
 	return &ReportGenerator{
 		StateManager: manager,
@@ -25,22 +32,22 @@ func NewReportGenerator(
 	}
 }
 
-func (g *ReportGenerator) GenerateReport(oldState, newState State) Report {
-	entries := []ReportEntry{}
+func (g *ReportGenerator) GenerateReport(oldState, newState state.State) reporters.Report {
+	entries := []reporters.ReportEntry{}
 
 	for chainName, chainInfo := range newState.ChainInfos {
 		if chainInfo.HasProposalsError() {
 			g.Logger.Debug().
 				Str("chain", chainName).
 				Msg("Error querying for proposals - sending an alert")
-			entry := ReportEntry{
+			entry := reporters.ReportEntry{
 				Chain:                  *g.Chains.FindByName(chainName),
 				Wallet:                 "",
 				ProposalID:             "",
 				ProposalTitle:          "",
 				ProposalDescription:    "",
 				ProposalVoteEndingTime: time.Now(),
-				Type:                   ProposalQueryError,
+				Type:                   types.ProposalQueryError,
 				Value:                  chainInfo.ProposalsError,
 			}
 			entries = append(entries, entry)
@@ -58,7 +65,7 @@ func (g *ReportGenerator) GenerateReport(oldState, newState State) Report {
 				oldVote, _, _ := oldState.GetVoteAndProposal(chainName, proposalID, wallet)
 				newVote, proposal, _ := newState.GetVoteAndProposal(chainName, proposalID, wallet)
 
-				entry := ReportEntry{
+				entry := reporters.ReportEntry{
 					Chain:                  *g.Chains.FindByName(chainName),
 					Wallet:                 wallet,
 					ProposalID:             proposalID,
@@ -74,7 +81,7 @@ func (g *ReportGenerator) GenerateReport(oldState, newState State) Report {
 						Str("proposal", proposalID).
 						Str("wallet", wallet).
 						Msg("Error querying for vote - sending an alert")
-					entry.Type = VoteQueryError
+					entry.Type = types.VoteQueryError
 					entry.Value = newVote.Error
 
 					entries = append(entries, entry)
@@ -88,7 +95,7 @@ func (g *ReportGenerator) GenerateReport(oldState, newState State) Report {
 						Str("proposal", proposalID).
 						Str("wallet", wallet).
 						Msg("Wallet hasn't voted now - sending an alert")
-					entry.Type = NotVoted
+					entry.Type = types.NotVoted
 					entries = append(entries, entry)
 					continue
 				}
@@ -103,7 +110,7 @@ func (g *ReportGenerator) GenerateReport(oldState, newState State) Report {
 						Str("wallet", wallet).
 						Msg("Wallet hasn't voted before but voted now - closing an alert")
 
-					entry.Type = Voted
+					entry.Type = types.Voted
 					entry.Value = vote.Option
 
 					entries = append(entries, entry)
@@ -117,7 +124,7 @@ func (g *ReportGenerator) GenerateReport(oldState, newState State) Report {
 						Str("proposal", proposal.ProposalID).
 						Str("wallet", wallet).
 						Msg("Wallet changed its vote - sending an alert")
-					entry.Type = Revoted
+					entry.Type = types.Revoted
 					entry.Value = newVote.Vote.Option
 					entry.OldValue = oldVote.Vote.Option
 
@@ -129,5 +136,5 @@ func (g *ReportGenerator) GenerateReport(oldState, newState State) Report {
 
 	g.StateManager.CommitState(newState)
 
-	return Report{Entries: entries}
+	return reporters.Report{Entries: entries}
 }
