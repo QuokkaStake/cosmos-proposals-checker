@@ -1,7 +1,12 @@
-package main
+package state
+
+import (
+	configTypes "main/pkg/config/types"
+	"main/pkg/types"
+)
 
 type ProposalVote struct {
-	Vote  *Vote
+	Vote  *types.Vote
 	Error string
 }
 
@@ -14,12 +19,12 @@ func (v ProposalVote) IsError() bool {
 }
 
 type WalletVotes struct {
-	Proposal Proposal
+	Proposal types.Proposal
 	Votes    map[string]ProposalVote
 }
 
 type ChainInfo struct {
-	Chain          Chain
+	Chain          configTypes.Chain
 	ProposalVotes  map[string]WalletVotes
 	ProposalsError string
 }
@@ -38,7 +43,7 @@ func NewState() State {
 	}
 }
 
-func (s *State) SetVote(chain Chain, proposal Proposal, wallet string, vote ProposalVote) {
+func (s *State) SetVote(chain configTypes.Chain, proposal types.Proposal, wallet string, vote ProposalVote) {
 	if _, ok := s.ChainInfos[chain.Name]; !ok {
 		s.ChainInfos[chain.Name] = ChainInfo{
 			Chain:         chain,
@@ -56,25 +61,25 @@ func (s *State) SetVote(chain Chain, proposal Proposal, wallet string, vote Prop
 	s.ChainInfos[chain.Name].ProposalVotes[proposal.ProposalID].Votes[wallet] = vote
 }
 
-func (s *State) SetChainProposalsError(chain Chain, err error) {
+func (s *State) SetChainProposalsError(chain configTypes.Chain, err error) {
 	s.ChainInfos[chain.Name] = ChainInfo{
 		Chain:          chain,
 		ProposalsError: err.Error(),
 	}
 }
 
-func (s State) GetVoteAndProposal(chain, proposalID, wallet string) (ProposalVote, Proposal, bool) {
+func (s State) GetVoteAndProposal(chain, proposalID, wallet string) (ProposalVote, types.Proposal, bool) {
 	if _, ok := s.ChainInfos[chain]; !ok {
-		return ProposalVote{}, Proposal{}, false
+		return ProposalVote{}, types.Proposal{}, false
 	}
 
 	if _, ok := s.ChainInfos[chain].ProposalVotes[proposalID]; !ok {
-		return ProposalVote{}, Proposal{}, false
+		return ProposalVote{}, types.Proposal{}, false
 	}
 
 	proposalVotes, found := s.ChainInfos[chain].ProposalVotes[proposalID]
 	if !found {
-		return ProposalVote{}, Proposal{}, false
+		return ProposalVote{}, types.Proposal{}, false
 	}
 
 	vote, found := proposalVotes.Votes[wallet]

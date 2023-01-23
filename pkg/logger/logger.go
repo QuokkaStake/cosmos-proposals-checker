@@ -1,6 +1,7 @@
-package main
+package logger
 
 import (
+	"main/pkg/config"
 	"os"
 
 	"github.com/rs/zerolog"
@@ -11,7 +12,7 @@ func GetDefaultLogger() *zerolog.Logger {
 	return &log
 }
 
-func GetLogger(config LogConfig) *zerolog.Logger {
+func GetLogger(config config.LogConfig) *zerolog.Logger {
 	log := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).With().Timestamp().Logger()
 
 	if config.JSONOutput {

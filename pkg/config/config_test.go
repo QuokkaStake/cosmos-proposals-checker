@@ -1,6 +1,7 @@
-package main
+package config
 
 import (
+	configTypes "main/pkg/config/types"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,7 +10,7 @@ import (
 func TestValidateChainWithEmptyName(t *testing.T) {
 	t.Parallel()
 
-	chain := Chain{
+	chain := configTypes.Chain{
 		Name: "",
 	}
 
@@ -20,7 +21,7 @@ func TestValidateChainWithEmptyName(t *testing.T) {
 func TestValidateChainWithoutEndpoints(t *testing.T) {
 	t.Parallel()
 
-	chain := Chain{
+	chain := configTypes.Chain{
 		Name:         "chain",
 		LCDEndpoints: []string{},
 	}
@@ -32,7 +33,7 @@ func TestValidateChainWithoutEndpoints(t *testing.T) {
 func TestValidateChainWithoutWallets(t *testing.T) {
 	t.Parallel()
 
-	chain := Chain{
+	chain := configTypes.Chain{
 		Name:         "chain",
 		LCDEndpoints: []string{"endpoint"},
 		Wallets:      []string{},
@@ -45,7 +46,7 @@ func TestValidateChainWithoutWallets(t *testing.T) {
 func TestValidateChainWithValidConfig(t *testing.T) {
 	t.Parallel()
 
-	chain := Chain{
+	chain := configTypes.Chain{
 		Name:         "chain",
 		LCDEndpoints: []string{"endpoint"},
 		Wallets:      []string{"wallet"},
@@ -58,7 +59,7 @@ func TestValidateChainWithValidConfig(t *testing.T) {
 func TestChainGetNameWithoutPrettyName(t *testing.T) {
 	t.Parallel()
 
-	chain := Chain{
+	chain := configTypes.Chain{
 		Name:       "chain",
 		PrettyName: "",
 	}
@@ -70,7 +71,7 @@ func TestChainGetNameWithoutPrettyName(t *testing.T) {
 func TestChainGetNameWithPrettyName(t *testing.T) {
 	t.Parallel()
 
-	chain := Chain{
+	chain := configTypes.Chain{
 		Name:       "chain",
 		PrettyName: "chain-pretty",
 	}
@@ -83,7 +84,7 @@ func TestValidateConfigNoChains(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
-		Chains: []*Chain{},
+		Chains: []*configTypes.Chain{},
 	}
 	err := config.Validate()
 	assert.NotEqual(t, err, nil, "Error should be presented!")
@@ -93,7 +94,7 @@ func TestValidateConfigInvalidChain(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
-		Chains: []*Chain{
+		Chains: []*configTypes.Chain{
 			{
 				Name: "",
 			},
@@ -107,7 +108,7 @@ func TestValidateConfigValidChain(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
-		Chains: []*Chain{
+		Chains: []*configTypes.Chain{
 			{
 				Name:         "chain",
 				LCDEndpoints: []string{"endpoint"},
@@ -122,7 +123,7 @@ func TestValidateConfigValidChain(t *testing.T) {
 func TestFindChainByNameIfPresent(t *testing.T) {
 	t.Parallel()
 
-	chains := Chains{
+	chains := configTypes.Chains{
 		{Name: "chain1"},
 		{Name: "chain2"},
 	}
@@ -134,7 +135,7 @@ func TestFindChainByNameIfPresent(t *testing.T) {
 func TestFindChainByNameIfNotPresent(t *testing.T) {
 	t.Parallel()
 
-	chains := Chains{
+	chains := configTypes.Chains{
 		{Name: "chain1"},
 		{Name: "chain2"},
 	}
@@ -146,7 +147,7 @@ func TestFindChainByNameIfNotPresent(t *testing.T) {
 func TestGetLinksEmpty(t *testing.T) {
 	t.Parallel()
 
-	chain := Chain{}
+	chain := configTypes.Chain{}
 	links := chain.GetExplorerProposalsLinks("test")
 
 	assert.Equal(t, len(links), 0, "Expected 0 links")
@@ -155,9 +156,9 @@ func TestGetLinksEmpty(t *testing.T) {
 func TestGetLinksPresent(t *testing.T) {
 	t.Parallel()
 
-	chain := Chain{
+	chain := configTypes.Chain{
 		KeplrName: "chain",
-		Explorer: &Explorer{
+		Explorer: &configTypes.Explorer{
 			ProposalLinkPattern: "example.com/proposal/%s",
 		},
 	}

@@ -1,10 +1,17 @@
-package main
+package telegram
 
 import (
 	"bytes"
-	"embed"
 	"fmt"
 	"html/template"
+	"main/pkg/config"
+	"main/pkg/mutes_manager"
+	"main/pkg/reporters"
+	"main/pkg/state"
+	"main/pkg/state/generator"
+	"main/pkg/types"
+	"main/pkg/utils"
+	"main/templates"
 	"strings"
 	"time"
 
@@ -15,25 +22,22 @@ import (
 type TelegramReporter struct {
 	TelegramToken  string
 	TelegramChat   int64
-	MutesManager   *MutesManager
-	StateGenerator *StateGenerator
+	MutesManager   *mutes_manager.MutesManager
+	StateGenerator *generator.StateGenerator
 
 	TelegramBot *tele.Bot
 	Logger      zerolog.Logger
-	Templates   map[ReportEntryType]*template.Template
+	Templates   map[types.ReportEntryType]*template.Template
 }
 
 const (
 	MaxMessageSize = 4096
 )
 
-//go:embed templates/*
-var templatesFs embed.FS
-
 func NewTelegramReporter(
-	config TelegramConfig,
-	mutesManager *MutesManager,
-	stateGenerator *StateGenerator,
+	config config.TelegramConfig,
+	mutesManager *mutes_manager.MutesManager,
+	stateGenerator *generator.StateGenerator,
 	logger *zerolog.Logger) *TelegramReporter {
 	return &TelegramReporter{
 		TelegramToken:  config.TelegramToken,
@@ -41,7 +45,7 @@ func NewTelegramReporter(
 		MutesManager:   mutesManager,
 		StateGenerator: stateGenerator,
 		Logger:         logger.With().Str("component", "telegram_reporter").Logger(),
-		Templates:      make(map[ReportEntryType]*template.Template, 0),
+		Templates:      make(map[types.ReportEntryType]*template.Template, 0),
 	}
 }
 
@@ -75,7 +79,7 @@ func (reporter TelegramReporter) Enabled() bool {
 	return reporter.TelegramToken != "" && reporter.TelegramChat != 0
 }
 
-func (reporter TelegramReporter) GetTemplate(t ReportEntryType) (*template.Template, error) {
+func (reporter TelegramReporter) GetTemplate(t types.ReportEntryType) (*template.Template, error) {
 	if template, ok := reporter.Templates[t]; ok {
 		reporter.Logger.Trace().Str("type", string(t)).Msg("Using cached template")
 		return template, nil
@@ -83,8 +87,8 @@ func (reporter TelegramReporter) GetTemplate(t ReportEntryType) (*template.Templ
 
 	reporter.Logger.Trace().Str("type", string(t)).Msg("Loading template")
 
-	filename := fmt.Sprintf("templates/telegram/%s.html", t)
-	template, err := template.ParseFS(templatesFs, filename)
+	filename := fmt.Sprintf("telegram/%s.html", t)
+	template, err := template.ParseFS(templates.TemplatesFs, filename)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +98,7 @@ func (reporter TelegramReporter) GetTemplate(t ReportEntryType) (*template.Templ
 	return template, nil
 }
 
-func (reporter *TelegramReporter) SerializeReportEntry(e ReportEntry) (string, error) {
+func (reporter *TelegramReporter) SerializeReportEntry(e reporters.ReportEntry) (string, error) {
 	template, err := reporter.GetTemplate(e.Type)
 	if err != nil {
 		reporter.Logger.Error().Err(err).Str("type", string(e.Type)).Msg("Error loading template")
@@ -111,7 +115,7 @@ func (reporter *TelegramReporter) SerializeReportEntry(e ReportEntry) (string, e
 	return buffer.String(), nil
 }
 
-func (reporter TelegramReporter) SendReport(report Report) error {
+func (reporter TelegramReporter) SendReport(report reporters.Report) error {
 	for _, entry := range report.Entries {
 		if !entry.HasVoted() && reporter.MutesManager.IsMuted(entry.Chain.Name, entry.ProposalID) {
 			reporter.Logger.Debug().
@@ -182,7 +186,7 @@ func (reporter *TelegramReporter) HandleListMutes(c tele.Context) error {
 		Str("text", c.Text()).
 		Msg("Got list mutes query")
 
-	mutes := Filter(reporter.MutesManager.Mutes.Mutes, func(m Mute) bool {
+	mutes := utils.Filter(reporter.MutesManager.Mutes.Mutes, func(m types.Mute) bool {
 		return !m.IsExpired()
 	})
 
@@ -202,7 +206,7 @@ func (reporter *TelegramReporter) HandleProposals(c tele.Context) error {
 		Str("text", c.Text()).
 		Msg("Got proposals list query")
 
-	state := reporter.StateGenerator.GetState(NewState())
+	state := reporter.StateGenerator.GetState(state.NewState())
 	template, _ := reporter.GetTemplate("proposals")
 	var buffer bytes.Buffer
 	if err := template.Execute(&buffer, state); err != nil {
@@ -222,7 +226,7 @@ func (reporter *TelegramReporter) HandleHelp(c tele.Context) error {
 	template, _ := reporter.GetTemplate("help")
 	var buffer bytes.Buffer
 	if err := template.Execute(&buffer, nil); err != nil {
-		reporter.Logger.Error().Err(err).Msg("Error rendering telp template")
+		reporter.Logger.Error().Err(err).Msg("Error rendering help template")
 		return err
 	}
 
@@ -255,10 +259,10 @@ func (reporter *TelegramReporter) BotReply(c tele.Context, msg string) error {
 	return nil
 }
 
-func ParseMuteOptions(query string, c tele.Context) (Mute, string) {
+func ParseMuteOptions(query string, c tele.Context) (types.Mute, string) {
 	args := strings.Split(query, " ")
 	if len(args) <= 2 {
-		return Mute{}, "Usage: /proposals_mute <duration> <chain> [<proposal>]"
+		return types.Mute{}, "Usage: /proposals_mute <duration> <chain> [<proposal>]"
 	}
 
 	_, args = args[0], args[1:] // removing first argument as it's always /proposals_mute
@@ -270,10 +274,10 @@ func ParseMuteOptions(query string, c tele.Context) (Mute, string) {
 
 	duration, err := time.ParseDuration(durationString)
 	if err != nil {
-		return Mute{}, "Invalid duration provided"
+		return types.Mute{}, "Invalid duration provided"
 	}
 
-	mute := Mute{
+	mute := types.Mute{
 		Chain:      chain,
 		ProposalID: proposalID,
 		Expires:    time.Now().Add(duration),

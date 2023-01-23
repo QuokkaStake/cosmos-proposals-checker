@@ -4,3 +4,4 @@ main
 *.json
 .idea
 cover.out
+cosmos-proposals-checker

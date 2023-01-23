@@ -1,7 +1,8 @@
-package main
+package mutes_manager
 
 import (
 	"encoding/json"
+	"main/pkg/types"
 	"os"
 
 	"github.com/rs/zerolog"
@@ -10,14 +11,14 @@ import (
 type MutesManager struct {
 	MutesPath string
 	Logger    zerolog.Logger
-	Mutes     Mutes
+	Mutes     types.Mutes
 }
 
 func NewMutesManager(mutesPath string, logger *zerolog.Logger) *MutesManager {
 	return &MutesManager{
 		MutesPath: mutesPath,
 		Logger:    logger.With().Str("component", "mutes_manager").Logger(),
-		Mutes:     Mutes{},
+		Mutes:     types.Mutes{},
 	}
 }
 
@@ -33,10 +34,10 @@ func (m *MutesManager) Load() {
 		return
 	}
 
-	var mutes Mutes
+	var mutes types.Mutes
 	if err = json.Unmarshal(content, &mutes); err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not unmarshall mutes")
-		m.Mutes = Mutes{}
+		m.Mutes = types.Mutes{}
 	}
 
 	m.Mutes = mutes
@@ -68,7 +69,7 @@ func (m *MutesManager) IsMuted(chain string, proposalID string) bool {
 	return m.Mutes.IsMuted(chain, proposalID)
 }
 
-func (m *MutesManager) AddMute(mute Mute) {
+func (m *MutesManager) AddMute(mute types.Mute) {
 	m.Mutes.AddMute(mute)
 	m.Save()
 }

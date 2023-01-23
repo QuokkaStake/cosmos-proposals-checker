@@ -1,28 +1,31 @@
-package main
+package generator
 
 import (
 	"github.com/rs/zerolog"
+	configTypes "main/pkg/config/types"
+	statePackage "main/pkg/state"
+	"main/pkg/tendermint"
 )
 
 type StateGenerator struct {
 	Logger zerolog.Logger
-	Chains Chains
+	Chains configTypes.Chains
 }
 
-func NewStateGenerator(logger *zerolog.Logger, chains Chains) *StateGenerator {
+func NewStateGenerator(logger *zerolog.Logger, chains configTypes.Chains) *StateGenerator {
 	return &StateGenerator{
 		Logger: logger.With().Str("component", "state_generator").Logger(),
 		Chains: chains,
 	}
 }
 
-func (g *StateGenerator) GetState(oldState State) State {
-	state := NewState()
+func (g *StateGenerator) GetState(oldState statePackage.State) statePackage.State {
+	state := statePackage.NewState()
 
 	for _, chain := range g.Chains {
 		g.Logger.Info().Str("name", chain.Name).Msg("Processing a chain")
 
-		rpc := NewRPC(chain.LCDEndpoints, g.Logger)
+		rpc := tendermint.NewRPC(chain.LCDEndpoints, g.Logger)
 
 		proposals, err := rpc.GetAllProposals()
 		if err != nil {
@@ -66,7 +69,7 @@ func (g *StateGenerator) GetState(oldState State) State {
 					continue
 				}
 
-				proposalVote := ProposalVote{}
+				proposalVote := statePackage.ProposalVote{}
 
 				if err != nil {
 					proposalVote.Error = err.Error()

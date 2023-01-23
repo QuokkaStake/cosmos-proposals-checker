@@ -1,7 +1,9 @@
-package main
+package state
 
 import (
 	"errors"
+	configTypes "main/pkg/config/types"
+	"main/pkg/types"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,10 +16,10 @@ func TestSetVoteWithoutChainInfo(t *testing.T) {
 	_, _, found := state.GetVoteAndProposal("chain", "proposal", "wallet")
 	assert.Equal(t, found, false, "Vote should not be presented!")
 
-	state.SetVote(Chain{Name: "chain"}, Proposal{
+	state.SetVote(configTypes.Chain{Name: "chain"}, types.Proposal{
 		ProposalID: "proposal",
 	}, "wallet", ProposalVote{
-		Vote: &Vote{
+		Vote: &types.Vote{
 			Option: "yep",
 		},
 	})
@@ -32,7 +34,7 @@ func TestSetProposalErrorWithoutChainInfo(t *testing.T) {
 	t.Parallel()
 
 	state := NewState()
-	state.SetChainProposalsError(Chain{Name: "test"}, errors.New("test error"))
+	state.SetChainProposalsError(configTypes.Chain{Name: "test"}, errors.New("test error"))
 
 	hasError2 := state.ChainInfos["test"].HasProposalsError()
 	assert.Equal(t, hasError2, true, "Chain info should have a proposal error!")
@@ -53,7 +55,7 @@ func TestSetProposalErrorWithChainInfo(t *testing.T) {
 	hasError := state.ChainInfos["test"].HasProposalsError()
 	assert.Equal(t, hasError, false, "Chain info should not have a proposal error!")
 
-	state.SetChainProposalsError(Chain{Name: "test"}, errors.New("test error"))
+	state.SetChainProposalsError(configTypes.Chain{Name: "test"}, errors.New("test error"))
 
 	hasError2 := state.ChainInfos["test"].HasProposalsError()
 	assert.Equal(t, hasError2, true, "Chain info should have a proposal error!")
@@ -192,7 +194,7 @@ func TestHasVotedWithWalletVotePresent(t *testing.T) {
 					"proposal": {
 						Votes: map[string]ProposalVote{
 							"wallet": {
-								Vote: &Vote{
+								Vote: &types.Vote{
 									Option: "YEP",
 								},
 							},
