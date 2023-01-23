@@ -38,3 +38,4 @@ linters:
     - noctx
     - gosec
     - testpackage
+    - gci

@@ -1,10 +1,11 @@
 package generator
 
 import (
-	"github.com/rs/zerolog"
 	configTypes "main/pkg/config/types"
 	statePackage "main/pkg/state"
 	"main/pkg/tendermint"
+
+	"github.com/rs/zerolog"
 )
 
 type StateGenerator struct {
