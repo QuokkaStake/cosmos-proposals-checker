@@ -48,11 +48,11 @@ func (e ReportEntry) IsVoteOrNotVoted() bool {
 }
 
 func (e ReportEntry) GetProposalTime() string {
-	return e.ProposalVoteEndingTime.Format(time.RFC3339Nano)
+	return e.ProposalVoteEndingTime.Format(time.RFC1123)
 }
 
 func (e ReportEntry) GetProposalTimeLeft() string {
-	return time.Until(e.ProposalVoteEndingTime).Round(time.Second).String()
+	return utils.FormatDuration(time.Until(e.ProposalVoteEndingTime).Round(time.Second))
 }
 
 func (e ReportEntry) GetVote() string {
