@@ -2,8 +2,9 @@ package telegram
 
 import (
 	"bytes"
-	tele "gopkg.in/telebot.v3"
 	"main/pkg/state"
+
+	tele "gopkg.in/telebot.v3"
 )
 
 func (reporter *TelegramReporter) HandleProposals(c tele.Context) error {

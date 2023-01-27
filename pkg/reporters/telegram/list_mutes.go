@@ -2,9 +2,10 @@ package telegram
 
 import (
 	"bytes"
-	tele "gopkg.in/telebot.v3"
 	"main/pkg/types"
 	"main/pkg/utils"
+
+	tele "gopkg.in/telebot.v3"
 )
 
 func (reporter *TelegramReporter) HandleListMutes(c tele.Context) error {

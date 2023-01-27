@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"bytes"
+
 	tele "gopkg.in/telebot.v3"
 )
 
