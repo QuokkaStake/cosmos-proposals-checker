@@ -17,13 +17,16 @@ func TestSetVoteWithoutChainInfo(t *testing.T) {
 	_, _, found := state.GetVoteAndProposal("chain", "proposal", "wallet")
 	assert.Equal(t, found, false, "Vote should not be presented!")
 
-	state.SetVote(configTypes.Chain{Name: "chain"}, types.Proposal{
-		ProposalID: "proposal",
-	}, "wallet", ProposalVote{
-		Vote: &types.Vote{
-			Option: "yep",
+	state.SetVote(
+		&configTypes.Chain{Name: "chain"},
+		types.Proposal{ProposalID: "proposal"},
+		&configTypes.Wallet{Address: "wallet"},
+		ProposalVote{
+			Vote: &types.Vote{
+				Option: "yep",
+			},
 		},
-	})
+	)
 
 	vote, _, found2 := state.GetVoteAndProposal("chain", "proposal", "wallet")
 	assert.Equal(t, found2, true, "Vote should be presented!")
@@ -35,7 +38,7 @@ func TestSetProposalErrorWithoutChainInfo(t *testing.T) {
 	t.Parallel()
 
 	state := NewState()
-	state.SetChainProposalsError(configTypes.Chain{Name: "test"}, errors.New("test error"))
+	state.SetChainProposalsError(&configTypes.Chain{Name: "test"}, errors.New("test error"))
 
 	hasError2 := state.ChainInfos["test"].HasProposalsError()
 	assert.Equal(t, hasError2, true, "Chain info should have a proposal error!")
@@ -56,7 +59,7 @@ func TestSetProposalErrorWithChainInfo(t *testing.T) {
 	hasError := state.ChainInfos["test"].HasProposalsError()
 	assert.Equal(t, hasError, false, "Chain info should not have a proposal error!")
 
-	state.SetChainProposalsError(configTypes.Chain{Name: "test"}, errors.New("test error"))
+	state.SetChainProposalsError(&configTypes.Chain{Name: "test"}, errors.New("test error"))
 
 	hasError2 := state.ChainInfos["test"].HasProposalsError()
 	assert.Equal(t, hasError2, true, "Chain info should have a proposal error!")

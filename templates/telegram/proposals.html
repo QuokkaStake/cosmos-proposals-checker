@@ -2,17 +2,19 @@
 {{ $chain := .Chain }}
 <strong>{{ .Chain.GetName }}</strong>
 {{- if .HasProposalsError }}
-❌ Error quering for proposals: {{ .ProposalsError }}
+❌ Error querying for proposals: {{ .ProposalsError }}
 {{- end }}
 {{- range .ProposalVotes }}
-Proposal #{{ .Proposal.ProposalID }}: {{ .Proposal.Content.Title }}
+{{- $proposalLink := $chain.GetProposalLink .Proposal }}
+Proposal #{{ .Proposal.ProposalID }}: {{ SerializeLink $proposalLink }}
 {{- range $wallet, $vote := .Votes }}
+{{- $walletLink := $chain.GetWalletLink $vote.Wallet -}}
 {{- if $vote.IsError }}
-❌ Wallet {{ $chain.GetWalletLink $wallet }} - error querying: {{ $vote.Error }}
+❌ Wallet {{ SerializeLink $walletLink }} - error querying: {{ $vote.Error }}
 {{- else if $vote.HasVoted }}
-✅ Wallet {{ $chain.GetWalletLink $wallet }} - voted: {{ $vote.Vote.ResolveVote }}
+✅ Wallet {{ SerializeLink $walletLink }} - voted: {{ $vote.Vote.ResolveVote }}
 {{- else }}
-🔴 Wallet {{ $chain.GetWalletLink $wallet }} - not voted
+🔴 Wallet {{ SerializeLink $walletLink }} - not voted
 {{- end }}
 {{- end }}
 {{ end }}

@@ -115,6 +115,8 @@ func (rpc *RPC) GetFull(url string, target interface{}) error {
 		return err
 	}
 
+	req.Header.Set("User-Agent", "cosmos-proposals-checker")
+
 	rpc.Logger.Debug().Str("url", url).Msg("Doing a query...")
 
 	res, err := client.Do(req)

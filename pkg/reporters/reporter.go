@@ -24,8 +24,8 @@ func (r *Report) Empty() bool {
 }
 
 type ReportEntry struct {
-	Chain                  configTypes.Chain
-	Wallet                 string
+	Chain                  *configTypes.Chain
+	Wallet                 *configTypes.Wallet
 	ProposalID             string
 	ProposalTitle          string
 	ProposalDescription    string

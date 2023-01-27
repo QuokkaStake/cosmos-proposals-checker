@@ -37,7 +37,7 @@ func TestValidateChainWithoutWallets(t *testing.T) {
 	chain := configTypes.Chain{
 		Name:         "chain",
 		LCDEndpoints: []string{"endpoint"},
-		Wallets:      []string{},
+		Wallets:      []*configTypes.Wallet{},
 	}
 
 	err := chain.Validate()
@@ -50,7 +50,7 @@ func TestValidateChainWithValidConfig(t *testing.T) {
 	chain := configTypes.Chain{
 		Name:         "chain",
 		LCDEndpoints: []string{"endpoint"},
-		Wallets:      []string{"wallet"},
+		Wallets:      []*configTypes.Wallet{{Address: "wallet"}},
 	}
 
 	err := chain.Validate()
@@ -113,7 +113,7 @@ func TestValidateConfigValidChain(t *testing.T) {
 			{
 				Name:         "chain",
 				LCDEndpoints: []string{"endpoint"},
-				Wallets:      []string{"wallet"},
+				Wallets:      []*configTypes.Wallet{{Address: "wallet"}},
 			},
 		},
 	}
