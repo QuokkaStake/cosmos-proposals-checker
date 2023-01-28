@@ -1,5 +1,5 @@
-{{ range .ChainInfos }}
-{{ $chain := .Chain }}
+{{- range .ChainInfos }}
+{{- $chain := .Chain -}}
 <strong>{{ .Chain.GetName }}</strong>
 {{- if .HasProposalsError }}
 ❌ Error querying for proposals: {{ .ProposalsError }}
