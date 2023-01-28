@@ -2,8 +2,6 @@ package types
 
 import (
 	"fmt"
-	"html/template"
-
 	"main/pkg/types"
 )
 
@@ -12,12 +10,25 @@ type Explorer struct {
 	WalletLinkPattern   string `toml:"wallet-link-pattern"`
 }
 
+type Wallet struct {
+	Address string `toml:"address"`
+	Alias   string `toml:"alias"`
+}
+
+func (w *Wallet) AddressOrAlias() string {
+	if w.Alias != "" {
+		return w.Alias
+	}
+
+	return w.Address
+}
+
 type Chain struct {
 	Name           string    `toml:"name"`
 	PrettyName     string    `toml:"pretty-name"`
 	KeplrName      string    `toml:"keplr-name"`
 	LCDEndpoints   []string  `toml:"lcd-endpoints"`
-	Wallets        []string  `toml:"wallets"`
+	Wallets        []*Wallet `toml:"wallets"`
 	MintscanPrefix string    `toml:"mintscan-prefix"`
 	Explorer       *Explorer `toml:"explorer"`
 }
@@ -33,6 +44,12 @@ func (c *Chain) Validate() error {
 
 	if len(c.Wallets) == 0 {
 		return fmt.Errorf("no wallets provided")
+	}
+
+	for index, wallet := range c.Wallets {
+		if wallet.Address == "" {
+			return fmt.Errorf("wallet #%d: address is empty", index)
+		}
 	}
 
 	return nil
@@ -66,13 +83,32 @@ func (c Chain) GetExplorerProposalsLinks(proposalID string) []types.Link {
 	return links
 }
 
-func (c Chain) GetWalletLink(wallet string) template.HTML {
-	if c.Explorer == nil || c.Explorer.WalletLinkPattern == "" {
-		return template.HTML(wallet)
+func (c Chain) GetProposalLink(proposal types.Proposal) types.Link {
+	if c.Explorer == nil || c.Explorer.ProposalLinkPattern == "" {
+		return types.Link{Name: proposal.Content.Title}
 	}
 
-	link := fmt.Sprintf(c.Explorer.WalletLinkPattern, wallet)
-	return template.HTML(fmt.Sprintf("<a href='%s'>%s</a>", link, wallet))
+	return types.Link{
+		Name: proposal.Content.Title,
+		Href: fmt.Sprintf(c.Explorer.ProposalLinkPattern, proposal.ProposalID),
+	}
+}
+
+func (c Chain) GetWalletLink(wallet *Wallet) types.Link {
+	if c.Explorer == nil || c.Explorer.WalletLinkPattern == "" {
+		return types.Link{Name: wallet.Address}
+	}
+
+	link := types.Link{
+		Name: wallet.Address,
+		Href: fmt.Sprintf(c.Explorer.WalletLinkPattern, wallet),
+	}
+
+	if wallet.Alias != "" {
+		link.Name = wallet.Alias
+	}
+
+	return link
 }
 
 type Chains []*Chain

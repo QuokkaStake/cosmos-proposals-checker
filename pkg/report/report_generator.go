@@ -41,11 +41,7 @@ func (g *ReportGenerator) GenerateReport(oldState, newState state.State) reporte
 				Str("chain", chainName).
 				Msg("Error querying for proposals - sending an alert")
 			entry := reporters.ReportEntry{
-				Chain:                  *g.Chains.FindByName(chainName),
-				Wallet:                 "",
-				ProposalID:             "",
-				ProposalTitle:          "",
-				ProposalDescription:    "",
+				Chain:                  g.Chains.FindByName(chainName),
 				ProposalVoteEndingTime: time.Now(),
 				Type:                   types.ProposalQueryError,
 				Value:                  chainInfo.ProposalsError,
@@ -66,8 +62,8 @@ func (g *ReportGenerator) GenerateReport(oldState, newState state.State) reporte
 				newVote, proposal, _ := newState.GetVoteAndProposal(chainName, proposalID, wallet)
 
 				entry := reporters.ReportEntry{
-					Chain:                  *g.Chains.FindByName(chainName),
-					Wallet:                 wallet,
+					Chain:                  g.Chains.FindByName(chainName),
+					Wallet:                 newVote.Wallet,
 					ProposalID:             proposalID,
 					ProposalTitle:          proposal.Content.Title,
 					ProposalDescription:    proposal.Content.Description,

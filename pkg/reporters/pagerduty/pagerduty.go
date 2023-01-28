@@ -88,7 +88,7 @@ func (r *PagerDutyReporter) NewPagerDutyAlertFromReportEntry(e reporters.ReportE
 			Severity:  "error",
 			Source:    hostname,
 			CustomDetails: map[string]string{
-				"Wallet":               e.Wallet,
+				"Wallet":               e.Wallet.AddressOrAlias(),
 				"Chain":                e.Chain.GetName(),
 				"Proposal ID":          e.ProposalID,
 				"Proposal title":       e.ProposalTitle,

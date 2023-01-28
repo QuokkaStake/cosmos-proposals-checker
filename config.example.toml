@@ -28,7 +28,9 @@ mintscan-prefix = "bitsong"
 lcd-endpoints = ["https://lcd-bitsong-app.cosmostation.io"]
 # List of wallets to monitor. At least 1 is required.
 wallets = [
-    "bitsong14rvn7anf22e00vj5x3al4w50ns78s7n4t8yxcy"
+    # Each wallet can have an address (required) and an alias (optional).
+    { address = "bitsong14rvn7anf22e00vj5x3al4w50ns78s7n4t8yxcy", alias = "Validator wallet" },
+    { address = "bitsong125hdkukw4pu2urhj4nv366q0avdqv24t0vprxs" },
 ]
 # Custom explorer links patterns. They are overridden if mintscan-prefix is specified.
 [chains.explorer]

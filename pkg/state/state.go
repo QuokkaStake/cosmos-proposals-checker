@@ -6,8 +6,9 @@ import (
 )
 
 type ProposalVote struct {
-	Vote  *types.Vote
-	Error string
+	Wallet *configTypes.Wallet
+	Vote   *types.Vote
+	Error  string
 }
 
 func (v ProposalVote) HasVoted() bool {
@@ -24,7 +25,7 @@ type WalletVotes struct {
 }
 
 type ChainInfo struct {
-	Chain          configTypes.Chain
+	Chain          *configTypes.Chain
 	ProposalVotes  map[string]WalletVotes
 	ProposalsError string
 }
@@ -43,7 +44,7 @@ func NewState() State {
 	}
 }
 
-func (s *State) SetVote(chain configTypes.Chain, proposal types.Proposal, wallet string, vote ProposalVote) {
+func (s *State) SetVote(chain *configTypes.Chain, proposal types.Proposal, wallet *configTypes.Wallet, vote ProposalVote) {
 	if _, ok := s.ChainInfos[chain.Name]; !ok {
 		s.ChainInfos[chain.Name] = ChainInfo{
 			Chain:         chain,
@@ -58,10 +59,10 @@ func (s *State) SetVote(chain configTypes.Chain, proposal types.Proposal, wallet
 		}
 	}
 
-	s.ChainInfos[chain.Name].ProposalVotes[proposal.ProposalID].Votes[wallet] = vote
+	s.ChainInfos[chain.Name].ProposalVotes[proposal.ProposalID].Votes[wallet.Address] = vote
 }
 
-func (s *State) SetChainProposalsError(chain configTypes.Chain, err error) {
+func (s *State) SetChainProposalsError(chain *configTypes.Chain, err error) {
 	s.ChainInfos[chain.Name] = ChainInfo{
 		Chain:          chain,
 		ProposalsError: err.Error(),

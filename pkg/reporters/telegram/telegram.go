@@ -10,10 +10,8 @@ import (
 	"main/pkg/config"
 	mutesManager "main/pkg/mutes_manager"
 	"main/pkg/reporters"
-	"main/pkg/state"
 	"main/pkg/state/generator"
 	"main/pkg/types"
-	"main/pkg/utils"
 	"main/templates"
 
 	"github.com/rs/zerolog"
@@ -39,7 +37,8 @@ func NewTelegramReporter(
 	config config.TelegramConfig,
 	mutesManager *mutesManager.MutesManager,
 	stateGenerator *generator.StateGenerator,
-	logger *zerolog.Logger) *TelegramReporter {
+	logger *zerolog.Logger,
+) *TelegramReporter {
 	return &TelegramReporter{
 		TelegramToken:  config.TelegramToken,
 		TelegramChat:   config.TelegramChat,
@@ -80,34 +79,37 @@ func (reporter TelegramReporter) Enabled() bool {
 	return reporter.TelegramToken != "" && reporter.TelegramChat != 0
 }
 
-func (reporter TelegramReporter) GetTemplate(t types.ReportEntryType) (*template.Template, error) {
-	if template, ok := reporter.Templates[t]; ok {
-		reporter.Logger.Trace().Str("type", string(t)).Msg("Using cached template")
-		return template, nil
+func (reporter TelegramReporter) GetTemplate(tmlpType types.ReportEntryType) (*template.Template, error) {
+	if cachedTemplate, ok := reporter.Templates[tmlpType]; ok {
+		reporter.Logger.Trace().Str("type", string(tmlpType)).Msg("Using cached template")
+		return cachedTemplate, nil
 	}
 
-	reporter.Logger.Trace().Str("type", string(t)).Msg("Loading template")
+	reporter.Logger.Trace().Str("type", string(tmlpType)).Msg("Loading template")
 
-	filename := fmt.Sprintf("telegram/%s.html", t)
-	template, err := template.ParseFS(templates.TemplatesFs, filename)
+	filename := fmt.Sprintf("%s.html", tmlpType)
+
+	t, err := template.New(filename).Funcs(template.FuncMap{
+		"SerializeLink": reporter.SerializeLink,
+	}).ParseFS(templates.TemplatesFs, "telegram/"+filename)
 	if err != nil {
 		return nil, err
 	}
 
-	reporter.Templates[t] = template
+	reporter.Templates[tmlpType] = t
 
-	return template, nil
+	return t, nil
 }
 
 func (reporter *TelegramReporter) SerializeReportEntry(e reporters.ReportEntry) (string, error) {
-	template, err := reporter.GetTemplate(e.Type)
+	parsedTemplate, err := reporter.GetTemplate(e.Type)
 	if err != nil {
 		reporter.Logger.Error().Err(err).Str("type", string(e.Type)).Msg("Error loading template")
 		return "", err
 	}
 
 	var buffer bytes.Buffer
-	err = template.Execute(&buffer, e)
+	err = parsedTemplate.Execute(&buffer, e)
 	if err != nil {
 		reporter.Logger.Error().Err(err).Str("type", string(e.Type)).Msg("Error rendering template")
 		return "", err
@@ -151,87 +153,6 @@ func (reporter TelegramReporter) SendReport(report reporters.Report) error {
 
 func (reporter TelegramReporter) Name() string {
 	return "telegram-reporter"
-}
-
-func (reporter *TelegramReporter) HandleAddMute(c tele.Context) error {
-	reporter.Logger.Info().
-		Str("sender", c.Sender().Username).
-		Str("text", c.Text()).
-		Msg("Got add mute query")
-
-	mute, err := ParseMuteOptions(c.Text(), c)
-	if err != "" {
-		return c.Reply(fmt.Sprintf("Error muting notification: %s", err))
-	}
-
-	reporter.MutesManager.AddMute(mute)
-	if mute.ProposalID != "" {
-		return reporter.BotReply(c, fmt.Sprintf(
-			"Notification for proposal #%s on %s are muted till %s.",
-			mute.ProposalID,
-			mute.Chain,
-			mute.GetExpirationTime(),
-		))
-	}
-
-	return reporter.BotReply(c, fmt.Sprintf(
-		"Notification for all proposals on %s are muted till %s.",
-		mute.Chain,
-		mute.GetExpirationTime(),
-	))
-}
-
-func (reporter *TelegramReporter) HandleListMutes(c tele.Context) error {
-	reporter.Logger.Info().
-		Str("sender", c.Sender().Username).
-		Str("text", c.Text()).
-		Msg("Got list mutes query")
-
-	mutes := utils.Filter(reporter.MutesManager.Mutes.Mutes, func(m types.Mute) bool {
-		return !m.IsExpired()
-	})
-
-	template, _ := reporter.GetTemplate("mutes")
-	var buffer bytes.Buffer
-	if err := template.Execute(&buffer, mutes); err != nil {
-		reporter.Logger.Error().Err(err).Msg("Error rendering votes template")
-		return err
-	}
-
-	return reporter.BotReply(c, buffer.String())
-}
-
-func (reporter *TelegramReporter) HandleProposals(c tele.Context) error {
-	reporter.Logger.Info().
-		Str("sender", c.Sender().Username).
-		Str("text", c.Text()).
-		Msg("Got proposals list query")
-
-	state := reporter.StateGenerator.GetState(state.NewState())
-	template, _ := reporter.GetTemplate("proposals")
-	var buffer bytes.Buffer
-	if err := template.Execute(&buffer, state); err != nil {
-		reporter.Logger.Error().Err(err).Msg("Error rendering votes template")
-		return err
-	}
-
-	return reporter.BotReply(c, buffer.String())
-}
-
-func (reporter *TelegramReporter) HandleHelp(c tele.Context) error {
-	reporter.Logger.Info().
-		Str("sender", c.Sender().Username).
-		Str("text", c.Text()).
-		Msg("Got help query")
-
-	template, _ := reporter.GetTemplate("help")
-	var buffer bytes.Buffer
-	if err := template.Execute(&buffer, nil); err != nil {
-		reporter.Logger.Error().Err(err).Msg("Error rendering help template")
-		return err
-	}
-
-	return reporter.BotReply(c, buffer.String())
 }
 
 func (reporter *TelegramReporter) BotReply(c tele.Context, msg string) error {
@@ -290,4 +211,12 @@ func ParseMuteOptions(query string, c tele.Context) (types.Mute, string) {
 	}
 
 	return mute, ""
+}
+
+func (reporter *TelegramReporter) SerializeLink(link types.Link) template.HTML {
+	if link.Href != "" {
+		return template.HTML(fmt.Sprintf("<a href='%s'>%s</a>", link.Href, link.Name))
+	}
+
+	return template.HTML(link.Name)
 }
