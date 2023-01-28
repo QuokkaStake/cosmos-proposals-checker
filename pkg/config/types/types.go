@@ -101,7 +101,7 @@ func (c Chain) GetWalletLink(wallet *Wallet) types.Link {
 
 	link := types.Link{
 		Name: wallet.Address,
-		Href: fmt.Sprintf(c.Explorer.WalletLinkPattern, wallet),
+		Href: fmt.Sprintf(c.Explorer.WalletLinkPattern, wallet.Address),
 	}
 
 	if wallet.Alias != "" {
