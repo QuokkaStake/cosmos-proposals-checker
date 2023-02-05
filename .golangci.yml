@@ -39,3 +39,4 @@ linters:
     - gosec
     - testpackage
     - gci
+    - musttag

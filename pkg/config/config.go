@@ -17,7 +17,7 @@ type Config struct {
 	StatePath       string          `toml:"state-path"`
 	MutesPath       string          `toml:"mutes-path"`
 	Chains          types.Chains    `toml:"chains"`
-	Interval        int64           `toml:"interval" default:"3600"`
+	Interval        string          `toml:"interval" default:"* * * * *"`
 }
 
 type PagerDutyConfig struct {
