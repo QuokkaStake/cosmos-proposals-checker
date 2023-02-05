@@ -2,8 +2,13 @@
 state-path = "cosmos-proposals-checker-state.json"
 # A path to a file that will store mutes of this app. Omitting it will disable the mute functionality.
 mutes-path = "cosmos-proposals-checker-mutes.json"
-# Interval to check and notify, in seconds. Defaults to 3600 (1 hour)
-interval = 60
+# Interval to check and notify.
+# Can be a cron-like interval (like "0 * * * *" for every hour),
+# "@hourly"/"@daily" for hourly/daily intervals, or "@every 1h"
+# for specifying intervals more granularly.
+# See https://pkg.go.dev/github.com/robfig/cron?utm_source=godoc#hdr-CRON_Expression_Format for examples.
+# Defaults to "@hourly"
+interval = "@hourly"
 
 # Logging configuration
 [log]
