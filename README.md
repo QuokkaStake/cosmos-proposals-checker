@@ -1,14 +1,14 @@
 # cosmos-proposals-checker
 
-![Latest release](https://img.shields.io/github/v/release/freak12techno/cosmos-proposals-checker)
-[![Actions Status](https://github.com/freak12techno/cosmos-proposals-checker/workflows/test/badge.svg)](https://github.com/freak12techno/cosmos-proposals-checker/actions)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ffreak12techno%2Fcosmos-proposals-checker.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Ffreak12techno%2Fcosmos-proposals-checker?ref=badge_shield)
+![Latest release](https://img.shields.io/github/v/release/QuokkaStake/cosmos-proposals-checker)
+[![Actions Status](https://github.com/QuokkaStake/cosmos-proposals-checker/workflows/test/badge.svg)](https://github.com/QuokkaStake/cosmos-proposals-checker/actions)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FQuokkaStake%2Fcosmos-proposals-checker.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FQuokkaStake%2Fcosmos-proposals-checker?ref=badge_shield)
 
 cosmos-proposals-checker is a tool that checks all configured chains for new proposals in voting period, then notifies you if one or more of the configured wallets haven't voted on it.
 
 ## How can I set it up?
 
-Download the latest release from [the releases page](https://github.com/freak12techno/cosmos-proposals-checker/releases/). After that, you should unzip it and you are ready to go:
+Download the latest release from [the releases page](https://github.com/QuokkaStake/cosmos-proposals-checker/releases/). After that, you should unzip it, and you are ready to go:
 
 ```sh
 wget <the link from the releases page>
@@ -16,14 +16,16 @@ tar <downloaded file>
 ./cosmos-proposals-checker --config <path to config>
 ```
 
-Alternatively, install `golang` (>1.18), clone the repo and build it. This will generate a `./main` binary file in the repository folder:
+Alternatively, install `golang` (>1.18), clone the repo and build it:
 ```
-git clone https://github.com/freak12techno/cosmos-proposals-checker
+git clone https://github.com/QuokkaStake/cosmos-proposals-checker
 cd cosmos-proposals-checker
-go build
+# This will generate a `cosmos-proposals-checker` binary file in the repository folder
+make build
+# This will generate a `cosmos-proposals-checker` binary file in $GOPATH/bin
 ```
 
-What you probably want to do is to have it running in the background. For that, first of all, we have to copy the file to the system apps folder:
+To run it detached, first we have to copy the file to the system apps folder:
 
 ```sh
 sudo cp ./cosmos-proposals-checker /usr/bin
@@ -57,7 +59,7 @@ KillSignal=SIGTERM
 WantedBy=multi-user.target
 ```
 
-Then we'll add this service to the autostart and run it:
+Then we'll add this service to autostart and run it:
 
 ```sh
 sudo systemctl daemon-reload # reload config to reflect changed
@@ -82,7 +84,7 @@ All configuration is done via `.toml` config file, which is mandatory. Run the a
 
 ## Notifiers
 
-Currently this program supports the following notifications channels:
+Currently, this program supports the following notifications channels:
 1) Telegram
 
 Go to @BotFather in Telegram and create a bot. After that, there are two options:
@@ -101,7 +103,7 @@ Then add a Telegram config to your config file (see `config.example.toml` for re
 
 2) PagerDuty
 
-Go to your PaderDuty page, then go to Services. Create a service if you haven't created one already. Select this service, then go to "Integrations" tab, add an integration there. Copy the integration key and add it to the `pagerduty` part in config (see `config.example.toml` for reference). Additionally, override PagerDuty URL if you are using EU version.
+Go to your PagerDuty page, then go to Services. Create a service if you haven't created one already. Select this service, then go to "Integrations" tab, add an integration there. Copy the integration key and add it to the `pagerduty` part in config (see `config.example.toml` for reference). Additionally, override PagerDuty URL in config if you are using EU version.
 
 
 ## Which networks this is guaranteed to work?
@@ -114,4 +116,4 @@ Bug reports and feature requests are always welcome! If you want to contribute, 
 
 
 ## License
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ffreak12techno%2Fcosmos-proposals-checker.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Ffreak12techno%2Fcosmos-proposals-checker?ref=badge_large)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FQuokkaStake%2Fcosmos-proposals-checker.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FQuokkaStake%2Fcosmos-proposals-checker?ref=badge_large)
