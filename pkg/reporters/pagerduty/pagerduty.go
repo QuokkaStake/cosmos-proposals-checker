@@ -100,7 +100,7 @@ func (r *PagerDutyReporter) NewPagerDutyAlertFromReportEntry(e reporters.ReportE
 		EventAction: eventAction,
 		DedupKey:    dedupKey,
 		Client:      "cosmos-proposals-checker",
-		ClientURL:   "https://github.com/freak12techno/cosmos-proposals-checker",
+		ClientURL:   "https://github.com/QuokkaStake/cosmos-proposals-checker",
 	}
 }
 
