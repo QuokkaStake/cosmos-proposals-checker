@@ -8,16 +8,16 @@ builds:
     goos:
       - linux
       - darwin
-archives:
-  - replacements:
-      darwin: Darwin
-      linux: Linux
-      386: i386
-      amd64: x86_64
+nfpms:
+  - vendor: 🐹 Quokka Stake
+    maintainer: Sergey <freak12techno@gmail.com>
+    formats:
+      - deb
+      - rpm
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  name_template: "{{ .Tag }}"
 changelog:
   sort: asc
   filters:
