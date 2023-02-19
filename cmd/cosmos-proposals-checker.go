@@ -12,12 +12,17 @@ func Execute(configPath string) {
 	app.Start()
 }
 
+var (
+	version = "unknown"
+)
+
 func main() {
 	var ConfigPath string
 
 	rootCmd := &cobra.Command{
-		Use:  "cosmos-proposals-checker",
-		Long: "Checks the specific wallets on different chains for proposal votes.",
+		Use:     "cosmos-proposals-checker",
+		Long:    "Checks the specific wallets on different chains for proposal votes.",
+		Version: version,
 		Run: func(cmd *cobra.Command, args []string) {
 			Execute(ConfigPath)
 		},
