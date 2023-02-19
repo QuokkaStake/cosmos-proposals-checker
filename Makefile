@@ -1,8 +1,11 @@
+VERSION := $(shell echo $(shell git describe --tags) | sed 's/^v//')
+LDFLAGS = -X main.version=${VERSION}
+
 build:
-	go build cmd/cosmos-proposals-checker.go
+	go build -ldflags '$(LDFLAGS)' cmd/cosmos-proposals-checker.go
 
 install:
-	go install cmd/cosmos-proposals-checker.go
+	go install -ldflags '$(LDFLAGS)' cmd/cosmos-proposals-checker.go
 
 lint:
 	golangci-lint run --fix ./...
