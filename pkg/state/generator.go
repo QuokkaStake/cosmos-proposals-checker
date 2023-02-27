@@ -1,8 +1,7 @@
-package generator
+package state
 
 import (
 	configTypes "main/pkg/config/types"
-	statePackage "main/pkg/state"
 	"main/pkg/tendermint"
 	"main/pkg/types"
 	"sync"
@@ -10,21 +9,21 @@ import (
 	"github.com/rs/zerolog"
 )
 
-type StateGenerator struct {
+type Generator struct {
 	Logger zerolog.Logger
 	Chains configTypes.Chains
 	Mutex  sync.Mutex
 }
 
-func NewStateGenerator(logger *zerolog.Logger, chains configTypes.Chains) *StateGenerator {
-	return &StateGenerator{
+func NewStateGenerator(logger *zerolog.Logger, chains configTypes.Chains) *Generator {
+	return &Generator{
 		Logger: logger.With().Str("component", "state_generator").Logger(),
 		Chains: chains,
 	}
 }
 
-func (g *StateGenerator) GetState(oldState statePackage.State) statePackage.State {
-	state := statePackage.NewState()
+func (g *Generator) GetState(oldState State) State {
+	state := NewState()
 
 	var wg sync.WaitGroup
 	wg.Add(len(g.Chains))
@@ -41,10 +40,10 @@ func (g *StateGenerator) GetState(oldState statePackage.State) statePackage.Stat
 	return state
 }
 
-func (g *StateGenerator) ProcessChain(
+func (g *Generator) ProcessChain(
 	chain *configTypes.Chain,
-	state statePackage.State,
-	oldState statePackage.State,
+	state State,
+	oldState State,
 ) {
 	rpc := tendermint.NewRPC(chain.LCDEndpoints, g.Logger)
 
@@ -85,13 +84,13 @@ func (g *StateGenerator) ProcessChain(
 	wg.Wait()
 }
 
-func (g *StateGenerator) ProcessProposalAndWallet(
+func (g *Generator) ProcessProposalAndWallet(
 	chain *configTypes.Chain,
 	proposal types.Proposal,
 	rpc *tendermint.RPC,
 	wallet *configTypes.Wallet,
-	state statePackage.State,
-	oldState statePackage.State,
+	state State,
+	oldState State,
 ) {
 	oldVote, _, found := oldState.GetVoteAndProposal(chain.Name, proposal.ProposalID, wallet.Address)
 	voteResponse, err := rpc.GetVote(proposal.ProposalID, wallet.Address)
@@ -113,7 +112,7 @@ func (g *StateGenerator) ProcessProposalAndWallet(
 		g.Mutex.Unlock()
 	}
 
-	proposalVote := statePackage.ProposalVote{
+	proposalVote := ProposalVote{
 		Wallet: wallet,
 	}
 

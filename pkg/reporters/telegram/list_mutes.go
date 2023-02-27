@@ -2,7 +2,7 @@ package telegram
 
 import (
 	"bytes"
-	"main/pkg/types"
+	mutes "main/pkg/mutes"
 	"main/pkg/utils"
 
 	tele "gopkg.in/telebot.v3"
@@ -14,13 +14,13 @@ func (reporter *TelegramReporter) HandleListMutes(c tele.Context) error {
 		Str("text", c.Text()).
 		Msg("Got list mutes query")
 
-	mutes := utils.Filter(reporter.MutesManager.Mutes.Mutes, func(m types.Mute) bool {
+	filteredMutes := utils.Filter(reporter.MutesManager.Mutes.Mutes, func(m *mutes.Mute) bool {
 		return !m.IsExpired()
 	})
 
 	template, _ := reporter.GetTemplate("mutes")
 	var buffer bytes.Buffer
-	if err := template.Execute(&buffer, mutes); err != nil {
+	if err := template.Execute(&buffer, filteredMutes); err != nil {
 		reporter.Logger.Error().Err(err).Msg("Error rendering votes template")
 		return err
 	}

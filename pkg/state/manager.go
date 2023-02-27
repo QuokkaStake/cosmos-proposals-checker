@@ -1,46 +1,44 @@
-package manager
+package state
 
 import (
 	"encoding/json"
 	"os"
 
-	"main/pkg/state"
-
 	"github.com/rs/zerolog"
 )
 
-type StateManager struct {
+type Manager struct {
 	StatePath string
 	Logger    zerolog.Logger
-	State     state.State
+	State     State
 }
 
-func NewStateManager(path string, logger *zerolog.Logger) *StateManager {
-	return &StateManager{
+func NewStateManager(path string, logger *zerolog.Logger) *Manager {
+	return &Manager{
 		StatePath: path,
 		Logger:    logger.With().Str("component", "state_manager").Logger(),
-		State:     state.NewState(),
+		State:     NewState(),
 	}
 }
 
-func (m *StateManager) Load() {
+func (m *Manager) Load() {
 	content, err := os.ReadFile(m.StatePath)
 	if err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not load state")
 		return
 	}
 
-	var s state.State
+	var s State
 	if err = json.Unmarshal(content, &s); err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not unmarshall state")
-		m.State = state.NewState()
+		m.State = NewState()
 		return
 	}
 
 	m.State = s
 }
 
-func (m *StateManager) Save() {
+func (m *Manager) Save() {
 	content, err := json.Marshal(m.State)
 	if err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not marshal state")
@@ -53,7 +51,7 @@ func (m *StateManager) Save() {
 	}
 }
 
-func (m *StateManager) CommitState(state state.State) {
+func (m *Manager) CommitState(state State) {
 	m.State = state
 	m.Save()
 }

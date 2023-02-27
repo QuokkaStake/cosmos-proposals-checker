@@ -4,26 +4,24 @@ import (
 	"encoding/json"
 	"os"
 
-	"main/pkg/types"
-
 	"github.com/rs/zerolog"
 )
 
-type MutesManager struct {
+type Manager struct {
 	MutesPath string
 	Logger    zerolog.Logger
-	Mutes     types.Mutes
+	Mutes     Mutes
 }
 
-func NewMutesManager(mutesPath string, logger *zerolog.Logger) *MutesManager {
-	return &MutesManager{
+func NewMutesManager(mutesPath string, logger *zerolog.Logger) *Manager {
+	return &Manager{
 		MutesPath: mutesPath,
 		Logger:    logger.With().Str("component", "mutes_manager").Logger(),
-		Mutes:     types.Mutes{},
+		Mutes:     Mutes{},
 	}
 }
 
-func (m *MutesManager) Load() {
+func (m *Manager) Load() {
 	if m.MutesPath == "" {
 		m.Logger.Debug().Msg("Mutes path not configured, not loading.")
 		return
@@ -35,16 +33,16 @@ func (m *MutesManager) Load() {
 		return
 	}
 
-	var mutes types.Mutes
+	var mutes Mutes
 	if err = json.Unmarshal(content, &mutes); err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not unmarshall mutes")
-		m.Mutes = types.Mutes{}
+		m.Mutes = Mutes{}
 	}
 
 	m.Mutes = mutes
 }
 
-func (m *MutesManager) Save() {
+func (m *Manager) Save() {
 	if m.MutesPath == "" {
 		m.Logger.Debug().Msg("Mutes path not configured, not saving.")
 		return
@@ -62,7 +60,7 @@ func (m *MutesManager) Save() {
 	}
 }
 
-func (m *MutesManager) IsMuted(chain string, proposalID string) bool {
+func (m *Manager) IsMuted(chain string, proposalID string) bool {
 	if m.MutesPath == "" {
 		return false
 	}
@@ -70,12 +68,12 @@ func (m *MutesManager) IsMuted(chain string, proposalID string) bool {
 	return m.Mutes.IsMuted(chain, proposalID)
 }
 
-func (m *MutesManager) AddMute(mute types.Mute) {
+func (m *Manager) AddMute(mute *Mute) {
 	m.Mutes.AddMute(mute)
 	m.Save()
 }
 
-func (m *MutesManager) DeleteMute(chain string, proposalID string) {
+func (m *Manager) DeleteMute(chain string, proposalID string) {
 	m.Mutes.DeleteMute(chain, proposalID)
 	m.Save()
 }

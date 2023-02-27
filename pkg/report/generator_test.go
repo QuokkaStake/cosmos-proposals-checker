@@ -6,7 +6,6 @@ import (
 	configTypes "main/pkg/config/types"
 	"main/pkg/logger"
 	"main/pkg/state"
-	"main/pkg/state/manager"
 	"main/pkg/types"
 
 	"github.com/stretchr/testify/assert"
@@ -15,7 +14,7 @@ import (
 func TestReportGeneratorWithProposalError(t *testing.T) {
 	t.Parallel()
 
-	stateManager := manager.NewStateManager("./state.json", logger.GetDefaultLogger())
+	stateManager := state.NewStateManager("./state.json", logger.GetDefaultLogger())
 
 	oldState := state.NewState()
 	newState := state.State{
@@ -39,7 +38,7 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 func TestReportGeneratorWithVoteError(t *testing.T) {
 	t.Parallel()
 
-	stateManager := manager.NewStateManager("./state.json", logger.GetDefaultLogger())
+	stateManager := state.NewStateManager("./state.json", logger.GetDefaultLogger())
 
 	oldState := state.NewState()
 	newState := state.State{
@@ -74,7 +73,7 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 func TestReportGeneratorWithNotVoted(t *testing.T) {
 	t.Parallel()
 
-	stateManager := manager.NewStateManager("./state.json", logger.GetDefaultLogger())
+	stateManager := state.NewStateManager("./state.json", logger.GetDefaultLogger())
 
 	oldState := state.NewState()
 	newState := state.State{
@@ -107,7 +106,7 @@ func TestReportGeneratorWithNotVoted(t *testing.T) {
 func TestReportGeneratorWithVoted(t *testing.T) {
 	t.Parallel()
 
-	stateManager := manager.NewStateManager("./state.json", logger.GetDefaultLogger())
+	stateManager := state.NewStateManager("./state.json", logger.GetDefaultLogger())
 
 	oldState := state.State{
 		ChainInfos: map[string]state.ChainInfo{
@@ -159,7 +158,7 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 func TestReportGeneratorWithRevoted(t *testing.T) {
 	t.Parallel()
 
-	stateManager := manager.NewStateManager("./state.json", logger.GetDefaultLogger())
+	stateManager := state.NewStateManager("./state.json", logger.GetDefaultLogger())
 
 	oldState := state.State{
 		ChainInfos: map[string]state.ChainInfo{

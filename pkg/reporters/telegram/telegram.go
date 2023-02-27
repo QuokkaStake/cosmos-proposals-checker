@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	mutes "main/pkg/mutes"
+	"main/pkg/state"
 	"strings"
 	"time"
 
 	"main/pkg/config"
-	mutesManager "main/pkg/mutes_manager"
 	"main/pkg/reporters"
-	"main/pkg/state/generator"
 	"main/pkg/types"
 	"main/templates"
 
@@ -21,8 +21,8 @@ import (
 type TelegramReporter struct {
 	TelegramToken  string
 	TelegramChat   int64
-	MutesManager   *mutesManager.MutesManager
-	StateGenerator *generator.StateGenerator
+	MutesManager   *mutes.Manager
+	StateGenerator *state.Generator
 
 	TelegramBot *tele.Bot
 	Logger      zerolog.Logger
@@ -35,8 +35,8 @@ const (
 
 func NewTelegramReporter(
 	config config.TelegramConfig,
-	mutesManager *mutesManager.MutesManager,
-	stateGenerator *generator.StateGenerator,
+	mutesManager *mutes.Manager,
+	stateGenerator *state.Generator,
 	logger *zerolog.Logger,
 ) *TelegramReporter {
 	return &TelegramReporter{
@@ -75,11 +75,11 @@ func (reporter *TelegramReporter) Init() {
 	go reporter.TelegramBot.Start()
 }
 
-func (reporter TelegramReporter) Enabled() bool {
+func (reporter *TelegramReporter) Enabled() bool {
 	return reporter.TelegramToken != "" && reporter.TelegramChat != 0
 }
 
-func (reporter TelegramReporter) GetTemplate(tmlpType types.ReportEntryType) (*template.Template, error) {
+func (reporter *TelegramReporter) GetTemplate(tmlpType types.ReportEntryType) (*template.Template, error) {
 	if cachedTemplate, ok := reporter.Templates[tmlpType]; ok {
 		reporter.Logger.Trace().Str("type", string(tmlpType)).Msg("Using cached template")
 		return cachedTemplate, nil
@@ -118,7 +118,7 @@ func (reporter *TelegramReporter) SerializeReportEntry(e reporters.ReportEntry) 
 	return buffer.String(), nil
 }
 
-func (reporter TelegramReporter) SendReport(report reporters.Report) error {
+func (reporter *TelegramReporter) SendReport(report reporters.Report) error {
 	for _, entry := range report.Entries {
 		if !entry.HasVoted() && reporter.MutesManager.IsMuted(entry.Chain.Name, entry.ProposalID) {
 			reporter.Logger.Debug().
@@ -151,7 +151,7 @@ func (reporter TelegramReporter) SendReport(report reporters.Report) error {
 	return nil
 }
 
-func (reporter TelegramReporter) Name() string {
+func (reporter *TelegramReporter) Name() string {
 	return "telegram-reporter"
 }
 
@@ -181,33 +181,46 @@ func (reporter *TelegramReporter) BotReply(c tele.Context, msg string) error {
 	return nil
 }
 
-func ParseMuteOptions(query string, c tele.Context) (types.Mute, string) {
+func ParseMuteOptions(query string, c tele.Context) (*mutes.Mute, string) {
 	args := strings.Split(query, " ")
-	if len(args) <= 2 {
-		return types.Mute{}, "Usage: /proposals_mute <duration> <chain> [<proposal>]"
+	if len(args) < 2 {
+		return nil, "Usage: /proposals_mute <duration> [params]"
 	}
 
-	_, args = args[0], args[1:] // removing first argument as it's always /proposals_mute
-	durationString, chain := args[0], args[1]
-	proposalID := ""
-	if len(args) >= 3 {
-		proposalID = args[2]
-	}
+	_, durationString, args := args[0], args[1], args[2:] // removing first argument as it's always /proposals_mute
 
 	duration, err := time.ParseDuration(durationString)
 	if err != nil {
-		return types.Mute{}, "Invalid duration provided"
+		return nil, fmt.Sprintf("Invalid duration provided: %s", durationString)
 	}
 
-	mute := types.Mute{
-		Chain:      chain,
-		ProposalID: proposalID,
+	mute := &mutes.Mute{
+		Chain:      "",
+		ProposalID: "",
 		Expires:    time.Now().Add(duration),
 		Comment: fmt.Sprintf(
 			"Muted using cosmos-proposals-checker for %s by %s",
 			duration,
 			c.Sender().FirstName,
 		),
+	}
+
+	for index, arg := range args {
+		argSplit := strings.SplitN(arg, "=", 2)
+		if len(argSplit) < 2 {
+			return nil, fmt.Sprintf(
+				"Invalid param at position %d: expected an expression like \"[chain=cosmos]\", but got %s",
+				index+1,
+				arg,
+			)
+		}
+
+		switch argSplit[0] {
+		case "chain":
+			mute.Chain = argSplit[1]
+		case "proposal":
+			mute.ProposalID = argSplit[1]
+		}
 	}
 
 	return mute, ""

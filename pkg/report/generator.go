@@ -6,33 +6,32 @@ import (
 	configTypes "main/pkg/config/types"
 	"main/pkg/reporters"
 	"main/pkg/state"
-	"main/pkg/state/manager"
 	"main/pkg/tendermint"
 	"main/pkg/types"
 
 	"github.com/rs/zerolog"
 )
 
-type ReportGenerator struct {
-	StateManager *manager.StateManager
+type Generator struct {
+	StateManager *state.Manager
 	Chains       configTypes.Chains
 	RPC          *tendermint.RPC
 	Logger       zerolog.Logger
 }
 
 func NewReportGenerator(
-	manager *manager.StateManager,
+	manager *state.Manager,
 	logger *zerolog.Logger,
 	chains configTypes.Chains,
-) *ReportGenerator {
-	return &ReportGenerator{
+) *Generator {
+	return &Generator{
 		StateManager: manager,
 		Chains:       chains,
 		Logger:       logger.With().Str("component", "report_generator").Logger(),
 	}
 }
 
-func (g *ReportGenerator) GenerateReport(oldState, newState state.State) reporters.Report {
+func (g *Generator) GenerateReport(oldState, newState state.State) reporters.Report {
 	entries := []reporters.ReportEntry{}
 
 	for chainName, chainInfo := range newState.ChainInfos {
