@@ -1,8 +1,12 @@
 Created mute with the following params:
-{{- if .Chain -}}
-<strong>Chain: </strong>{{ .Chain }}
+{{- if .Chain }}
+<strong>Chain:</strong> {{ .Chain }}
+{{- else -}}
+<strong>Chain:</strong> all chains
 {{- end }}
 {{- if .ProposalID -}}
-<strong>Proposal ID: </strong>{{ .ProposalID }}
+<strong>Proposal ID:</strong> {{ .ProposalID }}
+{{- else -}}
+<strong>Proposal ID:</strong> all proposals
 {{- end }}
 <strong>Expires: </strong>{{ .GetExpirationTime }}
