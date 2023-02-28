@@ -1,7 +1,4 @@
-{{- if eq (len .) 0 }}
-No active mutes.
-{{- end }}
-{{ range . }}
+Created mute with the following params:
 {{- if .Chain }}
 <strong>Chain:</strong> {{ .Chain }}
 {{- else }}
@@ -13,4 +10,3 @@ No active mutes.
 <strong>Proposal ID:</strong> all proposals
 {{- end }}
 <strong>Expires: </strong>{{ .GetExpirationTime }}
-{{ end }}

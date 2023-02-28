@@ -3,25 +3,24 @@ package pkg
 import (
 	configPkg "main/pkg/config"
 	"main/pkg/logger"
-	mutesManager "main/pkg/mutes_manager"
-	reportPkg "main/pkg/report"
+	mutes "main/pkg/mutes"
+	"main/pkg/report"
 	reportersPkg "main/pkg/reporters"
 	"main/pkg/reporters/pagerduty"
 	"main/pkg/reporters/telegram"
-	"main/pkg/state/generator"
-	"main/pkg/state/manager"
+	"main/pkg/state"
 
-	cron "github.com/robfig/cron/v3"
+	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
 )
 
 type App struct {
 	Logger          *zerolog.Logger
 	Config          *configPkg.Config
-	StateManager    *manager.StateManager
-	MutesManager    *mutesManager.MutesManager
-	ReportGenerator *reportPkg.ReportGenerator
-	StateGenerator  *generator.StateGenerator
+	StateManager    *state.Manager
+	MutesManager    *mutes.Manager
+	ReportGenerator *report.Generator
+	StateGenerator  *state.Generator
 	Reporters       []reportersPkg.Reporter
 }
 
@@ -37,10 +36,10 @@ func NewApp(configPath string) *App {
 
 	log := logger.GetLogger(config.LogConfig)
 
-	stateManager := manager.NewStateManager(config.StatePath, log)
-	mutesManager := mutesManager.NewMutesManager(config.MutesPath, log)
-	reportGenerator := reportPkg.NewReportGenerator(stateManager, log, config.Chains)
-	stateGenerator := generator.NewStateGenerator(log, config.Chains)
+	stateManager := state.NewStateManager(config.StatePath, log)
+	mutesManager := mutes.NewMutesManager(config.MutesPath, log)
+	reportGenerator := report.NewReportGenerator(stateManager, log, config.Chains)
+	stateGenerator := state.NewStateGenerator(log, config.Chains)
 
 	return &App{
 		Logger:          log,
@@ -81,19 +80,19 @@ func (a *App) Start() {
 
 func (a *App) Report() {
 	newState := a.StateGenerator.GetState(a.StateManager.State)
-	report := a.ReportGenerator.GenerateReport(a.StateManager.State, newState)
+	generatedReport := a.ReportGenerator.GenerateReport(a.StateManager.State, newState)
 
-	if report.Empty() {
+	if generatedReport.Empty() {
 		a.Logger.Debug().Msg("Empty report, not sending.")
 		return
 	}
 
-	a.Logger.Debug().Int("len", len(report.Entries)).Msg("Got non-empty report")
+	a.Logger.Debug().Int("len", len(generatedReport.Entries)).Msg("Got non-empty report")
 
 	for _, reporter := range a.Reporters {
 		if reporter.Enabled() {
 			a.Logger.Debug().Str("name", reporter.Name()).Msg("Sending report...")
-			if err := reporter.SendReport(report); err != nil {
+			if err := reporter.SendReport(generatedReport); err != nil {
 				a.Logger.Error().Err(err).Str("name", reporter.Name()).Msg("Failed to send report")
 			}
 		}

@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"bytes"
 	"fmt"
 
 	tele "gopkg.in/telebot.v3"
@@ -18,18 +19,13 @@ func (reporter *TelegramReporter) HandleAddMute(c tele.Context) error {
 	}
 
 	reporter.MutesManager.AddMute(mute)
-	if mute.ProposalID != "" {
-		return reporter.BotReply(c, fmt.Sprintf(
-			"Notification for proposal #%s on %s are muted till %s.",
-			mute.ProposalID,
-			mute.Chain,
-			mute.GetExpirationTime(),
-		))
+
+	template, _ := reporter.GetTemplate("mute_added")
+	var buffer bytes.Buffer
+	if err := template.Execute(&buffer, mute); err != nil {
+		reporter.Logger.Error().Err(err).Msg("Error rendering mute_added template")
+		return err
 	}
 
-	return reporter.BotReply(c, fmt.Sprintf(
-		"Notification for all proposals on %s are muted till %s.",
-		mute.Chain,
-		mute.GetExpirationTime(),
-	))
+	return reporter.BotReply(c, buffer.String())
 }
