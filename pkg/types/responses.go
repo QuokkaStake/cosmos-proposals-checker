@@ -13,6 +13,10 @@ type Proposal struct {
 	VotingEndTime time.Time        `json:"voting_end_time"`
 }
 
+func (p Proposal) GetTimeLeft() string {
+	return utils.FormatDuration(time.Until(p.VotingEndTime).Round(time.Second))
+}
+
 type ProposalContent struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
