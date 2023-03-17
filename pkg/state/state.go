@@ -35,18 +35,18 @@ func (c ChainInfo) HasProposalsError() bool {
 }
 
 type State struct {
-	ChainInfos map[string]ChainInfo
+	ChainInfos map[string]*ChainInfo
 }
 
 func NewState() State {
 	return State{
-		ChainInfos: make(map[string]ChainInfo),
+		ChainInfos: make(map[string]*ChainInfo),
 	}
 }
 
 func (s *State) SetVote(chain *configTypes.Chain, proposal types.Proposal, wallet *configTypes.Wallet, vote ProposalVote) {
 	if _, ok := s.ChainInfos[chain.Name]; !ok {
-		s.ChainInfos[chain.Name] = ChainInfo{
+		s.ChainInfos[chain.Name] = &ChainInfo{
 			Chain:         chain,
 			ProposalVotes: make(map[string]WalletVotes),
 		}
@@ -63,31 +63,33 @@ func (s *State) SetVote(chain *configTypes.Chain, proposal types.Proposal, walle
 }
 
 func (s *State) SetChainProposalsError(chain *configTypes.Chain, err error) {
-	s.ChainInfos[chain.Name] = ChainInfo{
+	s.ChainInfos[chain.Name] = &ChainInfo{
 		Chain:          chain,
 		ProposalsError: err.Error(),
 	}
 }
 
-func (s State) GetVoteAndProposal(chain, proposalID, wallet string) (ProposalVote, types.Proposal, bool) {
+func (s *State) SetChainVotes(chain *configTypes.Chain, votes map[string]WalletVotes) {
+	stateChain := s.ChainInfos[chain.Name]
+	stateChain.ProposalVotes = votes
+}
+
+func (s *State) GetVoteAndProposal(chain, proposalID, wallet string) (ProposalVote, types.Proposal, bool) {
 	if _, ok := s.ChainInfos[chain]; !ok {
 		return ProposalVote{}, types.Proposal{}, false
 	}
+	chainInfo := s.ChainInfos[chain]
 
-	if _, ok := s.ChainInfos[chain].ProposalVotes[proposalID]; !ok {
+	if _, ok := chainInfo.ProposalVotes[proposalID]; !ok {
 		return ProposalVote{}, types.Proposal{}, false
 	}
-
-	proposalVotes, found := s.ChainInfos[chain].ProposalVotes[proposalID]
-	if !found {
-		return ProposalVote{}, types.Proposal{}, false
-	}
+	proposalVotes := chainInfo.ProposalVotes[proposalID]
 
 	vote, found := proposalVotes.Votes[wallet]
 	return vote, proposalVotes.Proposal, found
 }
 
-func (s State) HasVoted(chain, proposal, wallet string) bool {
+func (s *State) HasVoted(chain, proposal, wallet string) bool {
 	if _, ok := s.ChainInfos[chain]; !ok {
 		return false
 	}
