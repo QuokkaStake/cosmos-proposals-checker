@@ -51,8 +51,16 @@ func (g *Generator) ProcessChain(
 	if err != nil {
 		g.Logger.Warn().Err(err).Msg("Error processing proposals")
 		g.Mutex.Lock()
+		defer g.Mutex.Unlock()
+
 		state.SetChainProposalsError(chain, err)
-		g.Mutex.Unlock()
+
+		stateChain, found := oldState.ChainInfos[chain.Name]
+		if found {
+			g.Logger.Trace().Str("chain", chain.Name).Msg("Got older state present, saving it")
+			state.SetChainVotes(chain, stateChain.ProposalVotes)
+		}
+
 		return
 	}
 

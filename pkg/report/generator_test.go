@@ -18,7 +18,7 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 
 	oldState := state.NewState()
 	newState := state.State{
-		ChainInfos: map[string]state.ChainInfo{
+		ChainInfos: map[string]*state.ChainInfo{
 			"chain": {
 				ProposalsError: "test error",
 			},
@@ -42,7 +42,7 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 
 	oldState := state.NewState()
 	newState := state.State{
-		ChainInfos: map[string]state.ChainInfo{
+		ChainInfos: map[string]*state.ChainInfo{
 			"chain": {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
@@ -77,7 +77,7 @@ func TestReportGeneratorWithNotVoted(t *testing.T) {
 
 	oldState := state.NewState()
 	newState := state.State{
-		ChainInfos: map[string]state.ChainInfo{
+		ChainInfos: map[string]*state.ChainInfo{
 			"chain": {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
@@ -109,7 +109,7 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 	stateManager := state.NewStateManager("./state.json", logger.GetDefaultLogger())
 
 	oldState := state.State{
-		ChainInfos: map[string]state.ChainInfo{
+		ChainInfos: map[string]*state.ChainInfo{
 			"chain": {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
@@ -125,7 +125,7 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 		},
 	}
 	newState := state.State{
-		ChainInfos: map[string]state.ChainInfo{
+		ChainInfos: map[string]*state.ChainInfo{
 			"chain": {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
@@ -161,7 +161,7 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 	stateManager := state.NewStateManager("./state.json", logger.GetDefaultLogger())
 
 	oldState := state.State{
-		ChainInfos: map[string]state.ChainInfo{
+		ChainInfos: map[string]*state.ChainInfo{
 			"chain": {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
@@ -181,7 +181,7 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 		},
 	}
 	newState := state.State{
-		ChainInfos: map[string]state.ChainInfo{
+		ChainInfos: map[string]*state.ChainInfo{
 			"chain": {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {

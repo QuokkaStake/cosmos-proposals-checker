@@ -47,11 +47,36 @@ func TestSetProposalErrorWithoutChainInfo(t *testing.T) {
 	assert.Equal(t, err, "test error", "Errors text should match!")
 }
 
+func TestSetVotes(t *testing.T) {
+	t.Parallel()
+
+	state := State{
+		ChainInfos: map[string]*ChainInfo{
+			"chain": {},
+		},
+	}
+
+	votes := map[string]WalletVotes{
+		"proposal": {
+			Votes: map[string]ProposalVote{
+				"wallet": {
+					Vote: &types.Vote{Option: "YES"},
+				},
+			},
+		},
+	}
+
+	state.SetChainVotes(&configTypes.Chain{Name: "chain"}, votes)
+
+	votes2 := state.ChainInfos["chain"].ProposalVotes
+	assert.NotNil(t, votes2, "There should be votes!")
+}
+
 func TestSetProposalErrorWithChainInfo(t *testing.T) {
 	t.Parallel()
 
 	state := State{
-		ChainInfos: map[string]ChainInfo{
+		ChainInfos: map[string]*ChainInfo{
 			"test": {},
 		},
 	}
@@ -77,12 +102,14 @@ func TestGetVoteWithoutChainInfo(t *testing.T) {
 	assert.Equal(t, found, false, "There should be no vote!")
 }
 
-func TestGetVoteWithChainInfo(t *testing.T) {
+func TestGetVoteWithoutProposalVotes(t *testing.T) {
 	t.Parallel()
 
 	state := State{
-		ChainInfos: map[string]ChainInfo{
-			"chain": {},
+		ChainInfos: map[string]*ChainInfo{
+			"chain": {
+				ProposalVotes: map[string]WalletVotes{},
+			},
 		},
 	}
 
@@ -94,7 +121,7 @@ func TestGetVoteWithWalletVoteNotPresent(t *testing.T) {
 	t.Parallel()
 
 	state := State{
-		ChainInfos: map[string]ChainInfo{
+		ChainInfos: map[string]*ChainInfo{
 			"chain": {
 				ProposalVotes: map[string]WalletVotes{
 					"proposal": {},
@@ -111,7 +138,7 @@ func TestGetVoteWithWalletVotePresent(t *testing.T) {
 	t.Parallel()
 
 	state := State{
-		ChainInfos: map[string]ChainInfo{
+		ChainInfos: map[string]*ChainInfo{
 			"chain": {
 				ProposalVotes: map[string]WalletVotes{
 					"proposal": {
@@ -141,7 +168,7 @@ func TestHasVotedWithChainInfo(t *testing.T) {
 	t.Parallel()
 
 	state := State{
-		ChainInfos: map[string]ChainInfo{
+		ChainInfos: map[string]*ChainInfo{
 			"chain": {},
 		},
 	}
@@ -154,7 +181,7 @@ func TestHasVotedWithWalletVoteIntoNotPresent(t *testing.T) {
 	t.Parallel()
 
 	state := State{
-		ChainInfos: map[string]ChainInfo{
+		ChainInfos: map[string]*ChainInfo{
 			"chain": {
 				ProposalVotes: map[string]WalletVotes{
 					"proposal": {},
@@ -171,7 +198,7 @@ func TestHasVotedWithWalletVoteInfoPresent(t *testing.T) {
 	t.Parallel()
 
 	state := State{
-		ChainInfos: map[string]ChainInfo{
+		ChainInfos: map[string]*ChainInfo{
 			"chain": {
 				ProposalVotes: map[string]WalletVotes{
 					"proposal": {
@@ -192,7 +219,7 @@ func TestHasVotedWithWalletVotePresent(t *testing.T) {
 	t.Parallel()
 
 	state := State{
-		ChainInfos: map[string]ChainInfo{
+		ChainInfos: map[string]*ChainInfo{
 			"chain": {
 				ProposalVotes: map[string]WalletVotes{
 					"proposal": {
