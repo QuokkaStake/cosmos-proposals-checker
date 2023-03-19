@@ -2,7 +2,7 @@ package telegram
 
 import (
 	"bytes"
-	"main/pkg/state"
+	statePkg "main/pkg/state"
 
 	tele "gopkg.in/telebot.v3"
 )
@@ -13,7 +13,7 @@ func (reporter *TelegramReporter) HandleProposals(c tele.Context) error {
 		Str("text", c.Text()).
 		Msg("Got proposals list query")
 
-	state := reporter.StateGenerator.GetState(state.NewState())
+	state := reporter.StateGenerator.GetState(statePkg.NewState())
 	template, _ := reporter.GetTemplate("proposals")
 	var buffer bytes.Buffer
 	if err := template.Execute(&buffer, state); err != nil {
