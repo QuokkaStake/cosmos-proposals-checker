@@ -44,6 +44,10 @@ func (rpc *RPC) GetAllProposals() ([]types.Proposal, error) {
 			return nil, err
 		}
 
+		if batchProposals.Message != "" {
+			return nil, errors.New(batchProposals.Message)
+		}
+
 		proposals = append(proposals, batchProposals.Proposals...)
 		if len(batchProposals.Proposals) < PaginationLimit {
 			break
@@ -75,7 +79,7 @@ func (rpc *RPC) GetVote(proposal, voter string) (*types.VoteRPCResponse, error) 
 }
 
 func (rpc *RPC) Get(url string, target interface{}) error {
-	errors := make([]error, len(rpc.URLs))
+	nodeErrors := make([]error, len(rpc.URLs))
 
 	for index, lcd := range rpc.URLs {
 		fullURL := lcd + url
@@ -91,7 +95,7 @@ func (rpc *RPC) Get(url string, target interface{}) error {
 		}
 
 		rpc.Logger.Warn().Str("url", fullURL).Err(err).Msg("LCD request failed")
-		errors[index] = err
+		nodeErrors[index] = err
 	}
 
 	rpc.Logger.Warn().Str("url", url).Msg("All LCD requests failed")
@@ -100,7 +104,7 @@ func (rpc *RPC) Get(url string, target interface{}) error {
 
 	sb.WriteString("All LCD requests failed:\n")
 	for index, url := range rpc.URLs {
-		sb.WriteString(fmt.Sprintf("#%d: %s -> %s\n", index+1, url, errors[index]))
+		sb.WriteString(fmt.Sprintf("#%d: %s -> %s\n", index+1, url, nodeErrors[index]))
 	}
 
 	return fmt.Errorf(sb.String())
