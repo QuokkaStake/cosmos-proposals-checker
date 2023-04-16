@@ -23,6 +23,8 @@ type ProposalContent struct {
 }
 
 type ProposalsRPCResponse struct {
+	Code      int64      `json:"code"`
+	Message   string     `json:"message"`
 	Proposals []Proposal `json:"proposals"`
 }
 
