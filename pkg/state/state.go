@@ -8,15 +8,15 @@ import (
 type ProposalVote struct {
 	Wallet *configTypes.Wallet
 	Vote   *types.Vote
-	Error  string
+	Error  error
 }
 
 func (v ProposalVote) HasVoted() bool {
-	return v.Vote != nil && v.Error == ""
+	return v.Vote != nil && v.Error == nil
 }
 
 func (v ProposalVote) IsError() bool {
-	return v.Error != ""
+	return v.Error != nil
 }
 
 type WalletVotes struct {
@@ -27,11 +27,11 @@ type WalletVotes struct {
 type ChainInfo struct {
 	Chain          *configTypes.Chain
 	ProposalVotes  map[string]WalletVotes
-	ProposalsError string
+	ProposalsError error
 }
 
 func (c ChainInfo) HasProposalsError() bool {
-	return c.ProposalsError != ""
+	return c.ProposalsError != nil
 }
 
 type State struct {
@@ -65,7 +65,7 @@ func (s *State) SetVote(chain *configTypes.Chain, proposal types.Proposal, walle
 func (s *State) SetChainProposalsError(chain *configTypes.Chain, err error) {
 	s.ChainInfos[chain.Name] = &ChainInfo{
 		Chain:          chain,
-		ProposalsError: err.Error(),
+		ProposalsError: err,
 	}
 }
 

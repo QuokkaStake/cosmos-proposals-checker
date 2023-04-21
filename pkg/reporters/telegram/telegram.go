@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	mutes "main/pkg/mutes"
+	"main/pkg/report/entry"
 	"main/pkg/state"
 	"strings"
 	"time"
@@ -18,7 +19,7 @@ import (
 	tele "gopkg.in/telebot.v3"
 )
 
-type TelegramReporter struct {
+type Reporter struct {
 	TelegramToken  string
 	TelegramChat   int64
 	MutesManager   *mutes.Manager
@@ -26,7 +27,7 @@ type TelegramReporter struct {
 
 	TelegramBot *tele.Bot
 	Logger      zerolog.Logger
-	Templates   map[types.ReportEntryType]*template.Template
+	Templates   map[string]*template.Template
 }
 
 const (
@@ -38,18 +39,18 @@ func NewTelegramReporter(
 	mutesManager *mutes.Manager,
 	stateGenerator *state.Generator,
 	logger *zerolog.Logger,
-) *TelegramReporter {
-	return &TelegramReporter{
+) *Reporter {
+	return &Reporter{
 		TelegramToken:  config.TelegramToken,
 		TelegramChat:   config.TelegramChat,
 		MutesManager:   mutesManager,
 		StateGenerator: stateGenerator,
 		Logger:         logger.With().Str("component", "telegram_reporter").Logger(),
-		Templates:      make(map[types.ReportEntryType]*template.Template, 0),
+		Templates:      make(map[string]*template.Template, 0),
 	}
 }
 
-func (reporter *TelegramReporter) Init() {
+func (reporter *Reporter) Init() {
 	if reporter.TelegramToken == "" || reporter.TelegramChat == 0 {
 		reporter.Logger.Debug().Msg("Telegram credentials not set, not creating Telegram reporter.")
 		return
@@ -75,17 +76,17 @@ func (reporter *TelegramReporter) Init() {
 	go reporter.TelegramBot.Start()
 }
 
-func (reporter *TelegramReporter) Enabled() bool {
+func (reporter *Reporter) Enabled() bool {
 	return reporter.TelegramToken != "" && reporter.TelegramChat != 0
 }
 
-func (reporter *TelegramReporter) GetTemplate(tmlpType types.ReportEntryType) (*template.Template, error) {
+func (reporter *Reporter) GetTemplate(tmlpType string) (*template.Template, error) {
 	if cachedTemplate, ok := reporter.Templates[tmlpType]; ok {
-		reporter.Logger.Trace().Str("type", string(tmlpType)).Msg("Using cached template")
+		reporter.Logger.Trace().Str("type", tmlpType).Msg("Using cached template")
 		return cachedTemplate, nil
 	}
 
-	reporter.Logger.Trace().Str("type", string(tmlpType)).Msg("Loading template")
+	reporter.Logger.Trace().Str("type", tmlpType).Msg("Loading template")
 
 	filename := fmt.Sprintf("%s.html", tmlpType)
 
@@ -101,34 +102,38 @@ func (reporter *TelegramReporter) GetTemplate(tmlpType types.ReportEntryType) (*
 	return t, nil
 }
 
-func (reporter *TelegramReporter) SerializeReportEntry(e reporters.ReportEntry) (string, error) {
-	parsedTemplate, err := reporter.GetTemplate(e.Type)
+func (reporter *Reporter) SerializeReportEntry(e entry.ReportEntry) (string, error) {
+	parsedTemplate, err := reporter.GetTemplate(e.Name())
 	if err != nil {
-		reporter.Logger.Error().Err(err).Str("type", string(e.Type)).Msg("Error loading template")
+		reporter.Logger.Error().Err(err).Str("type", e.Name()).Msg("Error loading template")
 		return "", err
 	}
 
 	var buffer bytes.Buffer
 	err = parsedTemplate.Execute(&buffer, e)
 	if err != nil {
-		reporter.Logger.Error().Err(err).Str("type", string(e.Type)).Msg("Error rendering template")
+		reporter.Logger.Error().Err(err).Str("type", e.Name()).Msg("Error rendering template")
 		return "", err
 	}
 
 	return buffer.String(), nil
 }
 
-func (reporter *TelegramReporter) SendReport(report reporters.Report) error {
-	for _, entry := range report.Entries {
-		if !entry.HasVoted() && reporter.MutesManager.IsMuted(entry.Chain.Name, entry.ProposalID) {
-			reporter.Logger.Debug().
-				Str("chain", entry.Chain.Name).
-				Str("proposal", entry.ProposalID).
-				Msg("Notifications are muted, not sending.")
-			continue
+func (reporter *Reporter) SendReport(report reporters.Report) error {
+	for _, reportEntry := range report.Entries {
+		if entryConverted, ok := reportEntry.(entry.ReportEntryNotError); ok {
+			chain := entryConverted.GetChain()
+			proposal := entryConverted.GetProposal()
+			if reporter.MutesManager.IsMuted(chain.Name, proposal.ProposalID) {
+				reporter.Logger.Debug().
+					Str("chain", chain.Name).
+					Str("proposal", proposal.ProposalID).
+					Msg("Notifications are muted, not sending.")
+				continue
+			}
 		}
 
-		serializedEntry, err := reporter.SerializeReportEntry(entry)
+		serializedEntry, err := reporter.SerializeReportEntry(reportEntry)
 		if err != nil {
 			reporter.Logger.Err(err).Msg("Could not serialize report entry")
 			return err
@@ -151,11 +156,11 @@ func (reporter *TelegramReporter) SendReport(report reporters.Report) error {
 	return nil
 }
 
-func (reporter *TelegramReporter) Name() string {
+func (reporter *Reporter) Name() string {
 	return "telegram-reporter"
 }
 
-func (reporter *TelegramReporter) BotReply(c tele.Context, msg string) error {
+func (reporter *Reporter) BotReply(c tele.Context, msg string) error {
 	msgsByNewline := strings.Split(msg, "\n")
 
 	var sb strings.Builder
@@ -226,7 +231,7 @@ func ParseMuteOptions(query string, c tele.Context) (*mutes.Mute, string) {
 	return mute, ""
 }
 
-func (reporter *TelegramReporter) SerializeLink(link types.Link) template.HTML {
+func (reporter *Reporter) SerializeLink(link types.Link) template.HTML {
 	if link.Href != "" {
 		return template.HTML(fmt.Sprintf("<a href='%s'>%s</a>", link.Href, link.Name))
 	}

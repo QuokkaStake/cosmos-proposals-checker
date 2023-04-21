@@ -1,6 +1,7 @@
 package report
 
 import (
+	"errors"
 	"testing"
 
 	configTypes "main/pkg/config/types"
@@ -20,7 +21,7 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 	newState := state.State{
 		ChainInfos: map[string]*state.ChainInfo{
 			"chain": {
-				ProposalsError: "test error",
+				ProposalsError: errors.New("test error"),
 			},
 		},
 	}
@@ -152,7 +153,7 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 	report := generator.GenerateReport(oldState, newState)
 	assert.Equal(t, len(report.Entries), 1, "Expected to have 1 entry!")
 	assert.Equal(t, report.Entries[0].Type, types.Voted, "Expected to have voted type!")
-	assert.Equal(t, report.Entries[0].ProposalID, "proposal", "Proposal ID mismatch!")
+	assert.Equal(t, report.Entries[0].Proposal.ProposalID, "proposal", "Proposal ID mismatch!")
 }
 
 func TestReportGeneratorWithRevoted(t *testing.T) {
