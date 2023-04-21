@@ -44,7 +44,7 @@ func TestSetProposalErrorWithoutChainInfo(t *testing.T) {
 	assert.Equal(t, hasError2, true, "Chain info should have a proposal error!")
 
 	err := state.ChainInfos["test"].ProposalsError
-	assert.Equal(t, err, "test error", "Errors text should match!")
+	assert.Equal(t, err.Error(), "test error", "Errors text should match!")
 }
 
 func TestSetVotes(t *testing.T) {
@@ -90,7 +90,7 @@ func TestSetProposalErrorWithChainInfo(t *testing.T) {
 	assert.Equal(t, hasError2, true, "Chain info should have a proposal error!")
 
 	err := state.ChainInfos["test"].ProposalsError
-	assert.Equal(t, err, "test error", "Errors text should match!")
+	assert.Equal(t, err.Error(), "test error", "Errors text should match!")
 }
 
 func TestGetVoteWithoutChainInfo(t *testing.T) {
