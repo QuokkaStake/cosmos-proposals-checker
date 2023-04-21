@@ -1,13 +1,14 @@
 package report
 
 import (
-	"github.com/rs/zerolog"
 	configTypes "main/pkg/config/types"
 	"main/pkg/events"
 	"main/pkg/report/entry"
 	"main/pkg/reporters"
 	"main/pkg/state"
 	"main/pkg/tendermint"
+
+	"github.com/rs/zerolog"
 )
 
 type Generator struct {
