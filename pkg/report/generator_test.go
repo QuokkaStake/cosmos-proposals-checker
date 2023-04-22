@@ -1,7 +1,6 @@
 package report
 
 import (
-	"errors"
 	"main/pkg/events"
 	"testing"
 
@@ -22,7 +21,7 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 	newState := state.State{
 		ChainInfos: map[string]*state.ChainInfo{
 			"chain": {
-				ProposalsError: errors.New("test error"),
+				ProposalsError: types.NewJSONError("test error"),
 			},
 		},
 	}
@@ -56,7 +55,7 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
-								Error: errors.New("test error"),
+								Error: types.NewJSONError("test error"),
 							},
 						},
 					},
