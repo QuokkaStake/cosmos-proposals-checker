@@ -8,7 +8,7 @@ import (
 	tele "gopkg.in/telebot.v3"
 )
 
-func (reporter *TelegramReporter) HandleListMutes(c tele.Context) error {
+func (reporter *Reporter) HandleListMutes(c tele.Context) error {
 	reporter.Logger.Info().
 		Str("sender", c.Sender().Username).
 		Str("text", c.Text()).

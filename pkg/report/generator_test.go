@@ -1,6 +1,7 @@
 package report
 
 import (
+	"main/pkg/events"
 	"testing"
 
 	configTypes "main/pkg/config/types"
@@ -20,7 +21,7 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 	newState := state.State{
 		ChainInfos: map[string]*state.ChainInfo{
 			"chain": {
-				ProposalsError: "test error",
+				ProposalsError: types.NewJSONError("test error"),
 			},
 		},
 	}
@@ -31,8 +32,10 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 
 	report := generator.GenerateReport(oldState, newState)
 	assert.Equal(t, len(report.Entries), 1, "Expected to have 1 entry!")
-	assert.Equal(t, report.Entries[0].Type, types.ProposalQueryError, "Expected to have a proposal query error!")
-	assert.Equal(t, report.Entries[0].Value, "test error", "Error text mismatch!")
+
+	entry, ok := report.Entries[0].(events.ProposalsQueryErrorEvent)
+	assert.True(t, ok, "Expected to have a proposal query error!")
+	assert.Equal(t, entry.Error.Error(), "test error", "Error text mismatch!")
 }
 
 func TestReportGeneratorWithVoteError(t *testing.T) {
@@ -47,11 +50,12 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							Content: &types.ProposalContent{},
+							ProposalID: "proposal",
+							Content:    &types.ProposalContent{},
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
-								Error: "test error",
+								Error: types.NewJSONError("test error"),
 							},
 						},
 					},
@@ -66,8 +70,10 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 
 	report := generator.GenerateReport(oldState, newState)
 	assert.Equal(t, len(report.Entries), 1, "Expected to have 1 entry!")
-	assert.Equal(t, report.Entries[0].Type, types.VoteQueryError, "Expected to have a vote query error!")
-	assert.Equal(t, report.Entries[0].ProposalID, "proposal", "Proposal ID mismatch!")
+
+	entry, ok := report.Entries[0].(events.VoteQueryError)
+	assert.True(t, ok, "Expected to have a vote query error!")
+	assert.Equal(t, entry.Proposal.ProposalID, "proposal", "Proposal ID mismatch!")
 }
 
 func TestReportGeneratorWithNotVoted(t *testing.T) {
@@ -82,7 +88,8 @@ func TestReportGeneratorWithNotVoted(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							Content: &types.ProposalContent{},
+							ProposalID: "proposal",
+							Content:    &types.ProposalContent{},
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {},
@@ -99,8 +106,10 @@ func TestReportGeneratorWithNotVoted(t *testing.T) {
 
 	report := generator.GenerateReport(oldState, newState)
 	assert.Equal(t, len(report.Entries), 1, "Expected to have 1 entry!")
-	assert.Equal(t, report.Entries[0].Type, types.NotVoted, "Expected to have not voted type!")
-	assert.Equal(t, report.Entries[0].ProposalID, "proposal", "Proposal ID mismatch!")
+
+	entry, ok := report.Entries[0].(events.NotVotedEvent)
+	assert.True(t, ok, "Expected to have not voted type!")
+	assert.Equal(t, entry.Proposal.ProposalID, "proposal", "Proposal ID mismatch!")
 }
 
 func TestReportGeneratorWithVoted(t *testing.T) {
@@ -114,7 +123,8 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							Content: &types.ProposalContent{},
+							ProposalID: "proposal",
+							Content:    &types.ProposalContent{},
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {},
@@ -130,7 +140,8 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							Content: &types.ProposalContent{},
+							ProposalID: "proposal",
+							Content:    &types.ProposalContent{},
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
@@ -151,8 +162,10 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 
 	report := generator.GenerateReport(oldState, newState)
 	assert.Equal(t, len(report.Entries), 1, "Expected to have 1 entry!")
-	assert.Equal(t, report.Entries[0].Type, types.Voted, "Expected to have voted type!")
-	assert.Equal(t, report.Entries[0].ProposalID, "proposal", "Proposal ID mismatch!")
+
+	entry, ok := report.Entries[0].(events.VotedEvent)
+	assert.True(t, ok, "Expected to have voted type!")
+	assert.Equal(t, entry.Proposal.ProposalID, "proposal", "Proposal ID mismatch!")
 }
 
 func TestReportGeneratorWithRevoted(t *testing.T) {
@@ -166,7 +179,8 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							Content: &types.ProposalContent{},
+							ProposalID: "proposal",
+							Content:    &types.ProposalContent{},
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
@@ -186,7 +200,8 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							Content: &types.ProposalContent{},
+							ProposalID: "proposal",
+							Content:    &types.ProposalContent{},
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
@@ -207,6 +222,8 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 
 	report := generator.GenerateReport(oldState, newState)
 	assert.Equal(t, len(report.Entries), 1, "Expected to have 1 entry!")
-	assert.Equal(t, report.Entries[0].Type, types.Revoted, "Expected to have revoted type!")
-	assert.Equal(t, report.Entries[0].ProposalID, "proposal", "Proposal ID mismatch!")
+
+	entry, ok := report.Entries[0].(events.RevotedEvent)
+	assert.True(t, ok, "Expected to have revoted type!")
+	assert.Equal(t, entry.Proposal.ProposalID, "proposal", "Proposal ID mismatch!")
 }

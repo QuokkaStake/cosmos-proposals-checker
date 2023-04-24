@@ -125,7 +125,7 @@ func (g *Generator) ProcessProposalAndWallet(
 	}
 
 	if err != nil {
-		proposalVote.Error = err.Error()
+		proposalVote.Error = types.NewJSONError(err.Error())
 	} else {
 		proposalVote.Vote = voteResponse.Vote
 	}

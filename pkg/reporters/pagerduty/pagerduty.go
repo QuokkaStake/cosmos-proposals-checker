@@ -3,7 +3,10 @@ package pagerduty
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"main/pkg/events"
+	"main/pkg/report/entry"
 	"net/http"
 	"os"
 	"time"
@@ -14,13 +17,13 @@ import (
 	"github.com/rs/zerolog"
 )
 
-type PagerDutyReporter struct {
+type Reporter struct {
 	PagerDutyURL string
 	APIKey       string
 	Logger       zerolog.Logger
 }
 
-type PagerDutyAlertPayload struct {
+type AlertPayload struct {
 	Summary       string            `json:"summary"`
 	Timestamp     string            `json:"timestamp"`
 	Severity      string            `json:"severity"`
@@ -28,37 +31,42 @@ type PagerDutyAlertPayload struct {
 	CustomDetails map[string]string `json:"custom_details"`
 }
 
-type PagerDutyLink struct {
+type Link struct {
 	Href string `json:"href"`
 	Text string `json:"text"`
 }
 
-type PagerDutyAlert struct {
-	Payload     PagerDutyAlertPayload `json:"payload"`
-	RoutingKey  string                `json:"routing_key"`
-	EventAction string                `json:"event_action"`
-	DedupKey    string                `json:"dedup_key"`
-	Client      string                `json:"client"`
-	Links       []PagerDutyLink       `json:"links"`
-	ClientURL   string                `json:"client_url"`
+type Alert struct {
+	Payload     AlertPayload `json:"payload"`
+	RoutingKey  string       `json:"routing_key"`
+	EventAction string       `json:"event_action"`
+	DedupKey    string       `json:"dedup_key"`
+	Client      string       `json:"client"`
+	Links       []Link       `json:"links"`
+	ClientURL   string       `json:"client_url"`
 }
 
-type PagerDutyResponse struct {
+type Response struct {
 	Status  string
 	Message string
 }
 
-func (r *PagerDutyReporter) NewPagerDutyAlertFromReportEntry(e reporters.ReportEntry) PagerDutyAlert {
+func (r *Reporter) NewAlertFromReportEntry(eventRaw entry.ReportEntry) (Alert, error) {
+	event, ok := eventRaw.(entry.ReportEntryNotError)
+	if !ok {
+		return Alert{}, errors.New("error converting alert entry")
+	}
+
 	eventAction := "trigger"
-	if e.HasVoted() {
+	if _, ok := event.(events.VotedEvent); ok {
 		eventAction = "resolve"
 	}
 
 	dedupKey := fmt.Sprintf(
 		"cosmos-proposals-checker alert chain=%s proposal=%s wallet=%s",
-		e.Chain.Name,
-		e.ProposalID,
-		e.Wallet,
+		event.GetChain().Name,
+		event.GetProposal().ProposalID,
+		event.GetWallet().AddressOrAlias(),
 	)
 
 	hostname, err := os.Hostname()
@@ -66,33 +74,33 @@ func (r *PagerDutyReporter) NewPagerDutyAlertFromReportEntry(e reporters.ReportE
 		hostname = "unknown-host"
 	}
 
-	links := []PagerDutyLink{}
-	explorerLinks := e.Chain.GetExplorerProposalsLinks(e.ProposalID)
+	links := []Link{}
+	explorerLinks := event.GetChain().GetExplorerProposalsLinks(event.GetProposal().ProposalID)
 	for _, link := range explorerLinks {
-		links = append(links, PagerDutyLink{
+		links = append(links, Link{
 			Href: link.Href,
 			Text: link.Name,
 		})
 	}
 
-	return PagerDutyAlert{
-		Payload: PagerDutyAlertPayload{
+	return Alert{
+		Payload: AlertPayload{
 			Summary: fmt.Sprintf(
 				"Wallet %s hasn't voted on proposal %s on %s: %s",
-				e.Wallet,
-				e.ProposalID,
-				e.Chain.GetName(),
-				e.ProposalTitle,
+				event.GetWallet().AddressOrAlias(),
+				event.GetProposal().ProposalID,
+				event.GetChain().GetName(),
+				event.GetProposal().Content.Title,
 			),
 			Timestamp: time.Now().Format(time.RFC3339),
 			Severity:  "error",
 			Source:    hostname,
 			CustomDetails: map[string]string{
-				"Wallet":               e.Wallet.AddressOrAlias(),
-				"Chain":                e.Chain.GetName(),
-				"Proposal ID":          e.ProposalID,
-				"Proposal title":       e.ProposalTitle,
-				"Proposal description": e.ProposalDescription,
+				"Wallet":               event.GetWallet().AddressOrAlias(),
+				"Chain":                event.GetChain().GetName(),
+				"Proposal ID":          event.GetProposal().ProposalID,
+				"Proposal title":       event.GetProposal().Content.Title,
+				"Proposal description": event.GetProposal().Content.Description,
 			},
 		},
 		Links:       links,
@@ -101,37 +109,41 @@ func (r *PagerDutyReporter) NewPagerDutyAlertFromReportEntry(e reporters.ReportE
 		DedupKey:    dedupKey,
 		Client:      "cosmos-proposals-checker",
 		ClientURL:   "https://github.com/QuokkaStake/cosmos-proposals-checker",
-	}
+	}, nil
 }
 
-func NewPagerDutyReporter(config config.PagerDutyConfig, logger *zerolog.Logger) PagerDutyReporter {
-	return PagerDutyReporter{
+func NewPagerDutyReporter(config config.PagerDutyConfig, logger *zerolog.Logger) Reporter {
+	return Reporter{
 		PagerDutyURL: config.PagerDutyURL,
 		APIKey:       config.APIKey,
 		Logger:       logger.With().Str("component", "pagerduty_reporter").Logger(),
 	}
 }
 
-func (r PagerDutyReporter) Init() {
+func (r Reporter) Init() {
 }
 
-func (r PagerDutyReporter) Enabled() bool {
+func (r Reporter) Enabled() bool {
 	return r.APIKey != ""
 }
 
-func (r PagerDutyReporter) Name() string {
+func (r Reporter) Name() string {
 	return "pagerduty-reporter"
 }
 
-func (r PagerDutyReporter) SendReport(report reporters.Report) error {
+func (r Reporter) SendReport(report reporters.Report) error {
 	var err error
 
-	for _, entry := range report.Entries {
-		if !entry.IsVoteOrNotVoted() {
+	for _, reportEntry := range report.Entries {
+		if !reportEntry.IsAlert() {
 			continue
 		}
 
-		alert := r.NewPagerDutyAlertFromReportEntry(entry)
+		alert, alertCreateErr := r.NewAlertFromReportEntry(reportEntry)
+		if alertCreateErr != nil {
+			err = alertCreateErr
+			continue
+		}
 
 		if alertErr := r.SendAlert(alert); alertErr != nil {
 			err = alertErr
@@ -141,8 +153,8 @@ func (r PagerDutyReporter) SendReport(report reporters.Report) error {
 	return err
 }
 
-func (r PagerDutyReporter) SendAlert(alert PagerDutyAlert) error {
-	var response PagerDutyResponse
+func (r Reporter) SendAlert(alert Alert) error {
+	var response Response
 	err := r.DoRequest(r.PagerDutyURL+"/v2/enqueue", alert, &response)
 	if err != nil {
 		return err
@@ -155,7 +167,7 @@ func (r PagerDutyReporter) SendAlert(alert PagerDutyAlert) error {
 	return nil
 }
 
-func (r PagerDutyReporter) DoRequest(url string, body interface{}, target interface{}) error {
+func (r Reporter) DoRequest(url string, body interface{}, target interface{}) error {
 	client := &http.Client{Timeout: 10 * 1000000000}
 	start := time.Now()
 

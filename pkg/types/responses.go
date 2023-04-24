@@ -17,6 +17,10 @@ func (p Proposal) GetTimeLeft() string {
 	return utils.FormatDuration(time.Until(p.VotingEndTime).Round(time.Second))
 }
 
+func (p Proposal) GetProposalTime() string {
+	return p.VotingEndTime.Format(time.RFC1123)
+}
+
 type ProposalContent struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
