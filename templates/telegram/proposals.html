@@ -1,3 +1,6 @@
+{{- if not .ChainInfos }}
+<strong>No active proposals</strong>
+{{- end }}
 {{- range .ChainInfos }}
 {{- $chain := .Chain -}}
 <strong>{{ .Chain.GetName }}</strong>
