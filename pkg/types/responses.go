@@ -1,6 +1,7 @@
 package types
 
 import (
+	"strings"
 	"time"
 
 	"main/pkg/utils"
@@ -33,12 +34,26 @@ type ProposalsRPCResponse struct {
 }
 
 type Vote struct {
-	ProposalID string `json:"proposal_id"`
-	Voter      string `json:"voter"`
-	Option     string `json:"option"`
+	ProposalID string       `json:"proposal_id"`
+	Voter      string       `json:"voter"`
+	Option     string       `json:"option"`
+	Options    []VoteOption `json:"options"`
+}
+
+type VoteOption struct {
+	Option string `json:"option"`
+	Weight string `json:"weight"`
 }
 
 func (v Vote) ResolveVote() string {
+	if len(v.Options) > 0 {
+		optionsStrings := utils.Map(v.Options, func(v VoteOption) string {
+			return utils.ResolveVote(v.Option)
+		})
+
+		return strings.Join(optionsStrings, ", ")
+	}
+
 	return utils.ResolveVote(v.Option)
 }
 

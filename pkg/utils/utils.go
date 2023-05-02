@@ -17,6 +17,16 @@ func Filter[T any](slice []T, f func(T) bool) []T {
 	return n
 }
 
+func Map[T, V any](slice []T, f func(T) V) []V {
+	result := make([]V, len(slice))
+
+	for index, value := range slice {
+		result[index] = f(value)
+	}
+
+	return result
+}
+
 func ResolveVote(value string) string {
 	votes := map[string]string{
 		"VOTE_OPTION_YES":          "Yes",
