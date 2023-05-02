@@ -65,7 +65,7 @@ func (r *Reporter) NewAlertFromReportEntry(eventRaw entry.ReportEntry) (Alert, e
 	dedupKey := fmt.Sprintf(
 		"cosmos-proposals-checker alert chain=%s proposal=%s wallet=%s",
 		event.GetChain().Name,
-		event.GetProposal().ProposalID,
+		event.GetProposal().ID,
 		event.GetWallet().AddressOrAlias(),
 	)
 
@@ -75,7 +75,7 @@ func (r *Reporter) NewAlertFromReportEntry(eventRaw entry.ReportEntry) (Alert, e
 	}
 
 	links := []Link{}
-	explorerLinks := event.GetChain().GetExplorerProposalsLinks(event.GetProposal().ProposalID)
+	explorerLinks := event.GetChain().GetExplorerProposalsLinks(event.GetProposal().ID)
 	for _, link := range explorerLinks {
 		links = append(links, Link{
 			Href: link.Href,
@@ -88,9 +88,9 @@ func (r *Reporter) NewAlertFromReportEntry(eventRaw entry.ReportEntry) (Alert, e
 			Summary: fmt.Sprintf(
 				"Wallet %s hasn't voted on proposal %s on %s: %s",
 				event.GetWallet().AddressOrAlias(),
-				event.GetProposal().ProposalID,
+				event.GetProposal().ID,
 				event.GetChain().GetName(),
-				event.GetProposal().Content.Title,
+				event.GetProposal().Title,
 			),
 			Timestamp: time.Now().Format(time.RFC3339),
 			Severity:  "error",
@@ -98,9 +98,9 @@ func (r *Reporter) NewAlertFromReportEntry(eventRaw entry.ReportEntry) (Alert, e
 			CustomDetails: map[string]string{
 				"Wallet":               event.GetWallet().AddressOrAlias(),
 				"Chain":                event.GetChain().GetName(),
-				"Proposal ID":          event.GetProposal().ProposalID,
-				"Proposal title":       event.GetProposal().Content.Title,
-				"Proposal description": event.GetProposal().Content.Description,
+				"Proposal ID":          event.GetProposal().ID,
+				"Proposal title":       event.GetProposal().Title,
+				"Proposal description": event.GetProposal().Description,
 			},
 		},
 		Links:       links,

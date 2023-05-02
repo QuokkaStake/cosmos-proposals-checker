@@ -19,7 +19,7 @@ func TestSetVoteWithoutChainInfo(t *testing.T) {
 
 	state.SetVote(
 		&configTypes.Chain{Name: "chain"},
-		types.Proposal{ProposalID: "proposal"},
+		types.Proposal{ID: "proposal"},
 		&configTypes.Wallet{Address: "wallet"},
 		ProposalVote{
 			Vote: &types.Vote{

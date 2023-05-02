@@ -91,7 +91,7 @@ func (g *Generator) GenerateReport(oldState, newState state.State) reporters.Rep
 				if newVote.HasVoted() && !oldVote.HasVoted() {
 					g.Logger.Debug().
 						Str("chain", chainName).
-						Str("proposal", proposal.ProposalID).
+						Str("proposal", proposal.ID).
 						Str("wallet", wallet).
 						Msg("Wallet hasn't voted before but voted now - closing an alert")
 
@@ -108,7 +108,7 @@ func (g *Generator) GenerateReport(oldState, newState state.State) reporters.Rep
 				if newVote.HasVoted() && oldVote.HasVoted() && newVote.Vote.Option != oldVote.Vote.Option {
 					g.Logger.Debug().
 						Str("chain", chainName).
-						Str("proposal", proposal.ProposalID).
+						Str("proposal", proposal.ID).
 						Str("wallet", wallet).
 						Msg("Wallet changed its vote - sending an alert")
 

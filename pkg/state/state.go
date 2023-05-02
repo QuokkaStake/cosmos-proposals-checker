@@ -52,14 +52,14 @@ func (s *State) SetVote(chain *configTypes.Chain, proposal types.Proposal, walle
 		}
 	}
 
-	if _, ok := s.ChainInfos[chain.Name].ProposalVotes[proposal.ProposalID]; !ok {
-		s.ChainInfos[chain.Name].ProposalVotes[proposal.ProposalID] = WalletVotes{
+	if _, ok := s.ChainInfos[chain.Name].ProposalVotes[proposal.ID]; !ok {
+		s.ChainInfos[chain.Name].ProposalVotes[proposal.ID] = WalletVotes{
 			Proposal: proposal,
 			Votes:    make(map[string]ProposalVote),
 		}
 	}
 
-	s.ChainInfos[chain.Name].ProposalVotes[proposal.ProposalID].Votes[wallet.Address] = vote
+	s.ChainInfos[chain.Name].ProposalVotes[proposal.ID].Votes[wallet.Address] = vote
 }
 
 func (s *State) SetChainProposalsError(chain *configTypes.Chain, err error) {

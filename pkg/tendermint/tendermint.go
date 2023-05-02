@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	configTypes "main/pkg/config/types"
+	"main/pkg/utils"
 	"net/http"
 	"strings"
 	"time"
@@ -16,18 +18,28 @@ import (
 const PaginationLimit = 1000
 
 type RPC struct {
-	URLs   []string
-	Logger zerolog.Logger
+	URLs          []string
+	ProposalsType string
+	Logger        zerolog.Logger
 }
 
-func NewRPC(urls []string, logger zerolog.Logger) *RPC {
+func NewRPC(chainConfig *configTypes.Chain, logger zerolog.Logger) *RPC {
 	return &RPC{
-		URLs:   urls,
-		Logger: logger.With().Str("component", "rpc").Logger(),
+		URLs:          chainConfig.LCDEndpoints,
+		ProposalsType: chainConfig.ProposalsType,
+		Logger:        logger.With().Str("component", "rpc").Logger(),
 	}
 }
 
 func (rpc *RPC) GetAllProposals() ([]types.Proposal, error) {
+	if rpc.ProposalsType == "v1" {
+		return rpc.GetAllV1Proposals()
+	}
+
+	return rpc.GetAllV1beta1Proposals()
+}
+
+func (rpc *RPC) GetAllV1beta1Proposals() ([]types.Proposal, error) {
 	proposals := []types.Proposal{}
 	offset := 0
 
@@ -39,7 +51,7 @@ func (rpc *RPC) GetAllProposals() ([]types.Proposal, error) {
 			offset,
 		)
 
-		var batchProposals types.ProposalsRPCResponse
+		var batchProposals types.V1Beta1ProposalsRPCResponse
 		if err := rpc.Get(url, &batchProposals); err != nil {
 			return nil, err
 		}
@@ -48,7 +60,45 @@ func (rpc *RPC) GetAllProposals() ([]types.Proposal, error) {
 			return nil, errors.New(batchProposals.Message)
 		}
 
-		proposals = append(proposals, batchProposals.Proposals...)
+		parsedProposals := utils.Map(batchProposals.Proposals, func(p types.V1beta1Proposal) types.Proposal {
+			return p.ToProposal()
+		})
+		proposals = append(proposals, parsedProposals...)
+		if len(batchProposals.Proposals) < PaginationLimit {
+			break
+		}
+
+		offset += PaginationLimit
+	}
+
+	return proposals, nil
+}
+
+func (rpc *RPC) GetAllV1Proposals() ([]types.Proposal, error) {
+	proposals := []types.Proposal{}
+	offset := 0
+
+	for {
+		url := fmt.Sprintf(
+			// 2 is for PROPOSAL_STATUS_VOTING_PERIOD
+			"/cosmos/gov/v1/proposals?pagination.limit=%d&pagination.offset=%d&proposal_status=2",
+			PaginationLimit,
+			offset,
+		)
+
+		var batchProposals types.V1ProposalsRPCResponse
+		if err := rpc.Get(url, &batchProposals); err != nil {
+			return nil, err
+		}
+
+		if batchProposals.Message != "" {
+			return nil, errors.New(batchProposals.Message)
+		}
+
+		parsedProposals := utils.Map(batchProposals.Proposals, func(p types.V1Proposal) types.Proposal {
+			return p.ToProposal()
+		})
+		proposals = append(proposals, parsedProposals...)
 		if len(batchProposals.Proposals) < PaginationLimit {
 			break
 		}

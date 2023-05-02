@@ -1,9 +1,9 @@
 {{- $walletLink := .Chain.GetWalletLink .Wallet -}}
-🔴 <strong> Wallet {{ SerializeLink $walletLink }} hasn't voted on proposal {{ .Proposal.ProposalID }} on {{ .Chain.GetName }} </strong>
-{{ .Proposal.Content.Title }}
+🔴 <strong> Wallet {{ SerializeLink $walletLink }} hasn't voted on proposal {{ .Proposal.ID }} on {{ .Chain.GetName }} </strong>
+{{ .Proposal.Title }}
 
 Voting ends at: {{ .Proposal.GetProposalTime }} (in {{ .Proposal.GetTimeLeft }})
 
-{{ range .Chain.GetExplorerProposalsLinks .Proposal.ProposalID }}{{ SerializeLink .}}
+{{ range .Chain.GetExplorerProposalsLinks .Proposal.ID }}{{ SerializeLink .}}
 {{ end }}
 Sent by <a href='https://github.com/QuokkaStake/cosmos-proposals-checker'>cosmos-proposals-checker.</a>

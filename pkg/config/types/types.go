@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"main/pkg/types"
+	"main/pkg/utils"
 )
 
 type Explorer struct {
@@ -28,6 +29,7 @@ type Chain struct {
 	PrettyName     string    `toml:"pretty-name"`
 	KeplrName      string    `toml:"keplr-name"`
 	LCDEndpoints   []string  `toml:"lcd-endpoints"`
+	ProposalsType  string    `toml:"proposals-type" default:"v1beta1"`
 	Wallets        []*Wallet `toml:"wallets"`
 	MintscanPrefix string    `toml:"mintscan-prefix"`
 	Explorer       *Explorer `toml:"explorer"`
@@ -44,6 +46,10 @@ func (c *Chain) Validate() error {
 
 	if len(c.Wallets) == 0 {
 		return fmt.Errorf("no wallets provided")
+	}
+
+	if !utils.Contains([]string{"v1beta1", "v1"}, c.ProposalsType) {
+		return fmt.Errorf("wrong proposals type: expected one of 'v1beta1', 'v1', but got %s", c.ProposalsType)
 	}
 
 	for index, wallet := range c.Wallets {
@@ -85,12 +91,12 @@ func (c Chain) GetExplorerProposalsLinks(proposalID string) []types.Link {
 
 func (c Chain) GetProposalLink(proposal types.Proposal) types.Link {
 	if c.Explorer == nil || c.Explorer.ProposalLinkPattern == "" {
-		return types.Link{Name: proposal.Content.Title}
+		return types.Link{Name: proposal.Title}
 	}
 
 	return types.Link{
-		Name: proposal.Content.Title,
-		Href: fmt.Sprintf(c.Explorer.ProposalLinkPattern, proposal.ProposalID),
+		Name: proposal.Title,
+		Href: fmt.Sprintf(c.Explorer.ProposalLinkPattern, proposal.ID),
 	}
 }
 

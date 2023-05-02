@@ -124,10 +124,10 @@ func (reporter *Reporter) SendReport(report reporters.Report) error {
 		if entryConverted, ok := reportEntry.(entry.ReportEntryNotError); ok {
 			chain := entryConverted.GetChain()
 			proposal := entryConverted.GetProposal()
-			if reporter.MutesManager.IsMuted(chain.Name, proposal.ProposalID) {
+			if reporter.MutesManager.IsMuted(chain.Name, proposal.ID) {
 				reporter.Logger.Debug().
 					Str("chain", chain.Name).
-					Str("proposal", proposal.ProposalID).
+					Str("proposal", proposal.ID).
 					Msg("Notifications are muted, not sending.")
 				continue
 			}

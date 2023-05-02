@@ -7,19 +7,22 @@ import (
 	"main/pkg/utils"
 )
 
-type Proposal struct {
+// cosmos/gov/v1beta1/proposals?pagination.limit=1000&pagination.offset=0
+
+type V1beta1Proposal struct {
 	ProposalID    string           `json:"proposal_id"`
 	Status        string           `json:"status"`
 	Content       *ProposalContent `json:"content"`
 	VotingEndTime time.Time        `json:"voting_end_time"`
 }
 
-func (p Proposal) GetTimeLeft() string {
-	return utils.FormatDuration(time.Until(p.VotingEndTime).Round(time.Second))
-}
-
-func (p Proposal) GetProposalTime() string {
-	return p.VotingEndTime.Format(time.RFC1123)
+func (p V1beta1Proposal) ToProposal() Proposal {
+	return Proposal{
+		ID:          p.ProposalID,
+		Title:       p.Content.Title,
+		Description: p.Content.Description,
+		EndTime:     p.VotingEndTime,
+	}
 }
 
 type ProposalContent struct {
@@ -27,11 +30,49 @@ type ProposalContent struct {
 	Description string `json:"description"`
 }
 
-type ProposalsRPCResponse struct {
-	Code      int64      `json:"code"`
-	Message   string     `json:"message"`
-	Proposals []Proposal `json:"proposals"`
+type V1Beta1ProposalsRPCResponse struct {
+	Code      int64             `json:"code"`
+	Message   string            `json:"message"`
+	Proposals []V1beta1Proposal `json:"proposals"`
 }
+
+// cosmos/gov/v1beta1/proposals?pagination.limit=1000&pagination.offset=0
+
+type V1ProposalMessage struct {
+	Content ProposalContent `json:"content"`
+}
+
+type V1Proposal struct {
+	ProposalID    string              `json:"id"`
+	Status        string              `json:"status"`
+	VotingEndTime time.Time           `json:"voting_end_time"`
+	Messages      []V1ProposalMessage `json:"messages"`
+}
+
+func (p V1Proposal) ToProposal() Proposal {
+	titles := utils.Map(p.Messages, func(m V1ProposalMessage) string {
+		return m.Content.Title
+	})
+
+	descriptions := utils.Map(p.Messages, func(m V1ProposalMessage) string {
+		return m.Content.Description
+	})
+
+	return Proposal{
+		ID:          p.ProposalID,
+		Title:       strings.Join(titles, ", "),
+		Description: strings.Join(descriptions, ", "),
+		EndTime:     p.VotingEndTime,
+	}
+}
+
+type V1ProposalsRPCResponse struct {
+	Code      int64        `json:"code"`
+	Message   string       `json:"message"`
+	Proposals []V1Proposal `json:"proposals"`
+}
+
+// cosmos/gov/v1beta1/proposals/:id/votes/:wallet
 
 type Vote struct {
 	ProposalID string       `json:"proposal_id"`

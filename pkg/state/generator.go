@@ -45,7 +45,7 @@ func (g *Generator) ProcessChain(
 	state State,
 	oldState State,
 ) {
-	rpc := tendermint.NewRPC(chain.LCDEndpoints, g.Logger)
+	rpc := tendermint.NewRPC(chain, g.Logger)
 
 	proposals, err := rpc.GetAllProposals()
 	if err != nil {
@@ -71,13 +71,13 @@ func (g *Generator) ProcessChain(
 	for _, proposal := range proposals {
 		g.Logger.Trace().
 			Str("name", chain.Name).
-			Str("proposal", proposal.ProposalID).
+			Str("proposal", proposal.ID).
 			Msg("Processing a proposal")
 
 		for _, wallet := range chain.Wallets {
 			g.Logger.Trace().
 				Str("name", chain.Name).
-				Str("proposal", proposal.ProposalID).
+				Str("proposal", proposal.ID).
 				Str("wallet", wallet.Address).
 				Msg("Processing wallet vote")
 			wg.Add(1)
@@ -100,13 +100,13 @@ func (g *Generator) ProcessProposalAndWallet(
 	state State,
 	oldState State,
 ) {
-	oldVote, _, found := oldState.GetVoteAndProposal(chain.Name, proposal.ProposalID, wallet.Address)
-	voteResponse, err := rpc.GetVote(proposal.ProposalID, wallet.Address)
+	oldVote, _, found := oldState.GetVoteAndProposal(chain.Name, proposal.ID, wallet.Address)
+	voteResponse, err := rpc.GetVote(proposal.ID, wallet.Address)
 
 	if found && oldVote.HasVoted() && voteResponse.Vote == nil {
 		g.Logger.Trace().
 			Str("chain", chain.Name).
-			Str("proposal", proposal.ProposalID).
+			Str("proposal", proposal.ID).
 			Str("wallet", wallet.Address).
 			Msg("Wallet has voted and there's no vote in the new state - using old vote")
 

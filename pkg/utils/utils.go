@@ -27,6 +27,16 @@ func Map[T, V any](slice []T, f func(T) V) []V {
 	return result
 }
 
+func Contains[T comparable](slice []T, elt T) bool {
+	for _, value := range slice {
+		if value == elt {
+			return true
+		}
+	}
+
+	return false
+}
+
 func ResolveVote(value string) string {
 	votes := map[string]string{
 		"VOTE_OPTION_YES":          "Yes",
