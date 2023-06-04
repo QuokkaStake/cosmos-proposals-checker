@@ -2,22 +2,23 @@ package config
 
 import (
 	"fmt"
+	"main/pkg/logger"
 	"os"
 
-	"main/pkg/config/types"
+	configTypes "main/pkg/config/types"
 
 	"github.com/BurntSushi/toml"
-	"github.com/mcuadros/go-defaults"
+	"github.com/creasty/defaults"
 )
 
 type Config struct {
-	PagerDutyConfig PagerDutyConfig `toml:"pagerduty"`
-	TelegramConfig  TelegramConfig  `toml:"telegram"`
-	LogConfig       LogConfig       `toml:"log"`
-	StatePath       string          `toml:"state-path"`
-	MutesPath       string          `toml:"mutes-path"`
-	Chains          types.Chains    `toml:"chains"`
-	Interval        string          `toml:"interval" default:"* * * * *"`
+	PagerDutyConfig PagerDutyConfig       `toml:"pagerduty"`
+	TelegramConfig  TelegramConfig        `toml:"telegram"`
+	LogConfig       configTypes.LogConfig `toml:"log"`
+	StatePath       string                `toml:"state-path"`
+	MutesPath       string                `toml:"mutes-path"`
+	Chains          configTypes.Chains    `toml:"chains"`
+	Interval        string                `toml:"interval" default:"* * * * *"`
 }
 
 type PagerDutyConfig struct {
@@ -28,11 +29,6 @@ type PagerDutyConfig struct {
 type TelegramConfig struct {
 	TelegramChat  int64  `toml:"chat"`
 	TelegramToken string `toml:"token"`
-}
-
-type LogConfig struct {
-	LogLevel   string `toml:"level" default:"info"`
-	JSONOutput bool   `toml:"json" default:"false"`
 }
 
 func (c *Config) Validate() error {
@@ -62,11 +58,13 @@ func GetConfig(path string) (*Config, error) {
 		return nil, err
 	}
 
-	defaults.SetDefaults(configStruct)
+	if err := defaults.Set(configStruct); err != nil {
+		logger.GetDefaultLogger().Fatal().Err(err).Msg("Error setting default config values")
+	}
 
 	for _, chain := range configStruct.Chains {
 		if chain.MintscanPrefix != "" {
-			chain.Explorer = &types.Explorer{
+			chain.Explorer = &configTypes.Explorer{
 				ProposalLinkPattern: fmt.Sprintf("https://mintscan.io/%s/proposals/%%s", chain.MintscanPrefix),
 				WalletLinkPattern:   fmt.Sprintf("https://mintscan.io/%s/account/%%s", chain.MintscanPrefix),
 			}

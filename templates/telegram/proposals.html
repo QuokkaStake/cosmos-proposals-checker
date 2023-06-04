@@ -9,7 +9,7 @@
 {{- end }}
 {{- range .ProposalVotes }}
 {{- $proposalLink := $chain.GetProposalLink .Proposal }}
-Proposal #{{ .Proposal.ProposalID }}: {{ SerializeLink $proposalLink }} (voting ends in {{ .Proposal.GetTimeLeft  }})
+Proposal #{{ .Proposal.ID }}: {{ SerializeLink $proposalLink }} (voting ends in {{ .Proposal.GetTimeLeft  }})
 {{- range $wallet, $vote := .Votes }}
 {{- $walletLink := $chain.GetWalletLink $vote.Wallet -}}
 {{- if $vote.IsError }}

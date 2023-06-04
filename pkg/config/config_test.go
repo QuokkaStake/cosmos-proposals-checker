@@ -48,9 +48,10 @@ func TestValidateChainWithValidConfig(t *testing.T) {
 	t.Parallel()
 
 	chain := configTypes.Chain{
-		Name:         "chain",
-		LCDEndpoints: []string{"endpoint"},
-		Wallets:      []*configTypes.Wallet{{Address: "wallet"}},
+		Name:          "chain",
+		LCDEndpoints:  []string{"endpoint"},
+		Wallets:       []*configTypes.Wallet{{Address: "wallet"}},
+		ProposalsType: "v1",
 	}
 
 	err := chain.Validate()
@@ -105,15 +106,33 @@ func TestValidateConfigInvalidChain(t *testing.T) {
 	assert.NotEqual(t, err, nil, "Error should be presented!")
 }
 
+func TestValidateConfigWrongProposalType(t *testing.T) {
+	t.Parallel()
+
+	config := Config{
+		Chains: []*configTypes.Chain{
+			{
+				Name:          "chain",
+				LCDEndpoints:  []string{"endpoint"},
+				Wallets:       []*configTypes.Wallet{{Address: "wallet"}},
+				ProposalsType: "test",
+			},
+		},
+	}
+	err := config.Validate()
+	assert.NotEqual(t, err, nil, "Error should be presented!")
+}
+
 func TestValidateConfigValidChain(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
 		Chains: []*configTypes.Chain{
 			{
-				Name:         "chain",
-				LCDEndpoints: []string{"endpoint"},
-				Wallets:      []*configTypes.Wallet{{Address: "wallet"}},
+				Name:          "chain",
+				LCDEndpoints:  []string{"endpoint"},
+				Wallets:       []*configTypes.Wallet{{Address: "wallet"}},
+				ProposalsType: "v1",
 			},
 		},
 	}
