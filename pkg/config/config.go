@@ -18,11 +18,11 @@ type Config struct {
 	StatePath       string                `toml:"state-path"`
 	MutesPath       string                `toml:"mutes-path"`
 	Chains          configTypes.Chains    `toml:"chains"`
-	Interval        string                `toml:"interval" default:"* * * * *"`
+	Interval        string                `default:"* * * * *" toml:"interval"`
 }
 
 type PagerDutyConfig struct {
-	PagerDutyURL string `toml:"url" default:"https://events.pagerduty.com"`
+	PagerDutyURL string `default:"https://events.pagerduty.com" toml:"url"`
 	APIKey       string `toml:"api-key"`
 }
 

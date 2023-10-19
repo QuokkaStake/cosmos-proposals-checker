@@ -40,3 +40,4 @@ linters:
     - testpackage
     - gci
     - musttag
+    - depguard
