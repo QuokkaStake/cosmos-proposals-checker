@@ -60,7 +60,9 @@ func (a *App) Start() {
 	a.MutesManager.Load()
 
 	for _, reporter := range a.Reporters {
-		reporter.Init()
+		if err := reporter.Init(); err != nil {
+			a.Logger.Fatal().Err(err).Str("name", reporter.Name()).Msg("Error initializing reporter")
+		}
 		if reporter.Enabled() {
 			a.Logger.Info().Str("name", reporter.Name()).Msg("Init reporter")
 		}

@@ -50,10 +50,10 @@ func NewTelegramReporter(
 	}
 }
 
-func (reporter *Reporter) Init() {
+func (reporter *Reporter) Init() error {
 	if reporter.TelegramToken == "" || reporter.TelegramChat == 0 {
 		reporter.Logger.Debug().Msg("Telegram credentials not set, not creating Telegram reporter.")
-		return
+		return nil
 	}
 
 	bot, err := tele.NewBot(tele.Settings{
@@ -63,7 +63,7 @@ func (reporter *Reporter) Init() {
 
 	if err != nil {
 		reporter.Logger.Warn().Err(err).Msg("Could not create Telegram bot")
-		return
+		return err
 	}
 
 	bot.Handle("/start", reporter.HandleHelp)
@@ -74,6 +74,8 @@ func (reporter *Reporter) Init() {
 
 	reporter.TelegramBot = bot
 	go reporter.TelegramBot.Start()
+
+	return nil
 }
 
 func (reporter *Reporter) Enabled() bool {

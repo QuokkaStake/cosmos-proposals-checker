@@ -120,7 +120,8 @@ func NewPagerDutyReporter(config config.PagerDutyConfig, logger *zerolog.Logger)
 	}
 }
 
-func (r Reporter) Init() {
+func (r Reporter) Init() error {
+	return nil
 }
 
 func (r Reporter) Enabled() bool {

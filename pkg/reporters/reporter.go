@@ -5,7 +5,7 @@ import (
 )
 
 type Reporter interface {
-	Init()
+	Init() error
 	Enabled() bool
 	SendReport(report Report) error
 	Name() string
