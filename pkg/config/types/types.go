@@ -29,7 +29,7 @@ type Chain struct {
 	PrettyName     string    `toml:"pretty-name"`
 	KeplrName      string    `toml:"keplr-name"`
 	LCDEndpoints   []string  `toml:"lcd-endpoints"`
-	ProposalsType  string    `toml:"proposals-type" default:"v1beta1"`
+	ProposalsType  string    `default:"v1beta1"      toml:"proposals-type"`
 	Wallets        []*Wallet `toml:"wallets"`
 	MintscanPrefix string    `toml:"mintscan-prefix"`
 	Explorer       *Explorer `toml:"explorer"`
@@ -130,6 +130,6 @@ func (c Chains) FindByName(name string) *Chain {
 }
 
 type LogConfig struct {
-	LogLevel   string `toml:"level" default:"info"`
-	JSONOutput bool   `toml:"json" default:"false"`
+	LogLevel   string `default:"info"  toml:"level"`
+	JSONOutput bool   `default:"false" toml:"json"`
 }
