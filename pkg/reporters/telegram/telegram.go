@@ -28,6 +28,8 @@ type Reporter struct {
 	TelegramBot *tele.Bot
 	Logger      zerolog.Logger
 	Templates   map[string]*template.Template
+
+	Version string
 }
 
 const (
@@ -39,6 +41,7 @@ func NewTelegramReporter(
 	mutesManager *mutes.Manager,
 	stateGenerator *state.Generator,
 	logger *zerolog.Logger,
+	version string,
 ) *Reporter {
 	return &Reporter{
 		TelegramToken:  config.TelegramToken,
@@ -47,6 +50,7 @@ func NewTelegramReporter(
 		StateGenerator: stateGenerator,
 		Logger:         logger.With().Str("component", "telegram_reporter").Logger(),
 		Templates:      make(map[string]*template.Template, 0),
+		Version:        version,
 	}
 }
 

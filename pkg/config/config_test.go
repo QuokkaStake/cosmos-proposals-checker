@@ -3,6 +3,8 @@ package config
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	configTypes "main/pkg/config/types"
 
 	"github.com/stretchr/testify/assert"
@@ -16,7 +18,7 @@ func TestValidateChainWithEmptyName(t *testing.T) {
 	}
 
 	err := chain.Validate()
-	assert.NotEqual(t, err, nil, "Error should be presented!")
+	require.Error(t, err, nil, "Error should be presented!")
 }
 
 func TestValidateChainWithoutEndpoints(t *testing.T) {
@@ -28,7 +30,7 @@ func TestValidateChainWithoutEndpoints(t *testing.T) {
 	}
 
 	err := chain.Validate()
-	assert.NotEqual(t, err, nil, "Error should be presented!")
+	require.Error(t, err, nil, "Error should be presented!")
 }
 
 func TestValidateChainWithoutWallets(t *testing.T) {
@@ -41,7 +43,7 @@ func TestValidateChainWithoutWallets(t *testing.T) {
 	}
 
 	err := chain.Validate()
-	assert.NotEqual(t, err, nil, "Error should be presented!")
+	require.Error(t, err, nil, "Error should be presented!")
 }
 
 func TestValidateChainWithValidConfig(t *testing.T) {
@@ -55,7 +57,7 @@ func TestValidateChainWithValidConfig(t *testing.T) {
 	}
 
 	err := chain.Validate()
-	assert.Equal(t, err, nil, "Error should not be presented!")
+	require.NoError(t, err, "Error should not be presented!")
 }
 
 func TestChainGetNameWithoutPrettyName(t *testing.T) {
@@ -66,8 +68,8 @@ func TestChainGetNameWithoutPrettyName(t *testing.T) {
 		PrettyName: "",
 	}
 
-	err := chain.GetName()
-	assert.Equal(t, err, "chain", "Chain name should match!")
+	name := chain.GetName()
+	assert.Equal(t, "chain", name, "Chain name should match!")
 }
 
 func TestChainGetNameWithPrettyName(t *testing.T) {
@@ -79,7 +81,7 @@ func TestChainGetNameWithPrettyName(t *testing.T) {
 	}
 
 	err := chain.GetName()
-	assert.Equal(t, err, "chain-pretty", "Chain name should match!")
+	assert.Equal(t, "chain-pretty", err, "Chain name should match!")
 }
 
 func TestValidateConfigNoChains(t *testing.T) {
@@ -89,7 +91,7 @@ func TestValidateConfigNoChains(t *testing.T) {
 		Chains: []*configTypes.Chain{},
 	}
 	err := config.Validate()
-	assert.NotEqual(t, err, nil, "Error should be presented!")
+	require.Error(t, err, nil, "Error should be presented!")
 }
 
 func TestValidateConfigInvalidChain(t *testing.T) {
@@ -103,7 +105,7 @@ func TestValidateConfigInvalidChain(t *testing.T) {
 		},
 	}
 	err := config.Validate()
-	assert.NotEqual(t, err, nil, "Error should be presented!")
+	require.Error(t, err, nil, "Error should be presented!")
 }
 
 func TestValidateConfigWrongProposalType(t *testing.T) {
@@ -120,7 +122,7 @@ func TestValidateConfigWrongProposalType(t *testing.T) {
 		},
 	}
 	err := config.Validate()
-	assert.NotEqual(t, err, nil, "Error should be presented!")
+	require.Error(t, err, nil, "Error should be presented!")
 }
 
 func TestValidateConfigValidChain(t *testing.T) {
@@ -137,7 +139,7 @@ func TestValidateConfigValidChain(t *testing.T) {
 		},
 	}
 	err := config.Validate()
-	assert.Equal(t, err, nil, "Error should not be presented!")
+	require.NoError(t, err, "Error should not be presented!")
 }
 
 func TestFindChainByNameIfPresent(t *testing.T) {
@@ -149,7 +151,7 @@ func TestFindChainByNameIfPresent(t *testing.T) {
 	}
 
 	chain := chains.FindByName("chain2")
-	assert.NotEqual(t, chain, nil, "Chain should be presented!")
+	assert.NotNil(t, chain, "Chain should be presented!")
 }
 
 func TestFindChainByNameIfNotPresent(t *testing.T) {
@@ -170,7 +172,7 @@ func TestGetLinksEmpty(t *testing.T) {
 	chain := configTypes.Chain{}
 	links := chain.GetExplorerProposalsLinks("test")
 
-	assert.Equal(t, len(links), 0, "Expected 0 links")
+	assert.Empty(t, links, "Expected 0 links")
 }
 
 func TestGetLinksPresent(t *testing.T) {
@@ -184,9 +186,9 @@ func TestGetLinksPresent(t *testing.T) {
 	}
 	links := chain.GetExplorerProposalsLinks("test")
 
-	assert.Equal(t, len(links), 2, "Expected 2 links")
-	assert.Equal(t, links[0].Name, "Keplr", "Expected Keplr link")
-	assert.Equal(t, links[0].Href, "https://wallet.keplr.app/#/chain/governance?detailId=test", "Wrong Keplr link")
-	assert.Equal(t, links[1].Name, "Explorer", "Expected Explorer link")
-	assert.Equal(t, links[1].Href, "example.com/proposal/test", "Wrong explorer link")
+	assert.Len(t, links, 2, "Expected 2 links")
+	assert.Equal(t, "Keplr", links[0].Name, "Expected Keplr link")
+	assert.Equal(t, "https://wallet.keplr.app/#/chain/governance?detailId=test", links[0].Href, "Wrong Keplr link")
+	assert.Equal(t, "Explorer", links[1].Name, "Expected Explorer link")
+	assert.Equal(t, "example.com/proposal/test", links[1].Href, "Wrong explorer link")
 }

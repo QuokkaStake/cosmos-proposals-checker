@@ -14,7 +14,7 @@ func (reporter *Reporter) HandleHelp(c tele.Context) error {
 
 	template, _ := reporter.GetTemplate("help")
 	var buffer bytes.Buffer
-	if err := template.Execute(&buffer, nil); err != nil {
+	if err := template.Execute(&buffer, reporter.Version); err != nil {
 		reporter.Logger.Error().Err(err).Msg("Error rendering help template")
 		return err
 	}

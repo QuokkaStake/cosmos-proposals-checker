@@ -15,7 +15,7 @@ func TestSetVoteWithoutChainInfo(t *testing.T) {
 
 	state := NewState()
 	_, _, found := state.GetVoteAndProposal("chain", "proposal", "wallet")
-	assert.Equal(t, found, false, "Vote should not be presented!")
+	assert.False(t, found, "Vote should not be presented!")
 
 	state.SetVote(
 		&configTypes.Chain{Name: "chain"},
@@ -29,9 +29,9 @@ func TestSetVoteWithoutChainInfo(t *testing.T) {
 	)
 
 	vote, _, found2 := state.GetVoteAndProposal("chain", "proposal", "wallet")
-	assert.Equal(t, found2, true, "Vote should be presented!")
-	assert.Equal(t, vote.HasVoted(), true, "Vote should be presented!")
-	assert.Equal(t, vote.IsError(), false, "There should be no error!")
+	assert.True(t, found2, "Vote should be presented!")
+	assert.True(t, vote.HasVoted(), "Vote should be presented!")
+	assert.False(t, vote.IsError(), "There should be no error!")
 }
 
 func TestSetProposalErrorWithoutChainInfo(t *testing.T) {
@@ -41,10 +41,10 @@ func TestSetProposalErrorWithoutChainInfo(t *testing.T) {
 	state.SetChainProposalsError(&configTypes.Chain{Name: "test"}, errors.New("test error"))
 
 	hasError2 := state.ChainInfos["test"].HasProposalsError()
-	assert.Equal(t, hasError2, true, "Chain info should have a proposal error!")
+	assert.True(t, hasError2, "Chain info should have a proposal error!")
 
 	err := state.ChainInfos["test"].ProposalsError
-	assert.Equal(t, err.Error(), "test error", "Errors text should match!")
+	assert.Equal(t, "test error", err.Error(), "Errors text should match!")
 }
 
 func TestSetVotes(t *testing.T) {
@@ -82,15 +82,15 @@ func TestSetProposalErrorWithChainInfo(t *testing.T) {
 	}
 
 	hasError := state.ChainInfos["test"].HasProposalsError()
-	assert.Equal(t, hasError, false, "Chain info should not have a proposal error!")
+	assert.False(t, hasError, "Chain info should not have a proposal error!")
 
 	state.SetChainProposalsError(&configTypes.Chain{Name: "test"}, errors.New("test error"))
 
 	hasError2 := state.ChainInfos["test"].HasProposalsError()
-	assert.Equal(t, hasError2, true, "Chain info should have a proposal error!")
+	assert.True(t, hasError2, "Chain info should have a proposal error!")
 
 	err := state.ChainInfos["test"].ProposalsError
-	assert.Equal(t, err.Error(), "test error", "Errors text should match!")
+	assert.Equal(t, "test error", err.Error(), "Errors text should match!")
 }
 
 func TestGetVoteWithoutChainInfo(t *testing.T) {
@@ -99,7 +99,7 @@ func TestGetVoteWithoutChainInfo(t *testing.T) {
 	state := State{}
 
 	_, _, found := state.GetVoteAndProposal("chain", "proposal", "wallet")
-	assert.Equal(t, found, false, "There should be no vote!")
+	assert.False(t, found, "There should be no vote!")
 }
 
 func TestGetVoteWithoutProposalVotes(t *testing.T) {
@@ -114,7 +114,7 @@ func TestGetVoteWithoutProposalVotes(t *testing.T) {
 	}
 
 	_, _, found := state.GetVoteAndProposal("chain", "proposal", "wallet")
-	assert.Equal(t, found, false, "There should be no vote!")
+	assert.False(t, found, "There should be no vote!")
 }
 
 func TestGetVoteWithWalletVoteNotPresent(t *testing.T) {
@@ -131,7 +131,7 @@ func TestGetVoteWithWalletVoteNotPresent(t *testing.T) {
 	}
 
 	_, _, found := state.GetVoteAndProposal("chain", "proposal", "wallet")
-	assert.Equal(t, found, false, "There should be no vote!")
+	assert.False(t, found, "There should be no vote!")
 }
 
 func TestGetVoteWithWalletVotePresent(t *testing.T) {
@@ -152,7 +152,7 @@ func TestGetVoteWithWalletVotePresent(t *testing.T) {
 	}
 
 	_, _, found := state.GetVoteAndProposal("chain", "proposal", "wallet")
-	assert.Equal(t, found, true, "There should be a vote!")
+	assert.True(t, found, "There should be a vote!")
 }
 
 func TestHasVotedWithoutChainInfo(t *testing.T) {
@@ -161,7 +161,7 @@ func TestHasVotedWithoutChainInfo(t *testing.T) {
 	state := State{}
 
 	voted := state.HasVoted("chain", "proposal", "wallet")
-	assert.Equal(t, voted, false, "There should be no vote!")
+	assert.False(t, voted, "There should be no vote!")
 }
 
 func TestHasVotedWithChainInfo(t *testing.T) {
@@ -174,7 +174,7 @@ func TestHasVotedWithChainInfo(t *testing.T) {
 	}
 
 	voted := state.HasVoted("chain", "proposal", "wallet")
-	assert.Equal(t, voted, false, "There should be no vote!")
+	assert.False(t, voted, "There should be no vote!")
 }
 
 func TestHasVotedWithWalletVoteIntoNotPresent(t *testing.T) {
@@ -191,7 +191,7 @@ func TestHasVotedWithWalletVoteIntoNotPresent(t *testing.T) {
 	}
 
 	voted := state.HasVoted("chain", "proposal", "wallet")
-	assert.Equal(t, voted, false, "There should be no vote!")
+	assert.False(t, voted, "There should be no vote!")
 }
 
 func TestHasVotedWithWalletVoteInfoPresent(t *testing.T) {
@@ -212,7 +212,7 @@ func TestHasVotedWithWalletVoteInfoPresent(t *testing.T) {
 	}
 
 	voted := state.HasVoted("chain", "proposal", "wallet")
-	assert.Equal(t, voted, false, "There should be no vote!")
+	assert.False(t, voted, "There should be no vote!")
 }
 
 func TestHasVotedWithWalletVotePresent(t *testing.T) {
@@ -237,5 +237,5 @@ func TestHasVotedWithWalletVotePresent(t *testing.T) {
 	}
 
 	voted := state.HasVoted("chain", "proposal", "wallet")
-	assert.Equal(t, voted, true, "There should be a vote!")
+	assert.True(t, voted, "There should be a vote!")
 }
