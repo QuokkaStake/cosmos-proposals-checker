@@ -31,11 +31,11 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 	})
 
 	report := generator.GenerateReport(oldState, newState)
-	assert.Equal(t, len(report.Entries), 1, "Expected to have 1 entry!")
+	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
 
 	entry, ok := report.Entries[0].(events.ProposalsQueryErrorEvent)
 	assert.True(t, ok, "Expected to have a proposal query error!")
-	assert.Equal(t, entry.Error.Error(), "test error", "Error text mismatch!")
+	assert.Equal(t, "test error", entry.Error.Error(), "Error text mismatch!")
 }
 
 func TestReportGeneratorWithVoteError(t *testing.T) {
@@ -68,11 +68,11 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 	})
 
 	report := generator.GenerateReport(oldState, newState)
-	assert.Equal(t, len(report.Entries), 1, "Expected to have 1 entry!")
+	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
 
 	entry, ok := report.Entries[0].(events.VoteQueryError)
 	assert.True(t, ok, "Expected to have a vote query error!")
-	assert.Equal(t, entry.Proposal.ID, "proposal", "Proposal ID mismatch!")
+	assert.Equal(t, "proposal", entry.Proposal.ID, "Proposal ID mismatch!")
 }
 
 func TestReportGeneratorWithNotVoted(t *testing.T) {
@@ -103,11 +103,11 @@ func TestReportGeneratorWithNotVoted(t *testing.T) {
 	})
 
 	report := generator.GenerateReport(oldState, newState)
-	assert.Equal(t, len(report.Entries), 1, "Expected to have 1 entry!")
+	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
 
 	entry, ok := report.Entries[0].(events.NotVotedEvent)
 	assert.True(t, ok, "Expected to have not voted type!")
-	assert.Equal(t, entry.Proposal.ID, "proposal", "Proposal ID mismatch!")
+	assert.Equal(t, "proposal", entry.Proposal.ID, "Proposal ID mismatch!")
 }
 
 func TestReportGeneratorWithVoted(t *testing.T) {
@@ -157,11 +157,11 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 	})
 
 	report := generator.GenerateReport(oldState, newState)
-	assert.Equal(t, len(report.Entries), 1, "Expected to have 1 entry!")
+	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
 
 	entry, ok := report.Entries[0].(events.VotedEvent)
 	assert.True(t, ok, "Expected to have voted type!")
-	assert.Equal(t, entry.Proposal.ID, "proposal", "Proposal ID mismatch!")
+	assert.Equal(t, "proposal", entry.Proposal.ID, "Proposal ID mismatch!")
 }
 
 func TestReportGeneratorWithRevoted(t *testing.T) {
@@ -215,9 +215,9 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 	})
 
 	report := generator.GenerateReport(oldState, newState)
-	assert.Equal(t, len(report.Entries), 1, "Expected to have 1 entry!")
+	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
 
 	entry, ok := report.Entries[0].(events.RevotedEvent)
 	assert.True(t, ok, "Expected to have revoted type!")
-	assert.Equal(t, entry.Proposal.ID, "proposal", "Proposal ID mismatch!")
+	assert.Equal(t, "proposal", entry.Proposal.ID, "Proposal ID mismatch!")
 }

@@ -7,14 +7,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func Execute(configPath string) {
-	app := pkg.NewApp(configPath)
-	app.Start()
-}
-
 var (
 	version = "unknown"
 )
+
+func Execute(configPath string) {
+	app := pkg.NewApp(configPath, version)
+	app.Start()
+}
 
 func main() {
 	var ConfigPath string

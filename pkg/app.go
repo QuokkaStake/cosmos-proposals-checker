@@ -24,7 +24,7 @@ type App struct {
 	Reporters       []reportersPkg.Reporter
 }
 
-func NewApp(configPath string) *App {
+func NewApp(configPath string, version string) *App {
 	config, err := configPkg.GetConfig(configPath)
 	if err != nil {
 		logger.GetDefaultLogger().Fatal().Err(err).Msg("Could not load config")
@@ -50,7 +50,7 @@ func NewApp(configPath string) *App {
 		StateGenerator:  stateGenerator,
 		Reporters: []reportersPkg.Reporter{
 			pagerduty.NewPagerDutyReporter(config.PagerDutyConfig, log),
-			telegram.NewTelegramReporter(config.TelegramConfig, mutesManager, stateGenerator, log),
+			telegram.NewTelegramReporter(config.TelegramConfig, mutesManager, stateGenerator, log, version),
 		},
 	}
 }

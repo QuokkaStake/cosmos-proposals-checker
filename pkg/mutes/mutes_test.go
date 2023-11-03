@@ -12,7 +12,7 @@ func TestMuteMatchesNoParams(t *testing.T) {
 
 	mute := &Mute{}
 	muted := mute.Matches("chain", "proposal")
-	assert.Equal(t, muted, true, "Mute should match!")
+	assert.True(t, muted, "Mute should match!")
 }
 
 func TestMuteMatchesWithChainSpecified(t *testing.T) {
@@ -20,9 +20,9 @@ func TestMuteMatchesWithChainSpecified(t *testing.T) {
 
 	mute := &Mute{Chain: "chain"}
 	muted := mute.Matches("chain", "proposal")
-	assert.Equal(t, muted, true, "Mute should match!")
+	assert.True(t, muted, "Mute should match!")
 	muted2 := mute.Matches("chain2", "proposal")
-	assert.Equal(t, muted2, false, "Mute should not match!")
+	assert.False(t, muted2, "Mute should not match!")
 }
 
 func TestMuteMatchesWithProposalSpecified(t *testing.T) {
@@ -30,9 +30,9 @@ func TestMuteMatchesWithProposalSpecified(t *testing.T) {
 
 	mute := &Mute{ProposalID: "proposal"}
 	muted := mute.Matches("chain", "proposal")
-	assert.Equal(t, muted, true, "Mute should match!")
+	assert.True(t, muted, "Mute should match!")
 	muted2 := mute.Matches("chain", "proposal2")
-	assert.Equal(t, muted2, false, "Mute should not match!")
+	assert.False(t, muted2, "Mute should not match!")
 }
 
 func TestMuteMatchesWithAllSpecified(t *testing.T) {
@@ -40,11 +40,11 @@ func TestMuteMatchesWithAllSpecified(t *testing.T) {
 
 	mute := &Mute{Chain: "chain", ProposalID: "proposal"}
 	muted := mute.Matches("chain", "proposal")
-	assert.Equal(t, muted, true, "Mute should match!")
+	assert.True(t, muted, "Mute should match!")
 	muted2 := mute.Matches("chain", "proposal2")
-	assert.Equal(t, muted2, false, "Mute should not match!")
+	assert.False(t, muted2, "Mute should not match!")
 	muted3 := mute.Matches("chain2", "proposal")
-	assert.Equal(t, muted3, false, "Mute should not match!")
+	assert.False(t, muted3, "Mute should not match!")
 }
 
 func TestMutesMatchesIgnoreExpired(t *testing.T) {
@@ -56,7 +56,7 @@ func TestMutesMatchesIgnoreExpired(t *testing.T) {
 		},
 	}
 	muted := mutes.IsMuted("chain", "proposal")
-	assert.Equal(t, muted, false, "Mute should not be muted!")
+	assert.False(t, muted, "Mute should not be muted!")
 }
 
 func TestMutesMatchesNotIgnoreActual(t *testing.T) {
@@ -68,7 +68,7 @@ func TestMutesMatchesNotIgnoreActual(t *testing.T) {
 		},
 	}
 	muted := mutes.IsMuted("chain", "proposal")
-	assert.Equal(t, muted, true, "Mute should be muted!")
+	assert.True(t, muted, "Mute should be muted!")
 }
 
 func TestMutesAddsMute(t *testing.T) {
@@ -81,8 +81,8 @@ func TestMutesAddsMute(t *testing.T) {
 	}
 
 	mutes.AddMute(&Mute{Chain: "chain2", Expires: time.Now().Add(time.Hour)})
-	assert.Equal(t, len(mutes.Mutes), 1, "There should be 1 mute!")
-	assert.Equal(t, mutes.Mutes[0].Chain, "chain2", "Chain name should match!")
+	assert.Len(t, mutes.Mutes, 1, "There should be 1 mute!")
+	assert.Equal(t, "chain2", mutes.Mutes[0].Chain, "Chain name should match!")
 }
 
 func TestMutesDeletesMute(t *testing.T) {
@@ -95,6 +95,6 @@ func TestMutesDeletesMute(t *testing.T) {
 	}
 
 	mutes.AddMute(&Mute{Chain: "chain2", Expires: time.Now().Add(time.Hour)})
-	assert.Equal(t, len(mutes.Mutes), 1, "There should be 1 mute!")
-	assert.Equal(t, mutes.Mutes[0].Chain, "chain2", "Chain name should match!")
+	assert.Len(t, mutes.Mutes, 1, "There should be 1 mute!")
+	assert.Equal(t, "chain2", mutes.Mutes[0].Chain, "Chain name should match!")
 }
