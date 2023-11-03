@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/math"
 	"fmt"
 	"main/pkg/utils"
 	"time"
@@ -32,4 +33,69 @@ func (p Proposal) GetTimeLeft() string {
 
 func (p Proposal) GetProposalTime() string {
 	return p.EndTime.Format(time.RFC1123)
+}
+
+type TallyInfo struct {
+	ChainName string
+	Proposal  Proposal
+	Tally     Tally
+	Pool      Pool
+}
+
+func (t *TallyInfo) GetNotAbstained() math.LegacyDec {
+	return t.Tally.Yes.Add(t.Tally.No).Add(t.Tally.NoWithVeto)
+}
+
+func (t *TallyInfo) GetTotalVoted() math.LegacyDec {
+	return t.GetNotAbstained().Add(t.Tally.Abstain)
+}
+
+func (t *TallyInfo) GetQuorum() string {
+	return fmt.Sprintf(
+		"%.2f%%",
+		t.GetTotalVoted().Quo(t.Pool.BondedTokens).Mul(math.LegacyNewDec(100)).MustFloat64(),
+	)
+}
+
+func (t *TallyInfo) GetNotVoted() string {
+	return fmt.Sprintf(
+		"%.2f%%",
+		math.LegacyNewDec(100).Sub(t.GetTotalVoted().Quo(t.Pool.BondedTokens).Mul(math.LegacyNewDec(100))).MustFloat64(),
+	)
+}
+
+func (t *TallyInfo) GetAbstained() string {
+	abstainedPercent := t.Tally.Abstain.Quo(t.GetTotalVoted()).Mul(math.LegacyNewDec(100)).MustFloat64()
+
+	return fmt.Sprintf(
+		"%.2f%%",
+		abstainedPercent,
+	)
+}
+
+func (t *TallyInfo) GetYesVotes() string {
+	percent := t.Tally.Yes.Quo(t.GetTotalVoted()).Mul(math.LegacyNewDec(100)).MustFloat64()
+
+	return fmt.Sprintf(
+		"%.2f%%",
+		percent,
+	)
+}
+
+func (t *TallyInfo) GetNoVotes() string {
+	percent := t.Tally.No.Quo(t.GetTotalVoted()).Mul(math.LegacyNewDec(100)).MustFloat64()
+
+	return fmt.Sprintf(
+		"%.2f%%",
+		percent,
+	)
+}
+
+func (t *TallyInfo) GetNoWithVetoVotes() string {
+	percent := t.Tally.NoWithVeto.Quo(t.GetTotalVoted()).Mul(math.LegacyNewDec(100)).MustFloat64()
+
+	return fmt.Sprintf(
+		"%.2f%%",
+		percent,
+	)
 }

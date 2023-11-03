@@ -2,6 +2,7 @@ package pkg
 
 import (
 	configPkg "main/pkg/config"
+	"main/pkg/data"
 	"main/pkg/logger"
 	mutes "main/pkg/mutes"
 	"main/pkg/report"
@@ -40,6 +41,7 @@ func NewApp(configPath string, version string) *App {
 	mutesManager := mutes.NewMutesManager(config.MutesPath, log)
 	reportGenerator := report.NewReportGenerator(stateManager, log, config.Chains)
 	stateGenerator := state.NewStateGenerator(log, config.Chains)
+	dataManager := data.NewManager(log, config.Chains)
 
 	return &App{
 		Logger:          log,
@@ -50,7 +52,7 @@ func NewApp(configPath string, version string) *App {
 		StateGenerator:  stateGenerator,
 		Reporters: []reportersPkg.Reporter{
 			pagerduty.NewPagerDutyReporter(config.PagerDutyConfig, log),
-			telegram.NewTelegramReporter(config.TelegramConfig, mutesManager, stateGenerator, log, version),
+			telegram.NewTelegramReporter(config.TelegramConfig, mutesManager, stateGenerator, dataManager, log, version),
 		},
 	}
 }
