@@ -2,11 +2,12 @@ package data
 
 import (
 	"fmt"
-	"github.com/rs/zerolog"
 	configTypes "main/pkg/config/types"
 	"main/pkg/tendermint"
 	"main/pkg/types"
 	"sync"
+
+	"github.com/rs/zerolog"
 )
 
 type Manager struct {
@@ -52,7 +53,6 @@ func (m *Manager) GetTallies() (map[string][]types.TallyInfo, error) {
 				pools[c.Name] = *pool.Pool
 			}
 			mutex.Unlock()
-
 		}(chain, rpc)
 
 		wg.Add(1)

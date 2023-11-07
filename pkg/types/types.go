@@ -1,10 +1,11 @@
 package types
 
 import (
-	"cosmossdk.io/math"
 	"fmt"
 	"main/pkg/utils"
 	"time"
+
+	"cosmossdk.io/math"
 )
 
 type Link struct {
