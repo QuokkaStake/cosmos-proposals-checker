@@ -96,6 +96,7 @@ To have fancy commands auto-suggestion, go to @BotFather again, select your bot 
 proposals - List proposals and wallets' votes on them
 proposals_mute - Mutes a proposal
 proposals_mutes - List active proposal mutes
+tally - Show the tally for proposals that are in voting period
 help - Displays help
 ```
 
