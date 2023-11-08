@@ -5,6 +5,7 @@
 <strong>Proposals on chain {{ $chainName }}:</strong>
 {{ range $tallyInfos }}
 Proposal #{{ .Proposal.ID }}: {{ .Proposal.Title }}
+Ends in: {{ .Proposal.GetTimeLeft }}
 - Not voted: {{ .GetNotVoted }}
 - Voted: {{ .GetQuorum }}
 - Voted "Abstain": {{ .GetAbstained }}
