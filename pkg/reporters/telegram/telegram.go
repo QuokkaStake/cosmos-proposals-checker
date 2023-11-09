@@ -8,6 +8,7 @@ import (
 	mutes "main/pkg/mutes"
 	"main/pkg/report/entry"
 	"main/pkg/state"
+	"main/pkg/utils"
 	"strings"
 	"time"
 
@@ -79,6 +80,7 @@ func (reporter *Reporter) Init() error {
 	bot.Handle("/proposals_mutes", reporter.HandleListMutes)
 	bot.Handle("/proposals", reporter.HandleProposals)
 	bot.Handle("/tally", reporter.HandleTally)
+	bot.Handle("/params", reporter.HandleParams)
 
 	reporter.TelegramBot = bot
 	go reporter.TelegramBot.Start()
@@ -101,7 +103,8 @@ func (reporter *Reporter) GetTemplate(tmlpType string) (*template.Template, erro
 	filename := fmt.Sprintf("%s.html", tmlpType)
 
 	t, err := template.New(filename).Funcs(template.FuncMap{
-		"SerializeLink": reporter.SerializeLink,
+		"SerializeLink":  reporter.SerializeLink,
+		"FormatDuration": utils.FormatDuration,
 	}).ParseFS(templates.TemplatesFs, "telegram/"+filename)
 	if err != nil {
 		return nil, err
