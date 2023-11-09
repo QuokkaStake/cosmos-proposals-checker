@@ -70,7 +70,6 @@ func (p V1Proposal) ToProposal() Proposal {
 
 	description := p.Summary
 	if description == "" {
-
 		descriptions := utils.Map(p.Messages, func(m V1ProposalMessage) string {
 			return m.Content.Description
 		})
