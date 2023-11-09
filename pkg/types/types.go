@@ -37,10 +37,14 @@ func (p Proposal) GetProposalTime() string {
 }
 
 type TallyInfo struct {
-	ChainName string
-	Proposal  Proposal
-	Tally     Tally
-	Pool      Pool
+	Proposal Proposal
+	Tally    Tally
+	Pool     Pool
+}
+
+type ChainTallyInfos struct {
+	Chain      *Chain
+	TallyInfos []TallyInfo
 }
 
 func (t *TallyInfo) GetNotAbstained() math.LegacyDec {

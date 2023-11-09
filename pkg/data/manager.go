@@ -21,7 +21,7 @@ func NewManager(logger *zerolog.Logger, chains types.Chains) *Manager {
 	}
 }
 
-func (m *Manager) GetTallies() (map[string][]types.TallyInfo, error) {
+func (m *Manager) GetTallies() (map[string]types.ChainTallyInfos, error) {
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 
@@ -119,33 +119,40 @@ func (m *Manager) GetTallies() (map[string][]types.TallyInfo, error) {
 
 	if len(errors) > 0 {
 		m.Logger.Error().Msg("Errors getting tallies info, not processing")
-		return map[string][]types.TallyInfo{}, fmt.Errorf("could not get tallies info")
+		return map[string]types.ChainTallyInfos{}, fmt.Errorf("could not get tallies info")
 	}
 
-	tallyInfos := make(map[string][]types.TallyInfo, 0)
+	tallyInfos := make(map[string]types.ChainTallyInfos, 0)
 
 	for chainName, chainProposals := range proposals {
-		for _, proposal := range chainProposals {
+		chain := m.Chains.FindByName(chainName)
+		if chain == nil {
+			return map[string]types.ChainTallyInfos{}, fmt.Errorf("could not chain with name %s", chainName)
+		}
+
+		if _, ok := tallyInfos[chainName]; !ok {
+			tallyInfos[chainName] = types.ChainTallyInfos{
+				Chain:      chain,
+				TallyInfos: make([]types.TallyInfo, len(chainProposals)),
+			}
+		}
+
+		for index, proposal := range chainProposals {
 			tally, ok := tallies[chainName][proposal.ID]
 			if !ok {
-				return map[string][]types.TallyInfo{}, fmt.Errorf("could not get tallies info")
+				return map[string]types.ChainTallyInfos{}, fmt.Errorf("could not get tallies info")
 			}
 
 			pool, ok := pools[chainName]
 			if !ok {
-				return map[string][]types.TallyInfo{}, fmt.Errorf("could not get tallies info")
+				return map[string]types.ChainTallyInfos{}, fmt.Errorf("could not get tallies info")
 			}
 
-			if _, ok := tallyInfos[chainName]; !ok {
-				tallyInfos[chainName] = []types.TallyInfo{}
+			tallyInfos[chainName].TallyInfos[index] = types.TallyInfo{
+				Proposal: proposal,
+				Tally:    tally,
+				Pool:     pool,
 			}
-
-			tallyInfos[chainName] = append(tallyInfos[chainName], types.TallyInfo{
-				ChainName: chainName,
-				Proposal:  proposal,
-				Tally:     tally,
-				Pool:      pool,
-			})
 		}
 	}
 
