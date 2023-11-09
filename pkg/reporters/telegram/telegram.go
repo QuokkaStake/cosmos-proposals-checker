@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"main/pkg/data"
 	mutes "main/pkg/mutes"
 	"main/pkg/report/entry"
 	"main/pkg/state"
@@ -24,6 +25,7 @@ type Reporter struct {
 	TelegramChat   int64
 	MutesManager   *mutes.Manager
 	StateGenerator *state.Generator
+	DataManager    *data.Manager
 
 	TelegramBot *tele.Bot
 	Logger      zerolog.Logger
@@ -40,6 +42,7 @@ func NewTelegramReporter(
 	config config.TelegramConfig,
 	mutesManager *mutes.Manager,
 	stateGenerator *state.Generator,
+	dataManager *data.Manager,
 	logger *zerolog.Logger,
 	version string,
 ) *Reporter {
@@ -48,6 +51,7 @@ func NewTelegramReporter(
 		TelegramChat:   config.TelegramChat,
 		MutesManager:   mutesManager,
 		StateGenerator: stateGenerator,
+		DataManager:    dataManager,
 		Logger:         logger.With().Str("component", "telegram_reporter").Logger(),
 		Templates:      make(map[string]*template.Template, 0),
 		Version:        version,
@@ -75,6 +79,7 @@ func (reporter *Reporter) Init() error {
 	bot.Handle("/proposals_mute", reporter.HandleAddMute)
 	bot.Handle("/proposals_mutes", reporter.HandleListMutes)
 	bot.Handle("/proposals", reporter.HandleProposals)
+	bot.Handle("/tally", reporter.HandleTally)
 
 	reporter.TelegramBot = bot
 	go reporter.TelegramBot.Start()

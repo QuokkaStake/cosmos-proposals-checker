@@ -128,6 +128,31 @@ func (rpc *RPC) GetVote(proposal, voter string) (*types.VoteRPCResponse, error) 
 	return &vote, nil
 }
 
+func (rpc *RPC) GetTally(proposal string) (*types.TallyRPCResponse, error) {
+	url := fmt.Sprintf(
+		"/cosmos/gov/v1beta1/proposals/%s/tally",
+		proposal,
+	)
+
+	var tally types.TallyRPCResponse
+	if err := rpc.Get(url, &tally); err != nil {
+		return nil, err
+	}
+
+	return &tally, nil
+}
+
+func (rpc *RPC) GetStakingPool() (*types.PoolRPCResponse, error) {
+	url := "/cosmos/staking/v1beta1/pool"
+
+	var pool types.PoolRPCResponse
+	if err := rpc.Get(url, &pool); err != nil {
+		return nil, err
+	}
+
+	return &pool, nil
+}
+
 func (rpc *RPC) Get(url string, target interface{}) error {
 	nodeErrors := make([]error, len(rpc.URLs))
 
@@ -161,7 +186,7 @@ func (rpc *RPC) Get(url string, target interface{}) error {
 }
 
 func (rpc *RPC) GetFull(url string, target interface{}) error {
-	client := &http.Client{Timeout: 10 * 1000000000}
+	client := &http.Client{Timeout: 300 * time.Second}
 	start := time.Now()
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)

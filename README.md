@@ -2,7 +2,6 @@
 
 ![Latest release](https://img.shields.io/github/v/release/QuokkaStake/cosmos-proposals-checker)
 [![Actions Status](https://github.com/QuokkaStake/cosmos-proposals-checker/workflows/test/badge.svg)](https://github.com/QuokkaStake/cosmos-proposals-checker/actions)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FQuokkaStake%2Fcosmos-proposals-checker.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FQuokkaStake%2Fcosmos-proposals-checker?ref=badge_shield)
 
 cosmos-proposals-checker is a tool that checks all configured chains for new proposals in voting period, then notifies you if one or more of the configured wallets haven't voted on it.
 
@@ -96,6 +95,7 @@ To have fancy commands auto-suggestion, go to @BotFather again, select your bot 
 proposals - List proposals and wallets' votes on them
 proposals_mute - Mutes a proposal
 proposals_mutes - List active proposal mutes
+tally - Show the tally for proposals that are in voting period
 help - Displays help
 ```
 
@@ -113,7 +113,3 @@ In theory, it should work on a Cosmos-based blockchains that expose a REST serve
 ## How can I contribute?
 
 Bug reports and feature requests are always welcome! If you want to contribute, feel free to open issues or PRs.
-
-
-## License
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FQuokkaStake%2Fcosmos-proposals-checker.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FQuokkaStake%2Fcosmos-proposals-checker?ref=badge_large)

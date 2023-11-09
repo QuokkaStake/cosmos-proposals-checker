@@ -1,0 +1,16 @@
+{{- if not . }}
+<strong>No active proposals.</strong>
+{{- end }}
+{{- range $chainName, $tallyInfos := . }}
+<strong>Proposals on chain {{ $chainName }}:</strong>
+{{ range $tallyInfos }}
+Proposal #{{ .Proposal.ID }}: {{ .Proposal.Title }}
+Ends in: {{ .Proposal.GetTimeLeft }}
+- Not voted: {{ .GetNotVoted }}
+- Voted: {{ .GetQuorum }}
+- Voted "Abstain": {{ .GetAbstained }}
+- Voted "Yes": {{ .GetYesVotes }}
+- Voted "No": {{ .GetNoVotes }}
+- Voted "NoWithVeto": {{ .GetNoWithVetoVotes }}
+{{ end }}
+{{ end }}
