@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	configTypes "main/pkg/config/types"
 	"main/pkg/utils"
 	"net/http"
 	"strings"
@@ -23,7 +22,7 @@ type RPC struct {
 	Logger        zerolog.Logger
 }
 
-func NewRPC(chainConfig *configTypes.Chain, logger zerolog.Logger) *RPC {
+func NewRPC(chainConfig *types.Chain, logger zerolog.Logger) *RPC {
 	return &RPC{
 		URLs:          chainConfig.LCDEndpoints,
 		ProposalsType: chainConfig.ProposalsType,

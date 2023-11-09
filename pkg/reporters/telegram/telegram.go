@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"main/pkg/config"
 	"main/pkg/reporters"
 	"main/pkg/types"
 	"main/templates"
@@ -39,7 +38,7 @@ const (
 )
 
 func NewTelegramReporter(
-	config config.TelegramConfig,
+	config types.TelegramConfig,
 	mutesManager *mutes.Manager,
 	stateGenerator *state.Generator,
 	dataManager *data.Manager,

@@ -1,7 +1,6 @@
 package entry
 
 import (
-	configTypes "main/pkg/config/types"
 	"main/pkg/types"
 )
 
@@ -12,7 +11,7 @@ type ReportEntry interface {
 
 type ReportEntryNotError interface {
 	ReportEntry
-	GetChain() *configTypes.Chain
-	GetWallet() *configTypes.Wallet
+	GetChain() *types.Chain
+	GetWallet() *types.Wallet
 	GetProposal() types.Proposal
 }

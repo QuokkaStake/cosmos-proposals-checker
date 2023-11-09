@@ -2,7 +2,6 @@ package types
 
 import (
 	"fmt"
-	"main/pkg/types"
 	"main/pkg/utils"
 )
 
@@ -69,18 +68,18 @@ func (c Chain) GetName() string {
 	return c.Name
 }
 
-func (c Chain) GetExplorerProposalsLinks(proposalID string) []types.Link {
-	links := []types.Link{}
+func (c Chain) GetExplorerProposalsLinks(proposalID string) []Link {
+	links := []Link{}
 
 	if c.KeplrName != "" {
-		links = append(links, types.Link{
+		links = append(links, Link{
 			Name: "Keplr",
 			Href: fmt.Sprintf("https://wallet.keplr.app/#/%s/governance?detailId=%s", c.KeplrName, proposalID),
 		})
 	}
 
 	if c.Explorer != nil && c.Explorer.ProposalLinkPattern != "" {
-		links = append(links, types.Link{
+		links = append(links, Link{
 			Name: "Explorer",
 			Href: fmt.Sprintf(c.Explorer.ProposalLinkPattern, proposalID),
 		})
@@ -89,23 +88,23 @@ func (c Chain) GetExplorerProposalsLinks(proposalID string) []types.Link {
 	return links
 }
 
-func (c Chain) GetProposalLink(proposal types.Proposal) types.Link {
+func (c Chain) GetProposalLink(proposal Proposal) Link {
 	if c.Explorer == nil || c.Explorer.ProposalLinkPattern == "" {
-		return types.Link{Name: proposal.Title}
+		return Link{Name: proposal.Title}
 	}
 
-	return types.Link{
+	return Link{
 		Name: proposal.Title,
 		Href: fmt.Sprintf(c.Explorer.ProposalLinkPattern, proposal.ID),
 	}
 }
 
-func (c Chain) GetWalletLink(wallet *Wallet) types.Link {
+func (c Chain) GetWalletLink(wallet *Wallet) Link {
 	if c.Explorer == nil || c.Explorer.WalletLinkPattern == "" {
-		return types.Link{Name: wallet.Address}
+		return Link{Name: wallet.Address}
 	}
 
-	link := types.Link{
+	link := Link{
 		Name: wallet.Address,
 		Href: fmt.Sprintf(c.Explorer.WalletLinkPattern, wallet.Address),
 	}
@@ -127,9 +126,4 @@ func (c Chains) FindByName(name string) *Chain {
 	}
 
 	return nil
-}
-
-type LogConfig struct {
-	LogLevel   string `default:"info"  toml:"level"`
-	JSONOutput bool   `default:"false" toml:"json"`
 }

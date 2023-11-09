@@ -1,11 +1,11 @@
 package events
 
 import (
-	configTypes "main/pkg/config/types"
+	types "main/pkg/types"
 )
 
 type ProposalsQueryErrorEvent struct {
-	Chain *configTypes.Chain
+	Chain *types.Chain
 	Error error
 }
 

@@ -2,7 +2,6 @@ package data
 
 import (
 	"fmt"
-	configTypes "main/pkg/config/types"
 	"main/pkg/tendermint"
 	"main/pkg/types"
 	"sync"
@@ -12,10 +11,10 @@ import (
 
 type Manager struct {
 	Logger zerolog.Logger
-	Chains configTypes.Chains
+	Chains types.Chains
 }
 
-func NewManager(logger *zerolog.Logger, chains configTypes.Chains) *Manager {
+func NewManager(logger *zerolog.Logger, chains types.Chains) *Manager {
 	return &Manager{
 		Logger: logger.With().Str("component", "data_manager").Logger(),
 		Chains: chains,
@@ -36,7 +35,7 @@ func (m *Manager) GetTallies() (map[string][]types.TallyInfo, error) {
 		rpc := tendermint.NewRPC(chain, m.Logger)
 
 		wg.Add(1)
-		go func(c *configTypes.Chain, rpc *tendermint.RPC) {
+		go func(c *types.Chain, rpc *tendermint.RPC) {
 			defer wg.Done()
 
 			pool, err := rpc.GetStakingPool()
@@ -56,7 +55,7 @@ func (m *Manager) GetTallies() (map[string][]types.TallyInfo, error) {
 		}(chain, rpc)
 
 		wg.Add(1)
-		go func(c *configTypes.Chain, rpc *tendermint.RPC) {
+		go func(c *types.Chain, rpc *tendermint.RPC) {
 			defer wg.Done()
 
 			chainProposals, err := rpc.GetAllProposals()
@@ -80,7 +79,7 @@ func (m *Manager) GetTallies() (map[string][]types.TallyInfo, error) {
 			for _, proposal := range chainProposals {
 				internalWg.Add(1)
 
-				go func(c *configTypes.Chain, p types.Proposal) {
+				go func(c *types.Chain, p types.Proposal) {
 					defer internalWg.Done()
 
 					tally, err := rpc.GetTally(p.ID)

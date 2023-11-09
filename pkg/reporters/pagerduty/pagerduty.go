@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"main/pkg/events"
 	"main/pkg/report/entry"
+	"main/pkg/types"
 	"net/http"
 	"os"
 	"time"
 
-	"main/pkg/config"
 	"main/pkg/reporters"
 
 	"github.com/rs/zerolog"
@@ -112,7 +112,7 @@ func (r *Reporter) NewAlertFromReportEntry(eventRaw entry.ReportEntry) (Alert, e
 	}, nil
 }
 
-func NewPagerDutyReporter(config config.PagerDutyConfig, logger *zerolog.Logger) Reporter {
+func NewPagerDutyReporter(config types.PagerDutyConfig, logger *zerolog.Logger) Reporter {
 	return Reporter{
 		PagerDutyURL: config.PagerDutyURL,
 		APIKey:       config.APIKey,
