@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"bytes"
+	"fmt"
 
 	tele "gopkg.in/telebot.v3"
 )
@@ -18,7 +19,7 @@ func (reporter *Reporter) HandleTally(c tele.Context) error {
 
 	tallies, err := reporter.DataManager.GetTallies()
 	if err != nil {
-		return reporter.BotReply(c, "Error getting tallies info")
+		return reporter.BotReply(c, fmt.Sprintf("Error getting tallies info: %s", err))
 	}
 
 	template, err := reporter.GetTemplate("tally")

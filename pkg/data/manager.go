@@ -121,7 +121,7 @@ func (m *Manager) GetTallies() (map[string]types.ChainTallyInfos, error) {
 
 	if len(errors) > 0 {
 		m.Logger.Error().Msg("Errors getting tallies info, not processing")
-		return map[string]types.ChainTallyInfos{}, fmt.Errorf("could not get tallies info")
+		return map[string]types.ChainTallyInfos{}, fmt.Errorf("could not get tallies info: got %d errors", len(errors))
 	}
 
 	tallyInfos := make(map[string]types.ChainTallyInfos, 0)
