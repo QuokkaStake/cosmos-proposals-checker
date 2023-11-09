@@ -49,21 +49,38 @@ type V1Proposal struct {
 	Status        string              `json:"status"`
 	VotingEndTime time.Time           `json:"voting_end_time"`
 	Messages      []V1ProposalMessage `json:"messages"`
+
+	Title   string `json:"title"`
+	Summary string `json:"summary"`
 }
 
 func (p V1Proposal) ToProposal() Proposal {
-	titles := utils.Map(p.Messages, func(m V1ProposalMessage) string {
-		return m.Content.Title
-	})
+	// Some chains (namely, Quicksilver) do not have title and description fields,
+	// instead they have content.title and content.description per each message.
+	// Others (namely, Kujira) have title and summary text.
+	// This should work for all of them.
+	title := p.Title
+	if title == "" {
+		titles := utils.Map(p.Messages, func(m V1ProposalMessage) string {
+			return m.Content.Title
+		})
 
-	descriptions := utils.Map(p.Messages, func(m V1ProposalMessage) string {
-		return m.Content.Description
-	})
+		title = strings.Join(titles, ", ")
+	}
+
+	description := p.Summary
+	if description == "" {
+		descriptions := utils.Map(p.Messages, func(m V1ProposalMessage) string {
+			return m.Content.Description
+		})
+
+		description = strings.Join(descriptions, ", ")
+	}
 
 	return Proposal{
 		ID:          p.ProposalID,
-		Title:       strings.Join(titles, ", "),
-		Description: strings.Join(descriptions, ", "),
+		Title:       title,
+		Description: description,
 		EndTime:     p.VotingEndTime,
 	}
 }
