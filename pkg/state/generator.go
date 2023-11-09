@@ -1,7 +1,6 @@
 package state
 
 import (
-	configTypes "main/pkg/config/types"
 	"main/pkg/tendermint"
 	"main/pkg/types"
 	"sync"
@@ -11,11 +10,11 @@ import (
 
 type Generator struct {
 	Logger zerolog.Logger
-	Chains configTypes.Chains
+	Chains types.Chains
 	Mutex  sync.Mutex
 }
 
-func NewStateGenerator(logger *zerolog.Logger, chains configTypes.Chains) *Generator {
+func NewStateGenerator(logger *zerolog.Logger, chains types.Chains) *Generator {
 	return &Generator{
 		Logger: logger.With().Str("component", "state_generator").Logger(),
 		Chains: chains,
@@ -30,7 +29,7 @@ func (g *Generator) GetState(oldState State) State {
 
 	for _, chain := range g.Chains {
 		g.Logger.Info().Str("name", chain.Name).Msg("Processing a chain")
-		go func(c *configTypes.Chain) {
+		go func(c *types.Chain) {
 			g.ProcessChain(c, state, oldState)
 			wg.Done()
 		}(chain)
@@ -41,7 +40,7 @@ func (g *Generator) GetState(oldState State) State {
 }
 
 func (g *Generator) ProcessChain(
-	chain *configTypes.Chain,
+	chain *types.Chain,
 	state State,
 	oldState State,
 ) {
@@ -82,7 +81,7 @@ func (g *Generator) ProcessChain(
 				Msg("Processing wallet vote")
 			wg.Add(1)
 
-			go func(p types.Proposal, w *configTypes.Wallet) {
+			go func(p types.Proposal, w *types.Wallet) {
 				g.ProcessProposalAndWallet(chain, p, rpc, w, state, oldState)
 				wg.Done()
 			}(proposal, wallet)
@@ -93,10 +92,10 @@ func (g *Generator) ProcessChain(
 }
 
 func (g *Generator) ProcessProposalAndWallet(
-	chain *configTypes.Chain,
+	chain *types.Chain,
 	proposal types.Proposal,
 	rpc *tendermint.RPC,
-	wallet *configTypes.Wallet,
+	wallet *types.Wallet,
 	state State,
 	oldState State,
 ) {

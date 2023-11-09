@@ -1,12 +1,11 @@
 package state
 
 import (
-	configTypes "main/pkg/config/types"
 	"main/pkg/types"
 )
 
 type ProposalVote struct {
-	Wallet *configTypes.Wallet
+	Wallet *types.Wallet
 	Vote   *types.Vote
 	Error  *types.JSONError
 }
@@ -25,7 +24,7 @@ type WalletVotes struct {
 }
 
 type ChainInfo struct {
-	Chain          *configTypes.Chain
+	Chain          *types.Chain
 	ProposalVotes  map[string]WalletVotes
 	ProposalsError *types.JSONError
 }
@@ -44,7 +43,7 @@ func NewState() State {
 	}
 }
 
-func (s *State) SetVote(chain *configTypes.Chain, proposal types.Proposal, wallet *configTypes.Wallet, vote ProposalVote) {
+func (s *State) SetVote(chain *types.Chain, proposal types.Proposal, wallet *types.Wallet, vote ProposalVote) {
 	if _, ok := s.ChainInfos[chain.Name]; !ok {
 		s.ChainInfos[chain.Name] = &ChainInfo{
 			Chain:         chain,
@@ -62,14 +61,14 @@ func (s *State) SetVote(chain *configTypes.Chain, proposal types.Proposal, walle
 	s.ChainInfos[chain.Name].ProposalVotes[proposal.ID].Votes[wallet.Address] = vote
 }
 
-func (s *State) SetChainProposalsError(chain *configTypes.Chain, err error) {
+func (s *State) SetChainProposalsError(chain *types.Chain, err error) {
 	s.ChainInfos[chain.Name] = &ChainInfo{
 		Chain:          chain,
 		ProposalsError: types.NewJSONError(err.Error()),
 	}
 }
 
-func (s *State) SetChainVotes(chain *configTypes.Chain, votes map[string]WalletVotes) {
+func (s *State) SetChainVotes(chain *types.Chain, votes map[string]WalletVotes) {
 	stateChain := s.ChainInfos[chain.Name]
 	stateChain.ProposalVotes = votes
 }

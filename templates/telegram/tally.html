@@ -2,9 +2,11 @@
 <strong>No active proposals.</strong>
 {{- end }}
 {{- range $chainName, $tallyInfos := . }}
-<strong>Proposals on chain {{ $chainName }}:</strong>
-{{ range $tallyInfos }}
-Proposal #{{ .Proposal.ID }}: {{ .Proposal.Title }}
+{{- if $tallyInfos.TallyInfos }}
+<strong>Proposals on chain {{ $tallyInfos.Chain.GetName }}:</strong>
+{{ range $tallyInfos.TallyInfos }}
+{{- $proposalLink := $tallyInfos.Chain.GetProposalLink .Proposal }}
+Proposal #{{ .Proposal.ID }}: {{ SerializeLink $proposalLink }}
 Ends in: {{ .Proposal.GetTimeLeft }}
 - Not voted: {{ .GetNotVoted }}
 - Voted: {{ .GetQuorum }}
@@ -13,4 +15,5 @@ Ends in: {{ .Proposal.GetTimeLeft }}
 - Voted "No": {{ .GetNoVotes }}
 - Voted "NoWithVeto": {{ .GetNoWithVetoVotes }}
 {{ end }}
+{{- end }}
 {{ end }}

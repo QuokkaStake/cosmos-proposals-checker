@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	configPkg "main/pkg/config"
 	"main/pkg/data"
 	"main/pkg/logger"
 	mutes "main/pkg/mutes"
@@ -10,6 +9,7 @@ import (
 	"main/pkg/reporters/pagerduty"
 	"main/pkg/reporters/telegram"
 	"main/pkg/state"
+	"main/pkg/types"
 
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
@@ -17,7 +17,7 @@ import (
 
 type App struct {
 	Logger          *zerolog.Logger
-	Config          *configPkg.Config
+	Config          *types.Config
 	StateManager    *state.Manager
 	MutesManager    *mutes.Manager
 	ReportGenerator *report.Generator
@@ -26,7 +26,7 @@ type App struct {
 }
 
 func NewApp(configPath string, version string) *App {
-	config, err := configPkg.GetConfig(configPath)
+	config, err := GetConfig(configPath)
 	if err != nil {
 		logger.GetDefaultLogger().Fatal().Err(err).Msg("Could not load config")
 	}

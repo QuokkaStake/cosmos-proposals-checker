@@ -4,7 +4,6 @@ import (
 	"main/pkg/events"
 	"testing"
 
-	configTypes "main/pkg/config/types"
 	"main/pkg/logger"
 	"main/pkg/state"
 	"main/pkg/types"
@@ -26,8 +25,8 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 		},
 	}
 
-	generator := NewReportGenerator(stateManager, logger.GetDefaultLogger(), configTypes.Chains{
-		&configTypes.Chain{Name: "chain"},
+	generator := NewReportGenerator(stateManager, logger.GetDefaultLogger(), types.Chains{
+		&types.Chain{Name: "chain"},
 	})
 
 	report := generator.GenerateReport(oldState, newState)
@@ -63,8 +62,8 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 		},
 	}
 
-	generator := NewReportGenerator(stateManager, logger.GetDefaultLogger(), configTypes.Chains{
-		&configTypes.Chain{Name: "chain"},
+	generator := NewReportGenerator(stateManager, logger.GetDefaultLogger(), types.Chains{
+		&types.Chain{Name: "chain"},
 	})
 
 	report := generator.GenerateReport(oldState, newState)
@@ -98,8 +97,8 @@ func TestReportGeneratorWithNotVoted(t *testing.T) {
 		},
 	}
 
-	generator := NewReportGenerator(stateManager, logger.GetDefaultLogger(), configTypes.Chains{
-		&configTypes.Chain{Name: "chain"},
+	generator := NewReportGenerator(stateManager, logger.GetDefaultLogger(), types.Chains{
+		&types.Chain{Name: "chain"},
 	})
 
 	report := generator.GenerateReport(oldState, newState)
@@ -152,8 +151,8 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 		},
 	}
 
-	generator := NewReportGenerator(stateManager, logger.GetDefaultLogger(), configTypes.Chains{
-		&configTypes.Chain{Name: "chain"},
+	generator := NewReportGenerator(stateManager, logger.GetDefaultLogger(), types.Chains{
+		&types.Chain{Name: "chain"},
 	})
 
 	report := generator.GenerateReport(oldState, newState)
@@ -210,8 +209,8 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 		},
 	}
 
-	generator := NewReportGenerator(stateManager, logger.GetDefaultLogger(), configTypes.Chains{
-		&configTypes.Chain{Name: "chain"},
+	generator := NewReportGenerator(stateManager, logger.GetDefaultLogger(), types.Chains{
+		&types.Chain{Name: "chain"},
 	})
 
 	report := generator.GenerateReport(oldState, newState)

@@ -1,12 +1,11 @@
 package events
 
 import (
-	configTypes "main/pkg/config/types"
 	"main/pkg/types"
 )
 
 type VoteQueryError struct {
-	Chain    *configTypes.Chain
+	Chain    *types.Chain
 	Proposal types.Proposal
 	Error    error
 }

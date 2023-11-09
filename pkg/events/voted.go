@@ -1,13 +1,12 @@
 package events
 
 import (
-	configTypes "main/pkg/config/types"
 	"main/pkg/types"
 )
 
 type VotedEvent struct {
-	Chain    *configTypes.Chain
-	Wallet   *configTypes.Wallet
+	Chain    *types.Chain
+	Wallet   *types.Wallet
 	Proposal types.Proposal
 	Vote     *types.Vote
 }
@@ -20,7 +19,7 @@ func (e VotedEvent) IsAlert() bool {
 	return true
 }
 
-func (e VotedEvent) GetChain() *configTypes.Chain {
+func (e VotedEvent) GetChain() *types.Chain {
 	return e.Chain
 }
 
@@ -28,6 +27,6 @@ func (e VotedEvent) GetProposal() types.Proposal {
 	return e.Proposal
 }
 
-func (e VotedEvent) GetWallet() *configTypes.Wallet {
+func (e VotedEvent) GetWallet() *types.Wallet {
 	return e.Wallet
 }

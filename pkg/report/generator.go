@@ -1,19 +1,19 @@
 package report
 
 import (
-	configTypes "main/pkg/config/types"
 	"main/pkg/events"
 	"main/pkg/report/entry"
 	"main/pkg/reporters"
 	"main/pkg/state"
 	"main/pkg/tendermint"
+	"main/pkg/types"
 
 	"github.com/rs/zerolog"
 )
 
 type Generator struct {
 	StateManager *state.Manager
-	Chains       configTypes.Chains
+	Chains       types.Chains
 	RPC          *tendermint.RPC
 	Logger       zerolog.Logger
 }
@@ -21,7 +21,7 @@ type Generator struct {
 func NewReportGenerator(
 	manager *state.Manager,
 	logger *zerolog.Logger,
-	chains configTypes.Chains,
+	chains types.Chains,
 ) *Generator {
 	return &Generator{
 		StateManager: manager,

@@ -2,7 +2,6 @@ package data
 
 import (
 	"fmt"
-	configTypes "main/pkg/config/types"
 	"main/pkg/tendermint"
 	"main/pkg/types"
 	"sync"
@@ -12,17 +11,17 @@ import (
 
 type Manager struct {
 	Logger zerolog.Logger
-	Chains configTypes.Chains
+	Chains types.Chains
 }
 
-func NewManager(logger *zerolog.Logger, chains configTypes.Chains) *Manager {
+func NewManager(logger *zerolog.Logger, chains types.Chains) *Manager {
 	return &Manager{
 		Logger: logger.With().Str("component", "data_manager").Logger(),
 		Chains: chains,
 	}
 }
 
-func (m *Manager) GetTallies() (map[string][]types.TallyInfo, error) {
+func (m *Manager) GetTallies() (map[string]types.ChainTallyInfos, error) {
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 
@@ -36,7 +35,7 @@ func (m *Manager) GetTallies() (map[string][]types.TallyInfo, error) {
 		rpc := tendermint.NewRPC(chain, m.Logger)
 
 		wg.Add(1)
-		go func(c *configTypes.Chain, rpc *tendermint.RPC) {
+		go func(c *types.Chain, rpc *tendermint.RPC) {
 			defer wg.Done()
 
 			pool, err := rpc.GetStakingPool()
@@ -56,7 +55,7 @@ func (m *Manager) GetTallies() (map[string][]types.TallyInfo, error) {
 		}(chain, rpc)
 
 		wg.Add(1)
-		go func(c *configTypes.Chain, rpc *tendermint.RPC) {
+		go func(c *types.Chain, rpc *tendermint.RPC) {
 			defer wg.Done()
 
 			chainProposals, err := rpc.GetAllProposals()
@@ -80,7 +79,7 @@ func (m *Manager) GetTallies() (map[string][]types.TallyInfo, error) {
 			for _, proposal := range chainProposals {
 				internalWg.Add(1)
 
-				go func(c *configTypes.Chain, p types.Proposal) {
+				go func(c *types.Chain, p types.Proposal) {
 					defer internalWg.Done()
 
 					tally, err := rpc.GetTally(p.ID)
@@ -120,33 +119,40 @@ func (m *Manager) GetTallies() (map[string][]types.TallyInfo, error) {
 
 	if len(errors) > 0 {
 		m.Logger.Error().Msg("Errors getting tallies info, not processing")
-		return map[string][]types.TallyInfo{}, fmt.Errorf("could not get tallies info")
+		return map[string]types.ChainTallyInfos{}, fmt.Errorf("could not get tallies info")
 	}
 
-	tallyInfos := make(map[string][]types.TallyInfo, 0)
+	tallyInfos := make(map[string]types.ChainTallyInfos, 0)
 
 	for chainName, chainProposals := range proposals {
-		for _, proposal := range chainProposals {
+		chain := m.Chains.FindByName(chainName)
+		if chain == nil {
+			return map[string]types.ChainTallyInfos{}, fmt.Errorf("could not chain with name %s", chainName)
+		}
+
+		if _, ok := tallyInfos[chainName]; !ok {
+			tallyInfos[chainName] = types.ChainTallyInfos{
+				Chain:      chain,
+				TallyInfos: make([]types.TallyInfo, len(chainProposals)),
+			}
+		}
+
+		for index, proposal := range chainProposals {
 			tally, ok := tallies[chainName][proposal.ID]
 			if !ok {
-				return map[string][]types.TallyInfo{}, fmt.Errorf("could not get tallies info")
+				return map[string]types.ChainTallyInfos{}, fmt.Errorf("could not get tallies info")
 			}
 
 			pool, ok := pools[chainName]
 			if !ok {
-				return map[string][]types.TallyInfo{}, fmt.Errorf("could not get tallies info")
+				return map[string]types.ChainTallyInfos{}, fmt.Errorf("could not get tallies info")
 			}
 
-			if _, ok := tallyInfos[chainName]; !ok {
-				tallyInfos[chainName] = []types.TallyInfo{}
+			tallyInfos[chainName].TallyInfos[index] = types.TallyInfo{
+				Proposal: proposal,
+				Tally:    tally,
+				Pool:     pool,
 			}
-
-			tallyInfos[chainName] = append(tallyInfos[chainName], types.TallyInfo{
-				ChainName: chainName,
-				Proposal:  proposal,
-				Tally:     tally,
-				Pool:      pool,
-			})
 		}
 	}
 
