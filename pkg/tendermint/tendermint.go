@@ -152,6 +152,17 @@ func (rpc *RPC) GetStakingPool() (*types.PoolRPCResponse, error) {
 	return &pool, nil
 }
 
+func (rpc *RPC) GetGovParams(paramsType string) (*types.ParamsResponse, error) {
+	url := fmt.Sprintf("/cosmos/gov/v1beta1/params/%s", paramsType)
+
+	var pool types.ParamsResponse
+	if err := rpc.Get(url, &pool); err != nil {
+		return nil, err
+	}
+
+	return &pool, nil
+}
+
 func (rpc *RPC) Get(url string, target interface{}) error {
 	nodeErrors := make([]error, len(rpc.URLs))
 
