@@ -96,6 +96,7 @@ proposals - List proposals and wallets' votes on them
 proposals_mute - Mutes a proposal
 proposals_mutes - List active proposal mutes
 tally - Show the tally for proposals that are in voting period
+params - Show chains params related to governance
 help - Displays help
 ```
 
