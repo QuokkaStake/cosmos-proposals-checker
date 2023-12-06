@@ -206,7 +206,7 @@ func (rpc *RPC) Get(url string, target interface{}) []types.NodeError {
 		rpc.Logger.Warn().Str("url", fullURL).Err(err).Msg("LCD request failed")
 		nodeErrors[index] = types.NodeError{
 			Node:  lcd,
-			Error: err,
+			Error: types.NewJSONError(err),
 		}
 	}
 

@@ -108,7 +108,7 @@ func (t *TallyInfo) GetNoWithVetoVotes() string {
 
 type NodeError struct {
 	Node  string
-	Error error
+	Error JSONError
 }
 
 type QueryError struct {

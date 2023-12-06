@@ -6,8 +6,8 @@ type JSONError struct {
 	error string
 }
 
-func NewJSONError(err string) *JSONError {
-	return &JSONError{error: err}
+func NewJSONError(err error) JSONError {
+	return JSONError{error: err.Error()}
 }
 
 func (e *JSONError) Error() string {
