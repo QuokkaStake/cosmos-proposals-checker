@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"main/pkg/utils"
+	"strings"
 	"time"
 
 	"cosmossdk.io/math"
@@ -103,4 +104,29 @@ func (t *TallyInfo) GetNoWithVetoVotes() string {
 		"%.2f%%",
 		percent,
 	)
+}
+
+type NodeError struct {
+	Node  string
+	Error error
+}
+
+type QueryError struct {
+	QueryError error
+	NodeErrors []NodeError
+}
+
+func (q QueryError) Error() string {
+	if q.QueryError != nil {
+		return q.QueryError.Error()
+	}
+
+	var sb strings.Builder
+
+	sb.WriteString("All LCD requests failed:\n")
+	for index, nodeError := range q.NodeErrors {
+		sb.WriteString(fmt.Sprintf("#%d: %s -> %s\n", index+1, nodeError.Node, nodeError.Error))
+	}
+
+	return sb.String()
 }

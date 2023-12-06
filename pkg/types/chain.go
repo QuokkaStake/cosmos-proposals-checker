@@ -34,7 +34,7 @@ type Chain struct {
 	Explorer       *Explorer `toml:"explorer"`
 }
 
-func (c *Chain) Validate() error {
+func (c Chain) Validate() error {
 	if c.Name == "" {
 		return fmt.Errorf("empty chain name")
 	}
