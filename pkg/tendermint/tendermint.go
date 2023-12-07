@@ -30,7 +30,7 @@ func NewRPC(chainConfig *types.Chain, logger zerolog.Logger) *RPC {
 	}
 }
 
-func (rpc *RPC) GetAllProposals() ([]types.Proposal, error) {
+func (rpc *RPC) GetAllProposals() ([]types.Proposal, *types.QueryError) {
 	if rpc.ProposalsType == "v1" {
 		return rpc.GetAllV1Proposals()
 	}
@@ -38,7 +38,7 @@ func (rpc *RPC) GetAllProposals() ([]types.Proposal, error) {
 	return rpc.GetAllV1beta1Proposals()
 }
 
-func (rpc *RPC) GetAllV1beta1Proposals() ([]types.Proposal, error) {
+func (rpc *RPC) GetAllV1beta1Proposals() ([]types.Proposal, *types.QueryError) {
 	proposals := []types.Proposal{}
 	offset := 0
 
@@ -51,12 +51,17 @@ func (rpc *RPC) GetAllV1beta1Proposals() ([]types.Proposal, error) {
 		)
 
 		var batchProposals types.V1Beta1ProposalsRPCResponse
-		if err := rpc.Get(url, &batchProposals); err != nil {
-			return nil, err
+		if errs := rpc.Get(url, &batchProposals); len(errs) > 0 {
+			return nil, &types.QueryError{
+				QueryError: nil,
+				NodeErrors: errs,
+			}
 		}
 
 		if batchProposals.Message != "" {
-			return nil, errors.New(batchProposals.Message)
+			return nil, &types.QueryError{
+				QueryError: errors.New(batchProposals.Message),
+			}
 		}
 
 		parsedProposals := utils.Map(batchProposals.Proposals, func(p types.V1beta1Proposal) types.Proposal {
@@ -73,7 +78,7 @@ func (rpc *RPC) GetAllV1beta1Proposals() ([]types.Proposal, error) {
 	return proposals, nil
 }
 
-func (rpc *RPC) GetAllV1Proposals() ([]types.Proposal, error) {
+func (rpc *RPC) GetAllV1Proposals() ([]types.Proposal, *types.QueryError) {
 	proposals := []types.Proposal{}
 	offset := 0
 
@@ -86,12 +91,17 @@ func (rpc *RPC) GetAllV1Proposals() ([]types.Proposal, error) {
 		)
 
 		var batchProposals types.V1ProposalsRPCResponse
-		if err := rpc.Get(url, &batchProposals); err != nil {
-			return nil, err
+		if errs := rpc.Get(url, &batchProposals); len(errs) > 0 {
+			return nil, &types.QueryError{
+				QueryError: nil,
+				NodeErrors: errs,
+			}
 		}
 
 		if batchProposals.Message != "" {
-			return nil, errors.New(batchProposals.Message)
+			return nil, &types.QueryError{
+				QueryError: errors.New(batchProposals.Message),
+			}
 		}
 
 		parsedProposals := utils.Map(batchProposals.Proposals, func(p types.V1Proposal) types.Proposal {
@@ -108,7 +118,7 @@ func (rpc *RPC) GetAllV1Proposals() ([]types.Proposal, error) {
 	return proposals, nil
 }
 
-func (rpc *RPC) GetVote(proposal, voter string) (*types.VoteRPCResponse, error) {
+func (rpc *RPC) GetVote(proposal, voter string) (*types.VoteRPCResponse, *types.QueryError) {
 	url := fmt.Sprintf(
 		"/cosmos/gov/v1beta1/proposals/%s/votes/%s",
 		proposal,
@@ -116,55 +126,69 @@ func (rpc *RPC) GetVote(proposal, voter string) (*types.VoteRPCResponse, error) 
 	)
 
 	var vote types.VoteRPCResponse
-	if err := rpc.Get(url, &vote); err != nil {
-		return nil, err
+	if errs := rpc.Get(url, &vote); len(errs) > 0 {
+		return nil, &types.QueryError{
+			QueryError: nil,
+			NodeErrors: errs,
+		}
 	}
 
 	if vote.IsError() && !strings.Contains(vote.Message, "not found") {
-		return nil, errors.New(vote.Message)
+		return nil, &types.QueryError{
+			QueryError: errors.New(vote.Message),
+		}
 	}
 
 	return &vote, nil
 }
 
-func (rpc *RPC) GetTally(proposal string) (*types.TallyRPCResponse, error) {
+func (rpc *RPC) GetTally(proposal string) (*types.TallyRPCResponse, *types.QueryError) {
 	url := fmt.Sprintf(
 		"/cosmos/gov/v1beta1/proposals/%s/tally",
 		proposal,
 	)
 
 	var tally types.TallyRPCResponse
-	if err := rpc.Get(url, &tally); err != nil {
-		return nil, err
+	if errs := rpc.Get(url, &tally); len(errs) > 0 {
+		return nil, &types.QueryError{
+			QueryError: nil,
+			NodeErrors: errs,
+		}
 	}
 
 	return &tally, nil
 }
 
-func (rpc *RPC) GetStakingPool() (*types.PoolRPCResponse, error) {
+func (rpc *RPC) GetStakingPool() (*types.PoolRPCResponse, *types.QueryError) {
 	url := "/cosmos/staking/v1beta1/pool"
 
 	var pool types.PoolRPCResponse
-	if err := rpc.Get(url, &pool); err != nil {
-		return nil, err
+	if errs := rpc.Get(url, &pool); len(errs) > 0 {
+		return nil, &types.QueryError{
+			QueryError: nil,
+			NodeErrors: errs,
+		}
 	}
 
 	return &pool, nil
 }
 
-func (rpc *RPC) GetGovParams(paramsType string) (*types.ParamsResponse, error) {
+func (rpc *RPC) GetGovParams(paramsType string) (*types.ParamsResponse, *types.QueryError) {
 	url := fmt.Sprintf("/cosmos/gov/v1beta1/params/%s", paramsType)
 
 	var pool types.ParamsResponse
-	if err := rpc.Get(url, &pool); err != nil {
-		return nil, err
+	if errs := rpc.Get(url, &pool); len(errs) > 0 {
+		return nil, &types.QueryError{
+			QueryError: nil,
+			NodeErrors: errs,
+		}
 	}
 
 	return &pool, nil
 }
 
-func (rpc *RPC) Get(url string, target interface{}) error {
-	nodeErrors := make([]error, len(rpc.URLs))
+func (rpc *RPC) Get(url string, target interface{}) []types.NodeError {
+	nodeErrors := make([]types.NodeError, len(rpc.URLs))
 
 	for index, lcd := range rpc.URLs {
 		fullURL := lcd + url
@@ -180,19 +204,14 @@ func (rpc *RPC) Get(url string, target interface{}) error {
 		}
 
 		rpc.Logger.Warn().Str("url", fullURL).Err(err).Msg("LCD request failed")
-		nodeErrors[index] = err
+		nodeErrors[index] = types.NodeError{
+			Node:  lcd,
+			Error: types.NewJSONError(err),
+		}
 	}
 
 	rpc.Logger.Warn().Str("url", url).Msg("All LCD requests failed")
-
-	var sb strings.Builder
-
-	sb.WriteString("All LCD requests failed:\n")
-	for index, url := range rpc.URLs {
-		sb.WriteString(fmt.Sprintf("#%d: %s -> %s\n", index+1, url, nodeErrors[index]))
-	}
-
-	return fmt.Errorf(sb.String())
+	return nodeErrors
 }
 
 func (rpc *RPC) GetFull(url string, target interface{}) error {

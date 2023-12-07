@@ -7,7 +7,7 @@ import (
 type ProposalVote struct {
 	Wallet *types.Wallet
 	Vote   *types.Vote
-	Error  *types.JSONError
+	Error  *types.QueryError
 }
 
 func (v ProposalVote) HasVoted() bool {
@@ -26,7 +26,7 @@ type WalletVotes struct {
 type ChainInfo struct {
 	Chain          *types.Chain
 	ProposalVotes  map[string]WalletVotes
-	ProposalsError *types.JSONError
+	ProposalsError *types.QueryError
 }
 
 func (c ChainInfo) HasProposalsError() bool {
@@ -61,10 +61,10 @@ func (s *State) SetVote(chain *types.Chain, proposal types.Proposal, wallet *typ
 	s.ChainInfos[chain.Name].ProposalVotes[proposal.ID].Votes[wallet.Address] = vote
 }
 
-func (s *State) SetChainProposalsError(chain *types.Chain, err error) {
+func (s *State) SetChainProposalsError(chain *types.Chain, err *types.QueryError) {
 	s.ChainInfos[chain.Name] = &ChainInfo{
 		Chain:          chain,
-		ProposalsError: types.NewJSONError(err.Error()),
+		ProposalsError: err,
 	}
 }
 

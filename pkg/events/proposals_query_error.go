@@ -6,7 +6,7 @@ import (
 
 type ProposalsQueryErrorEvent struct {
 	Chain *types.Chain
-	Error error
+	Error *types.QueryError
 }
 
 func (e ProposalsQueryErrorEvent) Name() string {

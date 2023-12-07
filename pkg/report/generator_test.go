@@ -1,6 +1,7 @@
 package report
 
 import (
+	"errors"
 	"main/pkg/events"
 	"testing"
 
@@ -20,7 +21,9 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 	newState := state.State{
 		ChainInfos: map[string]*state.ChainInfo{
 			"chain": {
-				ProposalsError: types.NewJSONError("test error"),
+				ProposalsError: &types.QueryError{
+					QueryError: errors.New("test error"),
+				},
 			},
 		},
 	}
@@ -34,7 +37,7 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 
 	entry, ok := report.Entries[0].(events.ProposalsQueryErrorEvent)
 	assert.True(t, ok, "Expected to have a proposal query error!")
-	assert.Equal(t, "test error", entry.Error.Error(), "Error text mismatch!")
+	assert.Equal(t, "test error", entry.Error.QueryError.Error(), "Error text mismatch!")
 }
 
 func TestReportGeneratorWithVoteError(t *testing.T) {
@@ -53,7 +56,9 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
-								Error: types.NewJSONError("test error"),
+								Error: &types.QueryError{
+									QueryError: errors.New("test error"),
+								},
 							},
 						},
 					},
