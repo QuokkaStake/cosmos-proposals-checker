@@ -7,7 +7,7 @@ import (
 type VoteQueryError struct {
 	Chain    *types.Chain
 	Proposal types.Proposal
-	Error    error
+	Error    *types.QueryError
 }
 
 func (e VoteQueryError) Name() string {
