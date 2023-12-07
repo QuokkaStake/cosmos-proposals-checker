@@ -125,7 +125,7 @@ func (q QueryError) Error() string {
 
 	sb.WriteString("All LCD requests failed:\n")
 	for index, nodeError := range q.NodeErrors {
-		sb.WriteString(fmt.Sprintf("#%d: %s -> %s\n", index+1, nodeError.Node, nodeError.Error))
+		sb.WriteString(fmt.Sprintf("#%d: %s -> %s\n", index+1, nodeError.Node, nodeError.Error.error))
 	}
 
 	return sb.String()
