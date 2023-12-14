@@ -1,6 +1,9 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Config struct {
 	PagerDutyConfig PagerDutyConfig `toml:"pagerduty"`
@@ -9,6 +12,7 @@ type Config struct {
 	StatePath       string          `toml:"state-path"`
 	MutesPath       string          `toml:"mutes-path"`
 	Chains          Chains          `toml:"chains"`
+	Timezone        string          `toml:"timezone"`
 	Interval        string          `default:"* * * * *" toml:"interval"`
 }
 
@@ -31,6 +35,10 @@ func (c *Config) Validate() error {
 		if err := chain.Validate(); err != nil {
 			return fmt.Errorf("error in chain %d: %s", index, err)
 		}
+	}
+
+	if _, err := time.LoadLocation(c.Timezone); err != nil {
+		return fmt.Errorf("error parsing timezone: %s", err)
 	}
 
 	return nil

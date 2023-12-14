@@ -9,6 +9,8 @@ mutes-path = "cosmos-proposals-checker-mutes.json"
 # See https://pkg.go.dev/github.com/robfig/cron?utm_source=godoc#hdr-CRON_Expression_Format for examples.
 # Defaults to "@hourly"
 interval = "@hourly"
+# Timezone in which time (like undelegation finish time) will be displayed. Defaults to "Etc/GMT", so UTC+0
+timezone = "Europe/Moscow"
 
 # Logging configuration
 [log]

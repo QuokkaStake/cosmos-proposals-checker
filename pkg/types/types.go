@@ -32,10 +32,6 @@ func (p Proposal) GetTimeLeft() string {
 	return utils.FormatDuration(time.Until(p.EndTime).Round(time.Second))
 }
 
-func (p Proposal) GetProposalTime() string {
-	return p.EndTime.Format(time.RFC1123)
-}
-
 type TallyInfo struct {
 	Proposal Proposal
 	Tally    Tally
