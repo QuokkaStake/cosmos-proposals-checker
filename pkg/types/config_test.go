@@ -123,10 +123,29 @@ func TestValidateConfigWrongProposalType(t *testing.T) {
 	require.Error(t, err, nil, "Error should be presented!")
 }
 
+func TestValidateConfigInvalidTimezone(t *testing.T) {
+	t.Parallel()
+
+	config := Config{
+		Timezone: "test",
+		Chains: []*Chain{
+			{
+				Name:          "chain",
+				LCDEndpoints:  []string{"endpoint"},
+				Wallets:       []*Wallet{{Address: "wallet"}},
+				ProposalsType: "v1",
+			},
+		},
+	}
+	err := config.Validate()
+	require.Error(t, err, nil, "Error should be presented!")
+}
+
 func TestValidateConfigValidChain(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
+		Timezone: "Europe/Moscow",
 		Chains: []*Chain{
 			{
 				Name:          "chain",

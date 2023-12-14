@@ -49,10 +49,6 @@ func (m *Mutes) IsMuted(chain string, proposalID string) bool {
 	return false
 }
 
-func (m *Mute) GetExpirationTime() string {
-	return m.Expires.Format(time.RFC822)
-}
-
 func (m *Mutes) AddMute(mute *Mute) {
 	m.Mutes = append(m.Mutes, mute)
 	m.Mutes = utils.Filter(m.Mutes, func(m *Mute) bool {

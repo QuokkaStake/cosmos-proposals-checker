@@ -9,4 +9,4 @@ Created mute with the following params:
 {{- else }}
 <strong>Proposal ID:</strong> all proposals
 {{- end }}
-<strong>Expires: </strong>{{ .GetExpirationTime }}
+<strong>Expires: </strong>{{ SerializeDate .Expires }}

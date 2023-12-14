@@ -12,5 +12,5 @@ No active mutes.
 {{- else }}
 <strong>Proposal ID:</strong> all proposals
 {{- end }}
-<strong>Expires: </strong>{{ .GetExpirationTime }}
+<strong>Expires: </strong>{{ SerializeDate .Expires }}
 {{ end }}

@@ -2,7 +2,7 @@
 🔴 <strong> Wallet {{ SerializeLink $walletLink }} hasn't voted on proposal {{ .Proposal.ID }} on {{ .Chain.GetName }} </strong>
 {{ .Proposal.Title }}
 
-Voting ends at: {{ .Proposal.GetProposalTime }} (in {{ .Proposal.GetTimeLeft }})
+Voting ends at: {{ SerializeDate .Proposal.EndTime }} (in {{ .Proposal.GetTimeLeft }})
 
 {{ range .Chain.GetExplorerProposalsLinks .Proposal.ID }}{{ SerializeLink .}}
 {{ end }}

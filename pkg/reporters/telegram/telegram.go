@@ -31,7 +31,8 @@ type Reporter struct {
 	Logger      zerolog.Logger
 	Templates   map[string]*template.Template
 
-	Version string
+	Version  string
+	Timezone *time.Location
 }
 
 const (
@@ -45,6 +46,7 @@ func NewTelegramReporter(
 	dataManager *data.Manager,
 	logger *zerolog.Logger,
 	version string,
+	timezone *time.Location,
 ) *Reporter {
 	return &Reporter{
 		TelegramToken:  config.TelegramToken,
@@ -55,6 +57,7 @@ func NewTelegramReporter(
 		Logger:         logger.With().Str("component", "telegram_reporter").Logger(),
 		Templates:      make(map[string]*template.Template, 0),
 		Version:        version,
+		Timezone:       timezone,
 	}
 }
 
@@ -104,6 +107,7 @@ func (reporter *Reporter) GetTemplate(tmlpType string) (*template.Template, erro
 
 	t, err := template.New(filename).Funcs(template.FuncMap{
 		"SerializeLink":  reporter.SerializeLink,
+		"SerializeDate":  reporter.SerializeDate,
 		"FormatDuration": utils.FormatDuration,
 	}).ParseFS(templates.TemplatesFs, "telegram/"+filename)
 	if err != nil {
@@ -250,4 +254,8 @@ func (reporter *Reporter) SerializeLink(link types.Link) template.HTML {
 	}
 
 	return template.HTML(link.Name)
+}
+
+func (reporter *Reporter) SerializeDate(date time.Time) string {
+	return date.In(reporter.Timezone).Format(time.RFC1123)
 }

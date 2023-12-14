@@ -10,6 +10,7 @@ import (
 	"main/pkg/reporters/telegram"
 	"main/pkg/state"
 	"main/pkg/types"
+	"time"
 
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
@@ -43,6 +44,8 @@ func NewApp(configPath string, version string) *App {
 	stateGenerator := state.NewStateGenerator(log, config.Chains)
 	dataManager := data.NewManager(log, config.Chains)
 
+	timeZone, _ := time.LoadLocation(config.Timezone)
+
 	return &App{
 		Logger:          log,
 		Config:          config,
@@ -52,7 +55,7 @@ func NewApp(configPath string, version string) *App {
 		StateGenerator:  stateGenerator,
 		Reporters: []reportersPkg.Reporter{
 			pagerduty.NewPagerDutyReporter(config.PagerDutyConfig, log),
-			telegram.NewTelegramReporter(config.TelegramConfig, mutesManager, stateGenerator, dataManager, log, version),
+			telegram.NewTelegramReporter(config.TelegramConfig, mutesManager, stateGenerator, dataManager, log, version, timeZone),
 		},
 	}
 }
