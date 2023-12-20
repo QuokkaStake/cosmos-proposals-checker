@@ -61,3 +61,8 @@ func (t TallyInfo) GetNotVoted() string {
 			).MustFloat64(),
 	)
 }
+
+type ChainTallyInfos struct {
+	Chain      *Chain
+	TallyInfos []TallyInfo
+}

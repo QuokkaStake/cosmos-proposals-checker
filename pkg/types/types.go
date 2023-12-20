@@ -16,8 +16,3 @@ func (l Link) Serialize() string {
 
 	return fmt.Sprintf("<a href='%s'>%s</a>", l.Href, l.Name)
 }
-
-type ChainTallyInfos struct {
-	Chain      *Chain
-	TallyInfos []TallyInfo
-}

@@ -16,7 +16,7 @@ func (rpc *RPC) GetTallies() (types.ChainTallyInfos, error) {
 
 	var pool math.LegacyDec
 	var proposals []types.Proposal
-	tallies := make(map[string]types.Tally, 0)
+	tallies := make(map[string]types.Tally)
 
 	wg.Add(1)
 	go func() {

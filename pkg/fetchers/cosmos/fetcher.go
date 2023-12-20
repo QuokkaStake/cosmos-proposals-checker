@@ -55,10 +55,10 @@ func (rpc *RPC) GetTally(proposal string) (*types.Tally, *types.QueryError) {
 	return tally.Tally.ToTally(), nil
 }
 
-func (rpc *RPC) GetStakingPool() (*types.PoolRPCResponse, *types.QueryError) {
+func (rpc *RPC) GetStakingPool() (*responses.PoolRPCResponse, *types.QueryError) {
 	url := "/cosmos/staking/v1beta1/pool"
 
-	var pool types.PoolRPCResponse
+	var pool responses.PoolRPCResponse
 	if errs := rpc.Get(url, &pool); len(errs) > 0 {
 		return nil, &types.QueryError{
 			QueryError: nil,

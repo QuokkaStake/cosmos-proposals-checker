@@ -6,19 +6,7 @@ import (
 	"time"
 
 	"main/pkg/utils"
-
-	"cosmossdk.io/math"
 )
-
-type PoolRPCResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
-	Pool    *Pool  `json:"pool"`
-}
-
-type Pool struct {
-	BondedTokens math.LegacyDec `json:"bonded_tokens"`
-}
 
 type ParamsResponse struct {
 	VotingParams  VotingParams  `json:"voting_params"`
