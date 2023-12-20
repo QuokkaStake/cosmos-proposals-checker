@@ -51,7 +51,7 @@ func (rpc *RPC) GetAllV1beta1Proposals() ([]types.Proposal, *types.QueryError) {
 			offset,
 		)
 
-		var batchProposals types.V1Beta1ProposalsRPCResponse
+		var batchProposals responses.V1Beta1ProposalsRPCResponse
 		if errs := rpc.Get(url, &batchProposals); len(errs) > 0 {
 			return nil, &types.QueryError{
 				QueryError: nil,
@@ -65,7 +65,7 @@ func (rpc *RPC) GetAllV1beta1Proposals() ([]types.Proposal, *types.QueryError) {
 			}
 		}
 
-		parsedProposals := utils.Map(batchProposals.Proposals, func(p types.V1beta1Proposal) types.Proposal {
+		parsedProposals := utils.Map(batchProposals.Proposals, func(p responses.V1beta1Proposal) types.Proposal {
 			return p.ToProposal()
 		})
 		proposals = append(proposals, parsedProposals...)
@@ -91,7 +91,7 @@ func (rpc *RPC) GetAllV1Proposals() ([]types.Proposal, *types.QueryError) {
 			offset,
 		)
 
-		var batchProposals types.V1ProposalsRPCResponse
+		var batchProposals responses.V1ProposalsRPCResponse
 		if errs := rpc.Get(url, &batchProposals); len(errs) > 0 {
 			return nil, &types.QueryError{
 				QueryError: nil,
@@ -105,7 +105,7 @@ func (rpc *RPC) GetAllV1Proposals() ([]types.Proposal, *types.QueryError) {
 			}
 		}
 
-		parsedProposals := utils.Map(batchProposals.Proposals, func(p types.V1Proposal) types.Proposal {
+		parsedProposals := utils.Map(batchProposals.Proposals, func(p responses.V1Proposal) types.Proposal {
 			return p.ToProposal()
 		})
 		proposals = append(proposals, parsedProposals...)
