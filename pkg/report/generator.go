@@ -2,10 +2,10 @@ package report
 
 import (
 	"main/pkg/events"
+	"main/pkg/fetchers/cosmos"
 	"main/pkg/report/entry"
 	"main/pkg/reporters"
 	"main/pkg/state"
-	"main/pkg/tendermint"
 	"main/pkg/types"
 
 	"github.com/rs/zerolog"
@@ -14,7 +14,7 @@ import (
 type Generator struct {
 	StateManager *state.Manager
 	Chains       types.Chains
-	RPC          *tendermint.RPC
+	RPC          *cosmos.RPC
 	Logger       zerolog.Logger
 }
 
@@ -105,7 +105,7 @@ func (g *Generator) GenerateReport(oldState, newState state.State) reporters.Rep
 				}
 
 				// Changed its vote - only notify via Telegram.
-				if newVote.HasVoted() && oldVote.HasVoted() && newVote.Vote.Option != oldVote.Vote.Option {
+				if newVote.HasVoted() && oldVote.HasVoted() && !newVote.Vote.VotesEquals(oldVote.Vote) {
 					g.Logger.Debug().
 						Str("chain", chainName).
 						Str("proposal", proposal.ID).

@@ -1,7 +1,7 @@
 package state
 
 import (
-	"main/pkg/tendermint"
+	"main/pkg/fetchers/cosmos"
 	"main/pkg/types"
 	"sync"
 
@@ -44,7 +44,7 @@ func (g *Generator) ProcessChain(
 	state State,
 	oldState State,
 ) {
-	rpc := tendermint.NewRPC(chain, g.Logger)
+	rpc := cosmos.NewRPC(chain, g.Logger)
 
 	proposals, err := rpc.GetAllProposals()
 	if err != nil {
@@ -94,15 +94,15 @@ func (g *Generator) ProcessChain(
 func (g *Generator) ProcessProposalAndWallet(
 	chain *types.Chain,
 	proposal types.Proposal,
-	rpc *tendermint.RPC,
+	rpc *cosmos.RPC,
 	wallet *types.Wallet,
 	state State,
 	oldState State,
 ) {
 	oldVote, _, found := oldState.GetVoteAndProposal(chain.Name, proposal.ID, wallet.Address)
-	voteResponse, err := rpc.GetVote(proposal.ID, wallet.Address)
+	vote, err := rpc.GetVote(proposal.ID, wallet.Address)
 
-	if found && oldVote.HasVoted() && voteResponse.Vote == nil {
+	if found && oldVote.HasVoted() && vote == nil {
 		g.Logger.Trace().
 			Str("chain", chain.Name).
 			Str("proposal", proposal.ID).
@@ -126,7 +126,7 @@ func (g *Generator) ProcessProposalAndWallet(
 	if err != nil {
 		proposalVote.Error = err
 	} else {
-		proposalVote.Vote = voteResponse.Vote
+		proposalVote.Vote = vote
 	}
 
 	g.Mutex.Lock()

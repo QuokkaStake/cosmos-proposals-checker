@@ -92,42 +92,6 @@ type V1ProposalsRPCResponse struct {
 	Proposals []V1Proposal `json:"proposals"`
 }
 
-// cosmos/gov/v1beta1/proposals/:id/votes/:wallet
-
-type Vote struct {
-	ProposalID string       `json:"proposal_id"`
-	Voter      string       `json:"voter"`
-	Option     string       `json:"option"`
-	Options    []VoteOption `json:"options"`
-}
-
-type VoteOption struct {
-	Option string `json:"option"`
-	Weight string `json:"weight"`
-}
-
-func (v Vote) ResolveVote() string {
-	if len(v.Options) > 0 {
-		optionsStrings := utils.Map(v.Options, func(v VoteOption) string {
-			return utils.ResolveVote(v.Option)
-		})
-
-		return strings.Join(optionsStrings, ", ")
-	}
-
-	return utils.ResolveVote(v.Option)
-}
-
-type VoteRPCResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
-	Vote    *Vote  `json:"vote"`
-}
-
-func (v VoteRPCResponse) IsError() bool {
-	return v.Code != 0
-}
-
 type TallyRPCResponse struct {
 	Code    int64  `json:"code"`
 	Message string `json:"message"`
