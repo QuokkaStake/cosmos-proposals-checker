@@ -2,12 +2,9 @@ package cosmos
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"main/pkg/fetchers/cosmos/responses"
-	"main/pkg/utils"
 	"net/http"
-	"strings"
 	"time"
 
 	"main/pkg/types"
@@ -18,6 +15,7 @@ import (
 const PaginationLimit = 1000
 
 type RPC struct {
+	ChainConfig   *types.Chain
 	URLs          []string
 	ProposalsType string
 	Logger        zerolog.Logger
@@ -25,6 +23,7 @@ type RPC struct {
 
 func NewRPC(chainConfig *types.Chain, logger zerolog.Logger) *RPC {
 	return &RPC{
+		ChainConfig:   chainConfig,
 		URLs:          chainConfig.LCDEndpoints,
 		ProposalsType: chainConfig.ProposalsType,
 		Logger:        logger.With().Str("component", "rpc").Logger(),
@@ -39,131 +38,13 @@ func (rpc *RPC) GetAllProposals() ([]types.Proposal, *types.QueryError) {
 	return rpc.GetAllV1beta1Proposals()
 }
 
-func (rpc *RPC) GetAllV1beta1Proposals() ([]types.Proposal, *types.QueryError) {
-	proposals := []types.Proposal{}
-	offset := 0
-
-	for {
-		url := fmt.Sprintf(
-			// 2 is for PROPOSAL_STATUS_VOTING_PERIOD
-			"/cosmos/gov/v1beta1/proposals?pagination.limit=%d&pagination.offset=%d&proposal_status=2",
-			PaginationLimit,
-			offset,
-		)
-
-		var batchProposals responses.V1Beta1ProposalsRPCResponse
-		if errs := rpc.Get(url, &batchProposals); len(errs) > 0 {
-			return nil, &types.QueryError{
-				QueryError: nil,
-				NodeErrors: errs,
-			}
-		}
-
-		if batchProposals.Message != "" {
-			return nil, &types.QueryError{
-				QueryError: errors.New(batchProposals.Message),
-			}
-		}
-
-		parsedProposals := utils.Map(batchProposals.Proposals, func(p responses.V1beta1Proposal) types.Proposal {
-			return p.ToProposal()
-		})
-		proposals = append(proposals, parsedProposals...)
-		if len(batchProposals.Proposals) < PaginationLimit {
-			break
-		}
-
-		offset += PaginationLimit
-	}
-
-	return proposals, nil
-}
-
-func (rpc *RPC) GetAllV1Proposals() ([]types.Proposal, *types.QueryError) {
-	proposals := []types.Proposal{}
-	offset := 0
-
-	for {
-		url := fmt.Sprintf(
-			// 2 is for PROPOSAL_STATUS_VOTING_PERIOD
-			"/cosmos/gov/v1/proposals?pagination.limit=%d&pagination.offset=%d&proposal_status=2",
-			PaginationLimit,
-			offset,
-		)
-
-		var batchProposals responses.V1ProposalsRPCResponse
-		if errs := rpc.Get(url, &batchProposals); len(errs) > 0 {
-			return nil, &types.QueryError{
-				QueryError: nil,
-				NodeErrors: errs,
-			}
-		}
-
-		if batchProposals.Message != "" {
-			return nil, &types.QueryError{
-				QueryError: errors.New(batchProposals.Message),
-			}
-		}
-
-		parsedProposals := utils.Map(batchProposals.Proposals, func(p responses.V1Proposal) types.Proposal {
-			return p.ToProposal()
-		})
-		proposals = append(proposals, parsedProposals...)
-		if len(batchProposals.Proposals) < PaginationLimit {
-			break
-		}
-
-		offset += PaginationLimit
-	}
-
-	return proposals, nil
-}
-
-func (rpc *RPC) GetVote(proposal, voter string) (*types.Vote, *types.QueryError) {
-	url := fmt.Sprintf(
-		"/cosmos/gov/v1beta1/proposals/%s/votes/%s",
-		proposal,
-		voter,
-	)
-
-	var vote responses.VoteRPCResponse
-	if errs := rpc.Get(url, &vote); len(errs) > 0 {
-		return nil, &types.QueryError{
-			QueryError: nil,
-			NodeErrors: errs,
-		}
-	}
-
-	if vote.IsError() {
-		// not voted
-		if strings.Contains(vote.Message, "not found") {
-			return nil, nil
-		}
-
-		// some other errors
-		return nil, &types.QueryError{
-			QueryError: errors.New(vote.Message),
-		}
-	}
-
-	voteParsed, err := vote.ToVote()
-	if err != nil {
-		return nil, &types.QueryError{
-			QueryError: err,
-			NodeErrors: nil,
-		}
-	}
-
-	return voteParsed, nil
-}
-
-func (rpc *RPC) GetTally(proposal string) (*types.TallyRPCResponse, *types.QueryError) {
+func (rpc *RPC) GetTally(proposal string) (*types.Tally, *types.QueryError) {
 	url := fmt.Sprintf(
 		"/cosmos/gov/v1beta1/proposals/%s/tally",
 		proposal,
 	)
 
-	var tally types.TallyRPCResponse
+	var tally responses.TallyRPCResponse
 	if errs := rpc.Get(url, &tally); len(errs) > 0 {
 		return nil, &types.QueryError{
 			QueryError: nil,
@@ -171,7 +52,7 @@ func (rpc *RPC) GetTally(proposal string) (*types.TallyRPCResponse, *types.Query
 		}
 	}
 
-	return &tally, nil
+	return tally.Tally.ToTally(), nil
 }
 
 func (rpc *RPC) GetStakingPool() (*types.PoolRPCResponse, *types.QueryError) {
