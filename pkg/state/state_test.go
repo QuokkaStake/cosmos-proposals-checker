@@ -22,7 +22,7 @@ func TestSetVoteWithoutChainInfo(t *testing.T) {
 		&types.Wallet{Address: "wallet"},
 		ProposalVote{
 			Vote: &types.Vote{
-				Option: "yep",
+				Options: []types.VoteOption{{Option: "YES", Weight: 1}},
 			},
 		},
 	)
@@ -61,7 +61,9 @@ func TestSetVotes(t *testing.T) {
 		"proposal": {
 			Votes: map[string]ProposalVote{
 				"wallet": {
-					Vote: &types.Vote{Option: "YES"},
+					Vote: &types.Vote{
+						Options: []types.VoteOption{{Option: "YES", Weight: 1}},
+					},
 				},
 			},
 		},
@@ -229,7 +231,7 @@ func TestHasVotedWithWalletVotePresent(t *testing.T) {
 						Votes: map[string]ProposalVote{
 							"wallet": {
 								Vote: &types.Vote{
-									Option: "YEP",
+									Options: []types.VoteOption{{Option: "YES", Weight: 1}},
 								},
 							},
 						},

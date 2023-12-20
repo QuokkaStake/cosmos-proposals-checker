@@ -146,7 +146,7 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
 								Vote: &types.Vote{
-									Option: "YES",
+									Options: []types.VoteOption{{Option: "YES", Weight: 1}},
 								},
 							},
 						},
@@ -184,7 +184,7 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
 								Vote: &types.Vote{
-									Option: "NO",
+									Options: []types.VoteOption{{Option: "NO", Weight: 1}},
 								},
 							},
 						},
@@ -204,7 +204,7 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
 								Vote: &types.Vote{
-									Option: "YES",
+									Options: []types.VoteOption{{Option: "YES", Weight: 1}},
 								},
 							},
 						},

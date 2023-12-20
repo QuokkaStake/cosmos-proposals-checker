@@ -37,21 +37,6 @@ func Contains[T comparable](slice []T, elt T) bool {
 	return false
 }
 
-func ResolveVote(value string) string {
-	votes := map[string]string{
-		"VOTE_OPTION_YES":          "Yes",
-		"VOTE_OPTION_ABSTAIN":      "Abstain",
-		"VOTE_OPTION_NO":           "No",
-		"VOTE_OPTION_NO_WITH_VETO": "No with veto",
-	}
-
-	if vote, ok := votes[value]; ok && vote != "" {
-		return vote
-	}
-
-	return value
-}
-
 func FormatDuration(duration time.Duration) string {
 	days := int64(duration.Hours() / 24)
 	hours := int64(math.Mod(duration.Hours(), 24))

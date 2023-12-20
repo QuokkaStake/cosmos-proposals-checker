@@ -2,7 +2,7 @@ package data
 
 import (
 	"fmt"
-	"main/pkg/tendermint"
+	"main/pkg/fetchers/cosmos"
 	"main/pkg/types"
 	"strconv"
 	"sync"
@@ -34,10 +34,10 @@ func (m *Manager) GetTallies() (map[string]types.ChainTallyInfos, error) {
 	tallies := make(map[string]map[string]types.Tally, 0)
 
 	for _, chain := range m.Chains {
-		rpc := tendermint.NewRPC(chain, m.Logger)
+		rpc := cosmos.NewRPC(chain, m.Logger)
 
 		wg.Add(1)
-		go func(c *types.Chain, rpc *tendermint.RPC) {
+		go func(c *types.Chain, rpc *cosmos.RPC) {
 			defer wg.Done()
 
 			pool, err := rpc.GetStakingPool()
@@ -57,7 +57,7 @@ func (m *Manager) GetTallies() (map[string]types.ChainTallyInfos, error) {
 		}(chain, rpc)
 
 		wg.Add(1)
-		go func(c *types.Chain, rpc *tendermint.RPC) {
+		go func(c *types.Chain, rpc *cosmos.RPC) {
 			defer wg.Done()
 
 			chainProposals, err := rpc.GetAllProposals()
@@ -168,7 +168,7 @@ func (m *Manager) GetChainParams(chain *types.Chain) (*types.ChainWithVotingPara
 	errors := make([]error, 0)
 	params := &types.ParamsResponse{}
 
-	rpc := tendermint.NewRPC(chain, m.Logger)
+	rpc := cosmos.NewRPC(chain, m.Logger)
 
 	wg.Add(3)
 
