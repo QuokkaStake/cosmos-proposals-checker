@@ -1,7 +1,7 @@
 package state
 
 import (
-	"main/pkg/fetchers/cosmos"
+	"main/pkg/fetchers"
 	"main/pkg/types"
 	"sync"
 
@@ -44,9 +44,9 @@ func (g *Generator) ProcessChain(
 	state State,
 	oldState State,
 ) {
-	rpc := cosmos.NewRPC(chain, g.Logger)
+	fetcher := fetchers.GetFetcher(chain, g.Logger)
 
-	proposals, err := rpc.GetAllProposals()
+	proposals, err := fetcher.GetAllProposals()
 	if err != nil {
 		g.Logger.Warn().Err(err).Msg("Error processing proposals")
 		g.Mutex.Lock()
@@ -82,7 +82,7 @@ func (g *Generator) ProcessChain(
 			wg.Add(1)
 
 			go func(p types.Proposal, w *types.Wallet) {
-				g.ProcessProposalAndWallet(chain, p, rpc, w, state, oldState)
+				g.ProcessProposalAndWallet(chain, p, fetcher, w, state, oldState)
 				wg.Done()
 			}(proposal, wallet)
 		}
@@ -94,13 +94,13 @@ func (g *Generator) ProcessChain(
 func (g *Generator) ProcessProposalAndWallet(
 	chain *types.Chain,
 	proposal types.Proposal,
-	rpc *cosmos.RPC,
+	fetcher fetchers.Fetcher,
 	wallet *types.Wallet,
 	state State,
 	oldState State,
 ) {
 	oldVote, _, found := oldState.GetVoteAndProposal(chain.Name, proposal.ID, wallet.Address)
-	vote, err := rpc.GetVote(proposal.ID, wallet.Address)
+	vote, err := fetcher.GetVote(proposal.ID, wallet.Address)
 
 	if found && oldVote.HasVoted() && vote == nil {
 		g.Logger.Trace().
