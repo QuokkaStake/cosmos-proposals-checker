@@ -7,25 +7,8 @@ import (
 
 // cosmos/gov/v1beta1/proposals/:id/votes/:wallet
 
-type VoteType string
-
-func (v VoteType) Resolve() string {
-	votes := map[string]string{
-		"VOTE_OPTION_YES":          "Yes",
-		"VOTE_OPTION_ABSTAIN":      "Abstain",
-		"VOTE_OPTION_NO":           "No",
-		"VOTE_OPTION_NO_WITH_VETO": "No with veto",
-	}
-
-	if vote, ok := votes[string(v)]; ok && v != "" {
-		return vote
-	}
-
-	return string(v)
-}
-
 type VoteOption struct {
-	Option VoteType
+	Option string
 	Weight float64
 }
 type VoteOptions []VoteOption
@@ -38,7 +21,7 @@ type Vote struct {
 
 func (v Vote) ResolveVote() string {
 	optionsStrings := utils.Map(v.Options, func(v VoteOption) string {
-		return v.Option.Resolve()
+		return v.Option
 	})
 
 	return strings.Join(optionsStrings, ", ")
