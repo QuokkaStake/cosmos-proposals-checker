@@ -141,6 +141,24 @@ func TestValidateConfigInvalidTimezone(t *testing.T) {
 	require.Error(t, err, nil, "Error should be presented!")
 }
 
+func TestValidateConfigInvalidWallet(t *testing.T) {
+	t.Parallel()
+
+	config := Config{
+		Timezone: "Europe/Moscow",
+		Chains: []*Chain{
+			{
+				Name:          "chain",
+				LCDEndpoints:  []string{"endpoint"},
+				Wallets:       []*Wallet{{Address: ""}},
+				ProposalsType: "v1",
+			},
+		},
+	}
+	err := config.Validate()
+	require.Error(t, err, nil, "Error should be presented!")
+}
+
 func TestValidateConfigValidChain(t *testing.T) {
 	t.Parallel()
 
@@ -157,55 +175,4 @@ func TestValidateConfigValidChain(t *testing.T) {
 	}
 	err := config.Validate()
 	require.NoError(t, err, "Error should not be presented!")
-}
-
-func TestFindChainByNameIfPresent(t *testing.T) {
-	t.Parallel()
-
-	chains := Chains{
-		{Name: "chain1"},
-		{Name: "chain2"},
-	}
-
-	chain := chains.FindByName("chain2")
-	assert.NotNil(t, chain, "Chain should be presented!")
-}
-
-func TestFindChainByNameIfNotPresent(t *testing.T) {
-	t.Parallel()
-
-	chains := Chains{
-		{Name: "chain1"},
-		{Name: "chain2"},
-	}
-
-	chain := chains.FindByName("chain3")
-	assert.Nil(t, chain, "Chain should not be presented!")
-}
-
-func TestGetLinksEmpty(t *testing.T) {
-	t.Parallel()
-
-	chain := Chain{}
-	links := chain.GetExplorerProposalsLinks("test")
-
-	assert.Empty(t, links, "Expected 0 links")
-}
-
-func TestGetLinksPresent(t *testing.T) {
-	t.Parallel()
-
-	chain := Chain{
-		KeplrName: "chain",
-		Explorer: &Explorer{
-			ProposalLinkPattern: "example.com/proposal/%s",
-		},
-	}
-	links := chain.GetExplorerProposalsLinks("test")
-
-	assert.Len(t, links, 2, "Expected 2 links")
-	assert.Equal(t, "Keplr", links[0].Name, "Expected Keplr link")
-	assert.Equal(t, "https://wallet.keplr.app/#/chain/governance?detailId=test", links[0].Href, "Wrong Keplr link")
-	assert.Equal(t, "Explorer", links[1].Name, "Expected Explorer link")
-	assert.Equal(t, "example.com/proposal/test", links[1].Href, "Wrong explorer link")
 }
