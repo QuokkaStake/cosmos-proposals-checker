@@ -2,7 +2,6 @@ package cosmos
 
 import (
 	"encoding/json"
-	"fmt"
 	"main/pkg/fetchers/cosmos/responses"
 	"net/http"
 	"time"
@@ -38,41 +37,10 @@ func (rpc *RPC) GetAllProposals() ([]types.Proposal, *types.QueryError) {
 	return rpc.GetAllV1beta1Proposals()
 }
 
-func (rpc *RPC) GetTally(proposal string) (*types.Tally, *types.QueryError) {
-	url := fmt.Sprintf(
-		"/cosmos/gov/v1beta1/proposals/%s/tally",
-		proposal,
-	)
-
-	var tally responses.TallyRPCResponse
-	if errs := rpc.Get(url, &tally); len(errs) > 0 {
-		return nil, &types.QueryError{
-			QueryError: nil,
-			NodeErrors: errs,
-		}
-	}
-
-	return tally.Tally.ToTally(), nil
-}
-
 func (rpc *RPC) GetStakingPool() (*responses.PoolRPCResponse, *types.QueryError) {
 	url := "/cosmos/staking/v1beta1/pool"
 
 	var pool responses.PoolRPCResponse
-	if errs := rpc.Get(url, &pool); len(errs) > 0 {
-		return nil, &types.QueryError{
-			QueryError: nil,
-			NodeErrors: errs,
-		}
-	}
-
-	return &pool, nil
-}
-
-func (rpc *RPC) GetGovParams(paramsType string) (*types.ParamsResponse, *types.QueryError) {
-	url := fmt.Sprintf("/cosmos/gov/v1beta1/params/%s", paramsType)
-
-	var pool types.ParamsResponse
 	if errs := rpc.Get(url, &pool); len(errs) > 0 {
 		return nil, &types.QueryError{
 			QueryError: nil,

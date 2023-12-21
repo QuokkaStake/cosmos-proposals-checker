@@ -2,11 +2,29 @@ package cosmos
 
 import (
 	"fmt"
+	"main/pkg/fetchers/cosmos/responses"
 	"main/pkg/types"
 	"sync"
 
 	"cosmossdk.io/math"
 )
+
+func (rpc *RPC) GetTally(proposal string) (*types.Tally, *types.QueryError) {
+	url := fmt.Sprintf(
+		"/cosmos/gov/v1beta1/proposals/%s/tally",
+		proposal,
+	)
+
+	var tally responses.TallyRPCResponse
+	if errs := rpc.Get(url, &tally); len(errs) > 0 {
+		return nil, &types.QueryError{
+			QueryError: nil,
+			NodeErrors: errs,
+		}
+	}
+
+	return tally.Tally.ToTally(), nil
+}
 
 func (rpc *RPC) GetTallies() (types.ChainTallyInfos, error) {
 	var wg sync.WaitGroup
