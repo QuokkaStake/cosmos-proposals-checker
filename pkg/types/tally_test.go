@@ -1,9 +1,10 @@
 package types
 
 import (
+	"testing"
+
 	"cosmossdk.io/math"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestTallyGetVoted(t *testing.T) {
