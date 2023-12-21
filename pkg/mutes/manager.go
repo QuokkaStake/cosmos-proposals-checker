@@ -72,8 +72,3 @@ func (m *Manager) AddMute(mute *Mute) {
 	m.Mutes.AddMute(mute)
 	m.Save()
 }
-
-func (m *Manager) DeleteMute(chain string, proposalID string) {
-	m.Mutes.DeleteMute(chain, proposalID)
-	m.Save()
-}

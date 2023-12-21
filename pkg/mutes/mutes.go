@@ -55,21 +55,3 @@ func (m *Mutes) AddMute(mute *Mute) {
 		return !m.IsExpired()
 	})
 }
-
-func (m *Mutes) DeleteMute(chain string, proposalID string) bool {
-	for index, mute := range m.Mutes {
-		if mute.Chain == chain && mute.ProposalID == proposalID {
-			m.Mutes = append(m.Mutes[:index], m.Mutes[index+1:]...)
-			m.Mutes = utils.Filter(m.Mutes, func(m *Mute) bool {
-				return !m.IsExpired()
-			})
-			return true
-		}
-	}
-
-	m.Mutes = utils.Filter(m.Mutes, func(m *Mute) bool {
-		return !m.IsExpired()
-	})
-
-	return false
-}
