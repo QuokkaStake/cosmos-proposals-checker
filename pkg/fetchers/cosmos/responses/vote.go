@@ -30,6 +30,13 @@ func (v VoteRPCResponse) IsError() bool {
 }
 
 func (v VoteRPCResponse) ToVote() (*types.Vote, error) {
+	votesMap := map[string]string{
+		"VOTE_OPTION_YES":          "Yes",
+		"VOTE_OPTION_ABSTAIN":      "Abstain",
+		"VOTE_OPTION_NO":           "No",
+		"VOTE_OPTION_NO_WITH_VETO": "No with veto",
+	}
+
 	var options []types.VoteOption
 
 	if len(v.Vote.Options) > 0 {
@@ -41,15 +48,26 @@ func (v VoteRPCResponse) ToVote() (*types.Vote, error) {
 				return nil, err
 			}
 
+			voteOption, found := votesMap[option.Option]
+			if !found {
+				voteOption = option.Option
+			}
+
 			options[index] = types.VoteOption{
-				Option: types.VoteType(option.Option),
+				Option: voteOption,
 				Weight: weight,
 			}
 		}
 	} else {
 		options = make([]types.VoteOption, 1)
+
+		voteOption, found := votesMap[v.Vote.Option]
+		if !found {
+			voteOption = v.Vote.Option
+		}
+
 		options[0] = types.VoteOption{
-			Option: types.VoteType(v.Vote.Option),
+			Option: voteOption,
 			Weight: 1,
 		}
 	}

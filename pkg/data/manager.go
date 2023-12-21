@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"main/pkg/fetchers/cosmos"
 	"main/pkg/types"
-	"strconv"
 	"sync"
-	"time"
 
 	"github.com/rs/zerolog"
 )
@@ -61,104 +59,6 @@ func (m *Manager) GetTallies() (map[string]types.ChainTallyInfos, error) {
 	return tallies, nil
 }
 
-func (m *Manager) GetChainParams(chain *types.Chain) (*types.ChainWithVotingParams, []error) {
-	var wg sync.WaitGroup
-	var mutex sync.Mutex
-
-	errors := make([]error, 0)
-	params := &types.ParamsResponse{}
-
-	rpc := cosmos.NewRPC(chain, m.Logger)
-
-	wg.Add(3)
-
-	go func() {
-		defer wg.Done()
-
-		votingParams, err := rpc.GetGovParams("voting")
-		mutex.Lock()
-		defer mutex.Unlock()
-
-		if err != nil {
-			errors = append(errors, err)
-			return
-		}
-
-		params.VotingParams = votingParams.VotingParams
-	}()
-
-	go func() {
-		defer wg.Done()
-
-		depositParams, err := rpc.GetGovParams("deposit")
-		mutex.Lock()
-		defer mutex.Unlock()
-
-		if err != nil {
-			errors = append(errors, err)
-			return
-		}
-
-		params.DepositParams = depositParams.DepositParams
-	}()
-
-	go func() {
-		defer wg.Done()
-
-		tallyingParams, err := rpc.GetGovParams("tallying")
-		mutex.Lock()
-		defer mutex.Unlock()
-
-		if err != nil {
-			errors = append(errors, err)
-			return
-		}
-
-		params.TallyParams = tallyingParams.TallyParams
-	}()
-
-	wg.Wait()
-
-	if len(errors) > 0 {
-		return nil, errors
-	}
-
-	quorum, err := strconv.ParseFloat(params.TallyParams.Quorum, 64)
-	if err != nil {
-		return nil, []error{err}
-	}
-
-	threshold, err := strconv.ParseFloat(params.TallyParams.Threshold, 64)
-	if err != nil {
-		return nil, []error{err}
-	}
-
-	vetoThreshold, err := strconv.ParseFloat(params.TallyParams.VetoThreshold, 64)
-	if err != nil {
-		return nil, []error{err}
-	}
-
-	votingPeriod, err := time.ParseDuration(params.VotingParams.VotingPeriod)
-	if err != nil {
-		return nil, []error{err}
-	}
-
-	maxDepositPeriod, err := time.ParseDuration(params.DepositParams.MaxDepositPeriod)
-	if err != nil {
-		return nil, []error{err}
-	}
-
-	return &types.ChainWithVotingParams{
-		Chain:            chain,
-		VotingPeriod:     votingPeriod,
-		MaxDepositPeriod: maxDepositPeriod,
-		MinDepositAmount: params.DepositParams.MinDepositAmount,
-		Quorum:           quorum,
-		Threshold:        threshold,
-		VetoThreshold:    vetoThreshold,
-	}, nil
-}
-
 func (m *Manager) GetParams() (map[string]types.ChainWithVotingParams, error) {
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
@@ -172,7 +72,9 @@ func (m *Manager) GetParams() (map[string]types.ChainWithVotingParams, error) {
 		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			chainParams, errs := m.GetChainParams(chain)
+			rpc := cosmos.NewRPC(chain, m.Logger)
+
+			chainParams, errs := rpc.GetChainParams()
 			mutex.Lock()
 			defer mutex.Unlock()
 

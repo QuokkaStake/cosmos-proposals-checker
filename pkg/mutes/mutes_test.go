@@ -84,17 +84,3 @@ func TestMutesAddsMute(t *testing.T) {
 	assert.Len(t, mutes.Mutes, 1, "There should be 1 mute!")
 	assert.Equal(t, "chain2", mutes.Mutes[0].Chain, "Chain name should match!")
 }
-
-func TestMutesDeletesMute(t *testing.T) {
-	t.Parallel()
-
-	mutes := Mutes{
-		Mutes: []*Mute{
-			{Chain: "chain1", Expires: time.Now().Add(-time.Hour)},
-		},
-	}
-
-	mutes.AddMute(&Mute{Chain: "chain2", Expires: time.Now().Add(time.Hour)})
-	assert.Len(t, mutes.Mutes, 1, "There should be 1 mute!")
-	assert.Equal(t, "chain2", mutes.Mutes[0].Chain, "Chain name should match!")
-}
