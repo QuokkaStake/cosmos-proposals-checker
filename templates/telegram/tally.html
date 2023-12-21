@@ -4,16 +4,15 @@
 {{- range $chainName, $tallyInfos := . }}
 {{- if $tallyInfos.TallyInfos }}
 <strong>Proposals on chain {{ $tallyInfos.Chain.GetName }}:</strong>
-{{ range $tallyInfos.TallyInfos }}
+{{ range $chainIndex, $tallyInfo := $tallyInfos.TallyInfos }}
 {{- $proposalLink := $tallyInfos.Chain.GetProposalLink .Proposal }}
 Proposal #{{ .Proposal.ID }}: {{ SerializeLink $proposalLink }}
 Ends in: {{ .Proposal.GetTimeLeft }}
 - Not voted: {{ .GetNotVoted }}
 - Voted: {{ .GetQuorum }}
-- Voted "Abstain": {{ .GetAbstained }}
-- Voted "Yes": {{ .GetYesVotes }}
-- Voted "No": {{ .GetNoVotes }}
-- Voted "NoWithVeto": {{ .GetNoWithVetoVotes }}
+{{- range $tallyOptionIndex, $tallyOption := .Tally }}
+- Voted "{{ $tallyOption.Option }}": {{ $tallyInfo.Tally.GetVoted $tallyOption }}
+{{- end }}
 {{ end }}
 {{- end }}
 {{ end }}

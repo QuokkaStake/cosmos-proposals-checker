@@ -6,32 +6,7 @@ import (
 	"time"
 
 	"main/pkg/utils"
-
-	"cosmossdk.io/math"
 )
-
-type TallyRPCResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
-	Tally   *Tally `json:"tally"`
-}
-
-type Tally struct {
-	Yes        math.LegacyDec `json:"yes"`
-	No         math.LegacyDec `json:"no"`
-	NoWithVeto math.LegacyDec `json:"no_with_veto"`
-	Abstain    math.LegacyDec `json:"abstain"`
-}
-
-type PoolRPCResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
-	Pool    *Pool  `json:"pool"`
-}
-
-type Pool struct {
-	BondedTokens math.LegacyDec `json:"bonded_tokens"`
-}
 
 type ParamsResponse struct {
 	VotingParams  VotingParams  `json:"voting_params"`
