@@ -1,9 +1,10 @@
 package neutron
 
 import (
-	"github.com/rs/zerolog"
 	"main/pkg/http"
 	"main/pkg/types"
+
+	"github.com/rs/zerolog"
 )
 
 type Fetcher struct {

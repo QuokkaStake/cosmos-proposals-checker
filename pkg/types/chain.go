@@ -33,8 +33,8 @@ type Chain struct {
 	MintscanPrefix string    `toml:"mintscan-prefix"`
 	Explorer       *Explorer `toml:"explorer"`
 
-	Type                 string `toml:"type" default:"cosmos"`
-	NeutronSmartContract string `toml:"neutron-smart-contract" default:"neutron1436kxs0w2es6xlqpp9rd35e3d0cjnw4sv8j3a7483sgks29jqwgshlt6zh"`
+	Type                 string `default:"cosmos"                                                             toml:"type"`
+	NeutronSmartContract string `default:"neutron1436kxs0w2es6xlqpp9rd35e3d0cjnw4sv8j3a7483sgks29jqwgshlt6zh" toml:"neutron-smart-contract"`
 }
 
 func (c Chain) Validate() error {

@@ -43,3 +43,4 @@ linters:
     - depguard
     - ifshort
     - ireturn
+    - godox
