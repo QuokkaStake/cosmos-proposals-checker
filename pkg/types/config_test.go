@@ -52,6 +52,7 @@ func TestValidateChainWithValidConfig(t *testing.T) {
 		LCDEndpoints:  []string{"endpoint"},
 		Wallets:       []*Wallet{{Address: "wallet"}},
 		ProposalsType: "v1",
+		Type:          "cosmos",
 	}
 
 	err := chain.Validate()
@@ -159,6 +160,25 @@ func TestValidateConfigInvalidWallet(t *testing.T) {
 	require.Error(t, err, nil, "Error should be presented!")
 }
 
+func TestValidateConfigInvalidType(t *testing.T) {
+	t.Parallel()
+
+	config := Config{
+		Timezone: "Europe/Moscow",
+		Chains: []*Chain{
+			{
+				Name:          "chain",
+				LCDEndpoints:  []string{"endpoint"},
+				Wallets:       []*Wallet{{Address: "wallet"}},
+				ProposalsType: "v1",
+				Type:          "invalid",
+			},
+		},
+	}
+	err := config.Validate()
+	require.Error(t, err, nil, "Error should be presented!")
+}
+
 func TestValidateConfigValidChain(t *testing.T) {
 	t.Parallel()
 
@@ -170,6 +190,7 @@ func TestValidateConfigValidChain(t *testing.T) {
 				LCDEndpoints:  []string{"endpoint"},
 				Wallets:       []*Wallet{{Address: "wallet"}},
 				ProposalsType: "v1",
+				Type:          "cosmos",
 			},
 		},
 	}
