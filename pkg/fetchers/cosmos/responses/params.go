@@ -60,17 +60,22 @@ func (params ParamsResponse) ToParams(chain *types.Chain) (*types.ChainWithVotin
 	}
 
 	return &types.ChainWithVotingParams{
-		Chain:            chain,
-		VotingPeriod:     votingPeriod,
-		MaxDepositPeriod: maxDepositPeriod,
-		MinDepositAmount: utils.Map(params.DepositParams.MinDepositAmount, func(amount Amount) types.Amount {
-			return types.Amount{
-				Denom:  amount.Denom,
-				Amount: amount.Amount,
-			}
-		}),
-		Quorum:        quorum,
-		Threshold:     threshold,
-		VetoThreshold: vetoThreshold,
+		Chain: chain,
+		Params: []types.ChainParam{
+			types.DurationParam{Description: "Voting period", Value: votingPeriod},
+			types.DurationParam{Description: "Max deposit period", Value: maxDepositPeriod},
+			types.AmountsParam{
+				Description: "Min deposit amount",
+				Value: utils.Map(params.DepositParams.MinDepositAmount, func(amount Amount) types.Amount {
+					return types.Amount{
+						Denom:  amount.Denom,
+						Amount: amount.Amount,
+					}
+				}),
+			},
+			types.PercentParam{Description: "Quorum", Value: quorum},
+			types.PercentParam{Description: "Threshold", Value: threshold},
+			types.PercentParam{Description: "Veto threshold", Value: vetoThreshold},
+		},
 	}, nil
 }

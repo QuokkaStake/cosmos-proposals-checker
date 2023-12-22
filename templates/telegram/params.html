@@ -1,9 +1,7 @@
 {{- range $chainName, $params := . }}
 <strong>Params of chain {{ $params.Chain.GetName }}:</strong>
-Voting period: {{ FormatDuration $params.VotingPeriod  }}
-Max deposit period: {{ FormatDuration $params.MaxDepositPeriod  }}
-Min deposit amount: {{ $params.FormatMinDepositAmount  }}
-Quorum: {{ $params.FormatQuorum  }}
-Threshold: {{ $params.FormatThreshold  }}
-Veto threshold: {{ $params.FormatVetoThreshold  }}
+{{- range $param := .Params }}
+{{ $param.GetDescription }}: {{ $param.Serialize }}
+{{- end }}
+
 {{ end }}
