@@ -32,11 +32,18 @@ type Chain struct {
 	Wallets        []*Wallet `toml:"wallets"`
 	MintscanPrefix string    `toml:"mintscan-prefix"`
 	Explorer       *Explorer `toml:"explorer"`
+
+	Type                 string `default:"cosmos"                                                             toml:"type"`
+	NeutronSmartContract string `default:"neutron1436kxs0w2es6xlqpp9rd35e3d0cjnw4sv8j3a7483sgks29jqwgshlt6zh" toml:"neutron-smart-contract"`
 }
 
 func (c Chain) Validate() error {
 	if c.Name == "" {
 		return fmt.Errorf("empty chain name")
+	}
+
+	if !utils.Contains([]string{"cosmos", "neutron"}, c.Type) {
+		return fmt.Errorf("expected type to be one of 'cosmos', 'neutron', but got '%s'", c.Type)
 	}
 
 	if len(c.LCDEndpoints) == 0 {
