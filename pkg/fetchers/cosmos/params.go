@@ -11,7 +11,7 @@ func (rpc *RPC) GetGovParams(paramsType string) (*responses.ParamsResponse, *typ
 	url := fmt.Sprintf("/cosmos/gov/v1beta1/params/%s", paramsType)
 
 	var params responses.ParamsResponse
-	if errs := rpc.Get(url, &params); len(errs) > 0 {
+	if errs := rpc.Client.Get(url, &params); len(errs) > 0 {
 		return nil, &types.QueryError{
 			QueryError: nil,
 			NodeErrors: errs,

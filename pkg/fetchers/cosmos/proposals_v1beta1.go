@@ -21,7 +21,7 @@ func (rpc *RPC) GetAllV1beta1Proposals() ([]types.Proposal, *types.QueryError) {
 		)
 
 		var batchProposals responses.V1Beta1ProposalsRPCResponse
-		if errs := rpc.Get(url, &batchProposals); len(errs) > 0 {
+		if errs := rpc.Client.Get(url, &batchProposals); len(errs) > 0 {
 			return nil, &types.QueryError{
 				QueryError: nil,
 				NodeErrors: errs,

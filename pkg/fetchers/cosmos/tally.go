@@ -16,7 +16,7 @@ func (rpc *RPC) GetTally(proposal string) (*types.Tally, *types.QueryError) {
 	)
 
 	var tally responses.TallyRPCResponse
-	if errs := rpc.Get(url, &tally); len(errs) > 0 {
+	if errs := rpc.Client.Get(url, &tally); len(errs) > 0 {
 		return nil, &types.QueryError{
 			QueryError: nil,
 			NodeErrors: errs,
