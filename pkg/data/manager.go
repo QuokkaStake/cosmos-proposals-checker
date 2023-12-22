@@ -2,7 +2,7 @@ package data
 
 import (
 	"fmt"
-	"main/pkg/fetchers/cosmos"
+	"main/pkg/fetchers"
 	"main/pkg/types"
 	"sync"
 
@@ -26,16 +26,16 @@ func (m *Manager) GetTallies() (map[string]types.ChainTallyInfos, error) {
 	var mutex sync.Mutex
 
 	errors := make([]error, 0)
-	tallies := make(map[string]types.ChainTallyInfos, 0)
+	tallies := make(map[string]types.ChainTallyInfos)
 
 	for _, chain := range m.Chains {
-		rpc := cosmos.NewRPC(chain, m.Logger)
+		fetcher := fetchers.GetFetcher(chain, m.Logger)
 
 		wg.Add(1)
-		go func(c *types.Chain, rpc *cosmos.RPC) {
+		go func(c *types.Chain, fetcher fetchers.Fetcher) {
 			defer wg.Done()
 
-			talliesForChain, err := rpc.GetTallies()
+			talliesForChain, err := fetcher.GetTallies()
 
 			mutex.Lock()
 
@@ -46,7 +46,7 @@ func (m *Manager) GetTallies() (map[string]types.ChainTallyInfos, error) {
 				tallies[c.Name] = talliesForChain
 			}
 			mutex.Unlock()
-		}(chain, rpc)
+		}(chain, fetcher)
 	}
 
 	wg.Wait()
@@ -63,7 +63,7 @@ func (m *Manager) GetParams() (map[string]types.ChainWithVotingParams, error) {
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 
-	params := make(map[string]types.ChainWithVotingParams, 0)
+	params := make(map[string]types.ChainWithVotingParams)
 	errors := make([]error, 0)
 
 	for _, chain := range m.Chains {
@@ -72,9 +72,9 @@ func (m *Manager) GetParams() (map[string]types.ChainWithVotingParams, error) {
 		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			rpc := cosmos.NewRPC(chain, m.Logger)
+			fetcher := fetchers.GetFetcher(chain, m.Logger)
 
-			chainParams, errs := rpc.GetChainParams()
+			chainParams, errs := fetcher.GetChainParams()
 			mutex.Lock()
 			defer mutex.Unlock()
 
