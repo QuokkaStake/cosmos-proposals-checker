@@ -2,49 +2,65 @@ package types
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestParamsFormatQuorum(t *testing.T) {
+func TestParamsDescription(t *testing.T) {
 	t.Parallel()
 
-	params := ChainWithVotingParams{
-		Quorum: 0.4,
-	}
+	assert.Equal(
+		t,
+		"Description",
+		PercentParam{Description: "Description"}.GetDescription(),
+		"Wrong value!",
+	)
 
-	assert.Equal(t, "40.00%", params.FormatQuorum(), "Wrong value!")
+	assert.Equal(
+		t,
+		"Description",
+		AmountsParam{Description: "Description"}.GetDescription(),
+		"Wrong value!",
+	)
+
+	assert.Equal(
+		t,
+		"Description",
+		DurationParam{Description: "Description"}.GetDescription(),
+		"Wrong value!",
+	)
 }
 
-func TestParamsFormatThreshold(t *testing.T) {
+func TestPercentParamSerialize(t *testing.T) {
 	t.Parallel()
 
-	params := ChainWithVotingParams{
-		Threshold: 0.4,
+	params := PercentParam{
+		Value: 0.4,
 	}
 
-	assert.Equal(t, "40.00%", params.FormatThreshold(), "Wrong value!")
+	assert.Equal(t, "40.00%", params.Serialize(), "Wrong value!")
 }
 
-func TestParamsFormatVetoThreshold(t *testing.T) {
+func TestAmountParamSerialize(t *testing.T) {
 	t.Parallel()
 
-	params := ChainWithVotingParams{
-		VetoThreshold: 0.4,
-	}
-
-	assert.Equal(t, "40.00%", params.FormatVetoThreshold(), "Wrong value!")
-}
-
-func TestParamsFormatFormatMinDepositAmount(t *testing.T) {
-	t.Parallel()
-
-	params := ChainWithVotingParams{
-		MinDepositAmount: []Amount{
+	params := AmountsParam{
+		Value: []Amount{
 			{Denom: "stake", Amount: "100"},
 			{Denom: "test", Amount: "100"},
 		},
 	}
 
-	assert.Equal(t, "100 stake,100 test", params.FormatMinDepositAmount(), "Wrong value!")
+	assert.Equal(t, "100 stake,100 test", params.Serialize(), "Wrong value!")
+}
+
+func TestDurationParamSerialize(t *testing.T) {
+	t.Parallel()
+
+	params := DurationParam{
+		Value: time.Hour + time.Minute,
+	}
+
+	assert.Equal(t, "1 hour 1 minute", params.Serialize(), "Wrong value!")
 }

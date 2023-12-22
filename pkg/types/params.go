@@ -8,35 +8,64 @@ import (
 	"main/pkg/utils"
 )
 
+type ChainWithVotingParams struct {
+	Chain  *Chain
+	Params []ChainParam
+}
+
+type ChainParam interface {
+	GetDescription() string
+	Serialize() string
+}
+
+/* ------------------------------------------------ */
+
+type PercentParam struct {
+	Description string
+	Value       float64
+}
+
+func (p PercentParam) GetDescription() string {
+	return p.Description
+}
+
+func (p PercentParam) Serialize() string {
+	return fmt.Sprintf("%.2f%%", p.Value*100)
+}
+
+/* ------------------------------------------------ */
+
+type DurationParam struct {
+	Description string
+	Value       time.Duration
+}
+
+func (p DurationParam) GetDescription() string {
+	return p.Description
+}
+
+func (p DurationParam) Serialize() string {
+	return utils.FormatDuration(p.Value)
+}
+
+/* ------------------------------------------------ */
+
 type Amount struct {
 	Denom  string
 	Amount string
 }
 
-type ChainWithVotingParams struct {
-	Chain            *Chain
-	VotingPeriod     time.Duration
-	MinDepositAmount []Amount
-	MaxDepositPeriod time.Duration
-	Quorum           float64
-	Threshold        float64
-	VetoThreshold    float64
+type AmountsParam struct {
+	Description string
+	Value       []Amount
 }
 
-func (c ChainWithVotingParams) FormatQuorum() string {
-	return fmt.Sprintf("%.2f%%", c.Quorum*100)
+func (p AmountsParam) GetDescription() string {
+	return p.Description
 }
 
-func (c ChainWithVotingParams) FormatThreshold() string {
-	return fmt.Sprintf("%.2f%%", c.Threshold*100)
-}
-
-func (c ChainWithVotingParams) FormatVetoThreshold() string {
-	return fmt.Sprintf("%.2f%%", c.VetoThreshold*100)
-}
-
-func (c ChainWithVotingParams) FormatMinDepositAmount() string {
-	amountsAsStrings := utils.Map(c.MinDepositAmount, func(a Amount) string {
+func (p AmountsParam) Serialize() string {
+	amountsAsStrings := utils.Map(p.Value, func(a Amount) string {
 		return a.Amount + " " + a.Denom
 	})
 	return strings.Join(amountsAsStrings, ",")
