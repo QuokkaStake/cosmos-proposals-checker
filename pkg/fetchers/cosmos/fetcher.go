@@ -1,11 +1,8 @@
 package cosmos
 
 import (
-	"encoding/json"
 	"main/pkg/fetchers/cosmos/responses"
-	"net/http"
-	"time"
-
+	"main/pkg/http"
 	"main/pkg/types"
 
 	"github.com/rs/zerolog"
@@ -15,17 +12,17 @@ const PaginationLimit = 1000
 
 type RPC struct {
 	ChainConfig   *types.Chain
-	URLs          []string
 	ProposalsType string
+	Client        *http.Client
 	Logger        zerolog.Logger
 }
 
 func NewRPC(chainConfig *types.Chain, logger zerolog.Logger) *RPC {
 	return &RPC{
 		ChainConfig:   chainConfig,
-		URLs:          chainConfig.LCDEndpoints,
 		ProposalsType: chainConfig.ProposalsType,
 		Logger:        logger.With().Str("component", "rpc").Logger(),
+		Client:        http.NewClient(chainConfig.Name, chainConfig.LCDEndpoints, logger),
 	}
 }
 
@@ -41,7 +38,7 @@ func (rpc *RPC) GetStakingPool() (*responses.PoolRPCResponse, *types.QueryError)
 	url := "/cosmos/staking/v1beta1/pool"
 
 	var pool responses.PoolRPCResponse
-	if errs := rpc.Get(url, &pool); len(errs) > 0 {
+	if errs := rpc.Client.Get(url, &pool); len(errs) > 0 {
 		return nil, &types.QueryError{
 			QueryError: nil,
 			NodeErrors: errs,
@@ -49,56 +46,4 @@ func (rpc *RPC) GetStakingPool() (*responses.PoolRPCResponse, *types.QueryError)
 	}
 
 	return &pool, nil
-}
-
-func (rpc *RPC) Get(url string, target interface{}) []types.NodeError {
-	nodeErrors := make([]types.NodeError, len(rpc.URLs))
-
-	for index, lcd := range rpc.URLs {
-		fullURL := lcd + url
-		rpc.Logger.Trace().Str("url", fullURL).Msg("Trying making request to LCD")
-
-		err := rpc.GetFull(
-			fullURL,
-			target,
-		)
-
-		if err == nil {
-			return nil
-		}
-
-		rpc.Logger.Warn().Str("url", fullURL).Err(err).Msg("LCD request failed")
-		nodeErrors[index] = types.NodeError{
-			Node:  lcd,
-			Error: types.NewJSONError(err),
-		}
-	}
-
-	rpc.Logger.Warn().Str("url", url).Msg("All LCD requests failed")
-	return nodeErrors
-}
-
-func (rpc *RPC) GetFull(url string, target interface{}) error {
-	client := &http.Client{Timeout: 300 * time.Second}
-	start := time.Now()
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("User-Agent", "cosmos-proposals-checker")
-
-	rpc.Logger.Debug().Str("url", url).Msg("Doing a query...")
-
-	res, err := client.Do(req)
-	if err != nil {
-		rpc.Logger.Warn().Str("url", url).Err(err).Msg("Query failed")
-		return err
-	}
-	defer res.Body.Close()
-
-	rpc.Logger.Debug().Str("url", url).Dur("duration", time.Since(start)).Msg("Query is finished")
-
-	return json.NewDecoder(res.Body).Decode(target)
 }

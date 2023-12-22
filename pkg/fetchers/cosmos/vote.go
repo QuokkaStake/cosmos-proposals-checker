@@ -16,7 +16,7 @@ func (rpc *RPC) GetVote(proposal, voter string) (*types.Vote, *types.QueryError)
 	)
 
 	var vote responses.VoteRPCResponse
-	if errs := rpc.Get(url, &vote); len(errs) > 0 {
+	if errs := rpc.Client.Get(url, &vote); len(errs) > 0 {
 		return nil, &types.QueryError{
 			QueryError: nil,
 			NodeErrors: errs,
