@@ -30,6 +30,13 @@ func TestParamsDescription(t *testing.T) {
 		DurationParam{Description: "Description"}.GetDescription(),
 		"Wrong value!",
 	)
+
+	assert.Equal(
+		t,
+		"Description",
+		BoolParam{Description: "Description"}.GetDescription(),
+		"Wrong value!",
+	)
 }
 
 func TestPercentParamSerialize(t *testing.T) {
@@ -63,4 +70,11 @@ func TestDurationParamSerialize(t *testing.T) {
 	}
 
 	assert.Equal(t, "1 hour 1 minute", params.Serialize(), "Wrong value!")
+}
+
+func TestBoolParamSerialize(t *testing.T) {
+	t.Parallel()
+
+	assert.Equal(t, "Yes", BoolParam{Value: true}.Serialize(), "Wrong value!")
+	assert.Equal(t, "No", BoolParam{Value: false}.Serialize(), "Wrong value!")
 }
