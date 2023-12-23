@@ -109,7 +109,7 @@ Go to your PagerDuty page, then go to Services. Create a service if you haven't 
 
 ## Which networks this is guaranteed to work?
 
-In theory, it should work on a Cosmos-based blockchains that expose a REST server.
+In theory, it should work on a Cosmos-based blockchains that expose a REST server, and also on Neutron.
 
 ## How can I contribute?
 
