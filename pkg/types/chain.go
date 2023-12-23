@@ -108,16 +108,12 @@ func (c Chain) GetProposalLink(proposal Proposal) Link {
 
 func (c Chain) GetWalletLink(wallet *Wallet) Link {
 	if c.Explorer == nil || c.Explorer.WalletLinkPattern == "" {
-		return Link{Name: wallet.Address}
+		return Link{Name: wallet.AddressOrAlias()}
 	}
 
 	link := Link{
-		Name: wallet.Address,
+		Name: wallet.AddressOrAlias(),
 		Href: fmt.Sprintf(c.Explorer.WalletLinkPattern, wallet.Address),
-	}
-
-	if wallet.Alias != "" {
-		link.Name = wallet.Alias
 	}
 
 	return link

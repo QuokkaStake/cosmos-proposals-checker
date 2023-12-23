@@ -1,27 +1,16 @@
 package neutron
 
 import (
-	"encoding/base64"
-	"fmt"
 	"main/pkg/fetchers/neutron/responses"
 	"main/pkg/types"
 )
 
 func (fetcher *Fetcher) GetAllProposals() ([]types.Proposal, *types.QueryError) {
-	query := base64.StdEncoding.EncodeToString([]byte("{\"list_proposals\": {}}"))
-
-	url := fmt.Sprintf(
-		"/cosmwasm/wasm/v1/contract/%s/smart/%s",
-		fetcher.ChainConfig.NeutronSmartContract,
-		query,
-	)
+	query := "{\"list_proposals\": {}}"
 
 	var proposals responses.ProposalsResponse
-	if errs := fetcher.Client.Get(url, &proposals); len(errs) > 0 {
-		return nil, &types.QueryError{
-			QueryError: nil,
-			NodeErrors: errs,
-		}
+	if err := fetcher.GetSmartContractState(query, &proposals); err != nil {
+		return nil, err
 	}
 
 	proposalsParsed, err := proposals.ToProposals()

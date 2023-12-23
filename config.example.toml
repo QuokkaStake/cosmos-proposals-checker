@@ -39,6 +39,12 @@ wallets = [
     { address = "bitsong14rvn7anf22e00vj5x3al4w50ns78s7n4t8yxcy", alias = "Validator wallet" },
     { address = "bitsong125hdkukw4pu2urhj4nv366q0avdqv24t0vprxs" },
 ]
+# Type. Currently can be either "cosmos" or "neutron". Optional, defaults to "cosmos.
+type = "cosmos"
+# Neutron smart contract address. Defaults to "neutron1436kxs0w2es6xlqpp9rd35e3d0cjnw4sv8j3a7483sgks29jqwgshlt6zh"
+# (mainnet contract address).
+neutron-smart-contract = "neutron1436kxs0w2es6xlqpp9rd35e3d0cjnw4sv8j3a7483sgks29jqwgshlt6zh"
+
 # Some chains have a new proposals structure (v1) compared to an older one (v1beta1),
 # when there are 2 or more actual proposals inside a single one (namely, Quicksilver).
 # On such chains, querying proposals with an older endpoint when there are proposals
