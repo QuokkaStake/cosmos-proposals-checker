@@ -50,6 +50,25 @@ func (p DurationParam) Serialize() string {
 
 /* ------------------------------------------------ */
 
+type BoolParam struct {
+	Description string
+	Value       bool
+}
+
+func (p BoolParam) GetDescription() string {
+	return p.Description
+}
+
+func (p BoolParam) Serialize() string {
+	if p.Value {
+		return "Yes"
+	}
+
+	return "No"
+}
+
+/* ------------------------------------------------ */
+
 type Amount struct {
 	Denom  string
 	Amount string
