@@ -3,7 +3,10 @@
 ![Latest release](https://img.shields.io/github/v/release/QuokkaStake/cosmos-proposals-checker)
 [![Actions Status](https://github.com/QuokkaStake/cosmos-proposals-checker/workflows/test/badge.svg)](https://github.com/QuokkaStake/cosmos-proposals-checker/actions)
 
-cosmos-proposals-checker is a tool that checks all configured chains for new proposals in voting period, then notifies you if one or more of the configured wallets haven't voted on it.
+cosmos-proposals-checker is a tool that checks all configured chains for new proposals in voting period,
+then notifies you if one or more of the configured wallets haven't voted on it. Like that:
+
+![Telegram](https://raw.githubusercontent.com/QuokkaStake/cosmos-proposals-checker/main/images/telegram.png)
 
 ## How can I set it up?
 
