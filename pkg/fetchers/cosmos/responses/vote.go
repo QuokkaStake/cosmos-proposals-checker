@@ -31,10 +31,10 @@ func (v VoteRPCResponse) IsError() bool {
 
 func (v VoteRPCResponse) ToVote() (*types.Vote, error) {
 	votesMap := map[string]string{
-		"VOTE_OPTION_YES":          "Yes",
-		"VOTE_OPTION_ABSTAIN":      "Abstain",
-		"VOTE_OPTION_NO":           "No",
-		"VOTE_OPTION_NO_WITH_VETO": "No with veto",
+		"VOTE_OPTION_YES":          "👌Yes",
+		"VOTE_OPTION_ABSTAIN":      "🤷Abstain",
+		"VOTE_OPTION_NO":           "🚫No",
+		"VOTE_OPTION_NO_WITH_VETO": "🤬No with veto",
 	}
 
 	var options []types.VoteOption

@@ -44,4 +44,3 @@ linters:
     - ifshort
     - ireturn
     - godox
-    - perfsprint
