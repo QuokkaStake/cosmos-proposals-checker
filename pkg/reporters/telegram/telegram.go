@@ -103,7 +103,7 @@ func (reporter *Reporter) GetTemplate(tmlpType string) (*template.Template, erro
 
 	reporter.Logger.Trace().Str("type", tmlpType).Msg("Loading template")
 
-	filename := fmt.Sprintf("%s.html", tmlpType)
+	filename := tmlpType + ".html"
 
 	t, err := template.New(filename).Funcs(template.FuncMap{
 		"SerializeLink":  reporter.SerializeLink,
