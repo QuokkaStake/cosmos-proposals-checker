@@ -162,7 +162,7 @@ func (r Reporter) SendAlert(alert Alert) error {
 	}
 
 	if response.Status != "success" {
-		return fmt.Errorf("expected 'success' status, got '" + response.Status + "'. Error: " + response.Message)
+		return errors.New("expected 'success' status, got '" + response.Status + "'. Error: " + response.Message)
 	}
 
 	return nil
