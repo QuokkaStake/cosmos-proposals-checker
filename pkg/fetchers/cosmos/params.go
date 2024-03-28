@@ -1,14 +1,13 @@
 package cosmos
 
 import (
-	"fmt"
 	"main/pkg/fetchers/cosmos/responses"
 	"main/pkg/types"
 	"sync"
 )
 
 func (rpc *RPC) GetGovParams(paramsType string) (*responses.ParamsResponse, *types.QueryError) {
-	url := fmt.Sprintf("/cosmos/gov/v1beta1/params/%s", paramsType)
+	url := "/cosmos/gov/v1beta1/params/" + paramsType
 
 	var params responses.ParamsResponse
 	if errs := rpc.Client.Get(url, &params); len(errs) > 0 {

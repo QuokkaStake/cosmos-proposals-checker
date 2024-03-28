@@ -1,6 +1,7 @@
 package cosmos
 
 import (
+	"errors"
 	"fmt"
 	"main/pkg/fetchers/cosmos/responses"
 	"main/pkg/types"
@@ -30,7 +31,7 @@ func (rpc *RPC) GetTallies() (types.ChainTallyInfos, error) {
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 
-	errors := make([]error, 0)
+	errorsList := make([]error, 0)
 
 	var pool math.LegacyDec
 	var proposals []types.Proposal
@@ -46,10 +47,10 @@ func (rpc *RPC) GetTallies() (types.ChainTallyInfos, error) {
 
 		if err != nil {
 			rpc.Logger.Error().Err(err).Msg("Error fetching staking pool")
-			errors = append(errors, err)
+			errorsList = append(errorsList, err)
 		} else if poolResponse.Pool == nil {
 			rpc.Logger.Error().Err(err).Msg("Staking pool is empty!")
-			errors = append(errors, fmt.Errorf("staking pool is empty"))
+			errorsList = append(errorsList, errors.New("staking pool is empty"))
 		} else {
 			pool = poolResponse.Pool.BondedTokens
 		}
@@ -66,7 +67,7 @@ func (rpc *RPC) GetTallies() (types.ChainTallyInfos, error) {
 
 		if err != nil {
 			rpc.Logger.Error().Err(err).Msg("Error fetching chain proposals")
-			errors = append(errors, err)
+			errorsList = append(errorsList, err)
 
 			mutex.Unlock()
 			return
@@ -94,13 +95,13 @@ func (rpc *RPC) GetTallies() (types.ChainTallyInfos, error) {
 						Err(err).
 						Str("proposal_id", p.ID).
 						Msg("Error fetching tally for proposal")
-					errors = append(errors, err)
+					errorsList = append(errorsList, err)
 				} else if tally == nil {
 					rpc.Logger.Error().
 						Err(err).
 						Str("proposal_id", p.ID).
 						Msg("Tally is empty")
-					errors = append(errors, fmt.Errorf("tally is empty"))
+					errorsList = append(errorsList, errors.New("tally is empty"))
 				} else {
 					tallies[p.ID] = *tally
 				}
@@ -112,9 +113,9 @@ func (rpc *RPC) GetTallies() (types.ChainTallyInfos, error) {
 
 	wg.Wait()
 
-	if len(errors) > 0 {
+	if len(errorsList) > 0 {
 		rpc.Logger.Error().Msg("Errors getting tallies info, not processing")
-		return types.ChainTallyInfos{}, fmt.Errorf("could not get tallies info: got %d errors", len(errors))
+		return types.ChainTallyInfos{}, fmt.Errorf("could not get tallies info: got %d errors", len(errorsList))
 	}
 
 	tallyInfos := types.ChainTallyInfos{
@@ -125,7 +126,7 @@ func (rpc *RPC) GetTallies() (types.ChainTallyInfos, error) {
 	for index, proposal := range proposals {
 		tally, ok := tallies[proposal.ID]
 		if !ok {
-			return types.ChainTallyInfos{}, fmt.Errorf("could not get tallies info")
+			return types.ChainTallyInfos{}, errors.New("could not get tallies info")
 		}
 
 		tallyInfos.TallyInfos[index] = types.TallyInfo{
