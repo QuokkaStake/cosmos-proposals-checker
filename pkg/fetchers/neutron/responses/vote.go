@@ -11,9 +11,9 @@ type Vote struct {
 
 func (v Vote) GetOption() string {
 	options := map[string]string{
-		"yes":     "Yes",
-		"no":      "No",
-		"abstain": "Abstain",
+		"yes":     "👌Yes",
+		"no":      "🚫No",
+		"abstain": "🤷Abstain",
 	}
 
 	if option, ok := options[v.Vote]; ok {
