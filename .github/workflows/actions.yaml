@@ -44,9 +44,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Run tests
         run: go test -coverprofile coverage.txt -v ./...
-      - name: Download uploader
-        run: curl -Os https://uploader.codecov.io/latest/linux/codecov
-      - name: Make uploader executable
-        run: chmod +x codecov
-      - name: Run uploader
-        run: ./codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.3.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: QuokkaStake/cosmos-proposals-checker
