@@ -24,6 +24,7 @@ func TestValidateChainWithoutEndpoints(t *testing.T) {
 
 	chain := Chain{
 		Name:         "chain",
+		Type:         "cosmos",
 		LCDEndpoints: []string{},
 	}
 
@@ -36,6 +37,7 @@ func TestValidateChainWithoutWallets(t *testing.T) {
 
 	chain := Chain{
 		Name:         "chain",
+		Type:         "cosmos",
 		LCDEndpoints: []string{"endpoint"},
 		Wallets:      []*Wallet{},
 	}
@@ -114,6 +116,7 @@ func TestValidateConfigWrongProposalType(t *testing.T) {
 		Chains: []*Chain{
 			{
 				Name:          "chain",
+				Type:          "cosmos",
 				LCDEndpoints:  []string{"endpoint"},
 				Wallets:       []*Wallet{{Address: "wallet"}},
 				ProposalsType: "test",
@@ -132,6 +135,7 @@ func TestValidateConfigInvalidTimezone(t *testing.T) {
 		Chains: []*Chain{
 			{
 				Name:          "chain",
+				Type:          "cosmos",
 				LCDEndpoints:  []string{"endpoint"},
 				Wallets:       []*Wallet{{Address: "wallet"}},
 				ProposalsType: "v1",
@@ -150,6 +154,7 @@ func TestValidateConfigInvalidWallet(t *testing.T) {
 		Chains: []*Chain{
 			{
 				Name:          "chain",
+				Type:          "cosmos",
 				LCDEndpoints:  []string{"endpoint"},
 				Wallets:       []*Wallet{{Address: ""}},
 				ProposalsType: "v1",
