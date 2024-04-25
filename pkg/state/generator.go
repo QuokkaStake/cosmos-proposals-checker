@@ -63,7 +63,10 @@ func (g *Generator) ProcessChain(
 		return
 	}
 
-	g.Logger.Info().Int("len", len(proposals)).Msg("Got proposals")
+	g.Logger.Info().
+		Str("chain", chain.Name).
+		Int("len", len(proposals)).
+		Msg("Got proposals")
 
 	var wg sync.WaitGroup
 

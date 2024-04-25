@@ -24,16 +24,28 @@ func NewClient(chainName string, hosts []string, logger zerolog.Logger) *Client 
 	}
 }
 
-func (client *Client) Get(url string, target interface{}) []types.NodeError {
+func (client *Client) Get(
+	url string,
+	target interface{},
+) []types.NodeError {
+	return client.GetWithPredicate(url, target, types.HTTPPredicateAlwaysPass())
+}
+
+func (client *Client) GetWithPredicate(
+	url string,
+	target interface{},
+	predicate types.HTTPPredicate,
+) []types.NodeError {
 	nodeErrors := make([]types.NodeError, len(client.Hosts))
 
 	for index, lcd := range client.Hosts {
 		fullURL := lcd + url
 		client.Logger.Trace().Str("url", fullURL).Msg("Trying making request to LCD")
 
-		err := client.GetFull(
+		_, err := client.GetFull(
 			fullURL,
 			target,
+			predicate,
 		)
 
 		if err == nil {
@@ -51,13 +63,17 @@ func (client *Client) Get(url string, target interface{}) []types.NodeError {
 	return nodeErrors
 }
 
-func (client *Client) GetFull(url string, target interface{}) error {
+func (client *Client) GetFull(
+	url string,
+	target interface{},
+	predicate types.HTTPPredicate,
+) (http.Header, error) {
 	httpClient := &http.Client{Timeout: 300 * time.Second}
 	start := time.Now()
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	req.Header.Set("User-Agent", "cosmos-proposals-checker")
@@ -67,11 +83,19 @@ func (client *Client) GetFull(url string, target interface{}) error {
 	res, err := httpClient.Do(req)
 	if err != nil {
 		client.Logger.Warn().Str("url", url).Err(err).Msg("Query failed")
-		return err
+		return nil, err
 	}
 	defer res.Body.Close()
 
+	if err := predicate(res); err != nil {
+		return nil, err
+	}
+
 	client.Logger.Debug().Str("url", url).Dur("duration", time.Since(start)).Msg("Query is finished")
 
-	return json.NewDecoder(res.Body).Decode(target)
+	if err := json.NewDecoder(res.Body).Decode(target); err != nil {
+		return nil, err
+	}
+
+	return res.Header, nil
 }
