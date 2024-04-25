@@ -9,7 +9,7 @@ func (fetcher *Fetcher) GetTallies() (types.ChainTallyInfos, error) {
 	query := "{\"list_proposals\": {}}"
 
 	var proposals responses.ProposalsResponse
-	if err := fetcher.GetSmartContractState(query, &proposals); err != nil {
+	if _, err := fetcher.GetSmartContractState(query, &proposals, 0); err != nil {
 		return types.ChainTallyInfos{}, err
 	}
 

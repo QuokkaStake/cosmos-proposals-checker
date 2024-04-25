@@ -6,7 +6,10 @@ import (
 	"main/pkg/types"
 )
 
-func (fetcher *Fetcher) GetVote(proposal, voter string) (*types.Vote, *types.QueryError) {
+func (fetcher *Fetcher) GetVote(
+	proposal, voter string,
+	prevHeight int64,
+) (*types.Vote, int64, *types.QueryError) {
 	query := fmt.Sprintf(
 		"{\"get_vote\":{\"proposal_id\":%s,\"voter\":\"%s\"}}",
 		proposal,
@@ -14,10 +17,11 @@ func (fetcher *Fetcher) GetVote(proposal, voter string) (*types.Vote, *types.Que
 	)
 
 	var vote responses.VoteResponse
-	if err := fetcher.GetSmartContractState(query, &vote); err != nil {
-		return nil, err
+	height, err := fetcher.GetSmartContractState(query, &vote, prevHeight)
+	if err != nil {
+		return nil, 0, err
 	}
 
 	voteParsed := vote.ToVote(proposal)
-	return voteParsed, nil
+	return voteParsed, height, nil
 }
