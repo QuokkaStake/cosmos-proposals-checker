@@ -2,8 +2,8 @@ package types
 
 import (
 	"fmt"
+	"main/pkg/utils"
 	"net/http"
-	"strconv"
 )
 
 type HTTPPredicate func(response *http.Response) error
@@ -16,14 +16,7 @@ func HTTPPredicateAlwaysPass() HTTPPredicate {
 
 func HTTPPredicateCheckHeightAfter(prevHeight int64) HTTPPredicate {
 	return func(response *http.Response) error {
-		currentHeightHeader := response.Header.Get("Grpc-Metadata-X-Cosmos-Block-Height")
-
-		// not returned height is ok
-		if currentHeightHeader == "" {
-			return nil
-		}
-
-		currentHeight, err := strconv.ParseInt(currentHeightHeader, 10, 64)
+		currentHeight, err := utils.GetBlockHeightFromHeader(response.Header)
 		if err != nil {
 			return err
 		}

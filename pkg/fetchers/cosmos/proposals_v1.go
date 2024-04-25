@@ -21,10 +21,18 @@ func (rpc *RPC) GetAllV1Proposals() ([]types.Proposal, *types.QueryError) {
 		)
 
 		var batchProposals responses.V1ProposalsRPCResponse
-		if errs := rpc.Client.Get(url, &batchProposals); len(errs) > 0 {
+		errs, header := rpc.Client.GetWithPredicate(url, &batchProposals, types.HTTPPredicateAlwaysPass())
+		if len(errs) > 0 {
 			return nil, &types.QueryError{
 				QueryError: nil,
 				NodeErrors: errs,
+			}
+		}
+
+		_, err := utils.GetBlockHeightFromHeader(header)
+		if err != nil {
+			return nil, &types.QueryError{
+				QueryError: errors.New("got error when parsing proposal height"),
 			}
 		}
 
