@@ -1,10 +1,11 @@
 package types
 
 import (
-	"github.com/stretchr/testify/require"
 	"main/pkg/constants"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestHTTPPredicateAlwaysPass(t *testing.T) {
