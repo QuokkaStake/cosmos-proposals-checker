@@ -28,28 +28,29 @@ func (client *Client) Get(
 	url string,
 	target interface{},
 ) []types.NodeError {
-	return client.GetWithPredicate(url, target, types.HTTPPredicateAlwaysPass())
+	errs, _ := client.GetWithPredicate(url, target, types.HTTPPredicateAlwaysPass())
+	return errs
 }
 
 func (client *Client) GetWithPredicate(
 	url string,
 	target interface{},
 	predicate types.HTTPPredicate,
-) []types.NodeError {
+) ([]types.NodeError, http.Header) {
 	nodeErrors := make([]types.NodeError, len(client.Hosts))
 
 	for index, lcd := range client.Hosts {
 		fullURL := lcd + url
 		client.Logger.Trace().Str("url", fullURL).Msg("Trying making request to LCD")
 
-		_, err := client.GetFull(
+		header, err := client.GetFull(
 			fullURL,
 			target,
 			predicate,
 		)
 
 		if err == nil {
-			return nil
+			return nil, header
 		}
 
 		client.Logger.Warn().Str("url", fullURL).Err(err).Msg("LCD request failed")
@@ -60,7 +61,7 @@ func (client *Client) GetWithPredicate(
 	}
 
 	client.Logger.Warn().Str("url", url).Msg("All LCD requests failed")
-	return nodeErrors
+	return nodeErrors, nil
 }
 
 func (client *Client) GetFull(
