@@ -103,7 +103,7 @@ func (g *Generator) ProcessProposalAndWallet(
 	oldState State,
 ) {
 	oldVote, _, found := oldState.GetVoteAndProposal(chain.Name, proposal.ID, wallet.Address)
-	vote, err := fetcher.GetVote(proposal.ID, wallet.Address)
+	vote, voteHeight, err := fetcher.GetVote(proposal.ID, wallet.Address, oldVote.Height)
 
 	if found && oldVote.HasVoted() && vote == nil {
 		g.Logger.Trace().
@@ -130,6 +130,7 @@ func (g *Generator) ProcessProposalAndWallet(
 		proposalVote.Error = err
 	} else {
 		proposalVote.Vote = vote
+		proposalVote.Height = voteHeight
 	}
 
 	g.Mutex.Lock()

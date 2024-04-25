@@ -9,7 +9,7 @@ func (fetcher *Fetcher) GetChainParams() (*types.ChainWithVotingParams, []error)
 	query := "{\"config\":{}}"
 
 	var params responses.ParamsResponse
-	if err := fetcher.GetSmartContractState(query, &params); err != nil {
+	if _, err := fetcher.GetSmartContractState(query, &params, 0); err != nil {
 		return nil, []error{err}
 	}
 

@@ -2,9 +2,11 @@ package neutron
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"main/pkg/http"
 	"main/pkg/types"
+	"main/pkg/utils"
 
 	"github.com/rs/zerolog"
 )
@@ -23,7 +25,11 @@ func NewFetcher(chainConfig *types.Chain, logger zerolog.Logger) *Fetcher {
 	}
 }
 
-func (fetcher *Fetcher) GetSmartContractState(queryString string, output interface{}) *types.QueryError {
+func (fetcher *Fetcher) GetSmartContractState(
+	queryString string,
+	output interface{},
+	prevHeight int64,
+) (int64, *types.QueryError) {
 	query := base64.StdEncoding.EncodeToString([]byte(queryString))
 
 	url := fmt.Sprintf(
@@ -32,12 +38,24 @@ func (fetcher *Fetcher) GetSmartContractState(queryString string, output interfa
 		query,
 	)
 
-	if errs := fetcher.Client.Get(url, &output); len(errs) > 0 {
-		return &types.QueryError{
+	errs, header := fetcher.Client.GetWithPredicate(
+		url,
+		&output,
+		types.HTTPPredicateCheckHeightAfter(prevHeight),
+	)
+	if len(errs) > 0 {
+		return 0, &types.QueryError{
 			QueryError: nil,
 			NodeErrors: errs,
 		}
 	}
 
-	return nil
+	height, err := utils.GetBlockHeightFromHeader(header)
+	if err != nil {
+		return 0, &types.QueryError{
+			QueryError: errors.New("got error when parsing vote height"),
+		}
+	}
+
+	return height, nil
 }

@@ -8,6 +8,7 @@ type ProposalVote struct {
 	Wallet *types.Wallet
 	Vote   *types.Vote
 	Error  *types.QueryError
+	Height int64
 }
 
 func (v ProposalVote) HasVoted() bool {
