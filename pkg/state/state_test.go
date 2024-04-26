@@ -98,6 +98,25 @@ func TestSetProposalErrorWithChainInfo(t *testing.T) {
 	assert.Equal(t, "test error", err.QueryError.Error(), "Errors text should match!")
 }
 
+func TestSetProposalLastHeight(t *testing.T) {
+	t.Parallel()
+
+	state := State{
+		ChainInfos: map[string]*ChainInfo{
+			"chain1": {ProposalsHeight: 123},
+		},
+	}
+
+	assert.Equal(t, int64(123), state.GetLastProposalsHeight(&types.Chain{Name: "chain1"}))
+	assert.Equal(t, int64(0), state.GetLastProposalsHeight(&types.Chain{Name: "chain2"}))
+
+	state.SetChainProposalsHeight(&types.Chain{Name: "chain1"}, 456)
+	state.SetChainProposalsHeight(&types.Chain{Name: "chain2"}, 789)
+
+	assert.Equal(t, int64(456), state.GetLastProposalsHeight(&types.Chain{Name: "chain1"}))
+	assert.Equal(t, int64(789), state.GetLastProposalsHeight(&types.Chain{Name: "chain2"}))
+}
+
 func TestGetVoteWithoutChainInfo(t *testing.T) {
 	t.Parallel()
 

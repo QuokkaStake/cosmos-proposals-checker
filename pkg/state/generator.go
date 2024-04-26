@@ -46,7 +46,8 @@ func (g *Generator) ProcessChain(
 ) {
 	fetcher := fetchers.GetFetcher(chain, g.Logger)
 
-	proposals, err := fetcher.GetAllProposals()
+	prevHeight := oldState.GetLastProposalsHeight(chain)
+	proposals, proposalsHeight, err := fetcher.GetAllProposals(prevHeight)
 	if err != nil {
 		g.Logger.Warn().Err(err).Msg("Error processing proposals")
 		g.Mutex.Lock()
@@ -66,7 +67,10 @@ func (g *Generator) ProcessChain(
 	g.Logger.Info().
 		Str("chain", chain.Name).
 		Int("len", len(proposals)).
+		Int64("height", proposalsHeight).
 		Msg("Got proposals")
+
+	state.SetChainProposalsHeight(chain, proposalsHeight)
 
 	var wg sync.WaitGroup
 

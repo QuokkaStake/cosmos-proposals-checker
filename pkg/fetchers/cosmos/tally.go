@@ -61,7 +61,7 @@ func (rpc *RPC) GetTallies() (types.ChainTallyInfos, error) {
 	go func() {
 		defer wg.Done()
 
-		chainProposals, err := rpc.GetAllProposals()
+		chainProposals, _, err := rpc.GetAllProposals(0)
 
 		mutex.Lock()
 

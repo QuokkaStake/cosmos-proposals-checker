@@ -26,12 +26,12 @@ func NewRPC(chainConfig *types.Chain, logger zerolog.Logger) *RPC {
 	}
 }
 
-func (rpc *RPC) GetAllProposals() ([]types.Proposal, *types.QueryError) {
+func (rpc *RPC) GetAllProposals(prevHeight int64) ([]types.Proposal, int64, *types.QueryError) {
 	if rpc.ProposalsType == "v1" {
-		return rpc.GetAllV1Proposals()
+		return rpc.GetAllV1Proposals(prevHeight)
 	}
 
-	return rpc.GetAllV1beta1Proposals()
+	return rpc.GetAllV1beta1Proposals(prevHeight)
 }
 
 func (rpc *RPC) GetStakingPool() (*responses.PoolRPCResponse, *types.QueryError) {

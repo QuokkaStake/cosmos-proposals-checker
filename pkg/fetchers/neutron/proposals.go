@@ -5,21 +5,24 @@ import (
 	"main/pkg/types"
 )
 
-func (fetcher *Fetcher) GetAllProposals() ([]types.Proposal, *types.QueryError) {
+func (fetcher *Fetcher) GetAllProposals(
+	prevHeight int64,
+) ([]types.Proposal, int64, *types.QueryError) {
 	query := "{\"list_proposals\": {}}"
 
 	var proposals responses.ProposalsResponse
-	if _, err := fetcher.GetSmartContractState(query, &proposals, 0); err != nil {
-		return nil, err
+	height, err := fetcher.GetSmartContractState(query, &proposals, prevHeight)
+	if err != nil {
+		return nil, height, err
 	}
 
-	proposalsParsed, err := proposals.ToProposals()
-	if err != nil {
-		return nil, &types.QueryError{
+	proposalsParsed, parseErr := proposals.ToProposals()
+	if parseErr != nil {
+		return nil, height, &types.QueryError{
 			QueryError: err,
 			NodeErrors: nil,
 		}
 	}
 
-	return proposalsParsed, nil
+	return proposalsParsed, height, nil
 }

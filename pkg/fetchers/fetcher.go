@@ -9,7 +9,7 @@ import (
 )
 
 type Fetcher interface {
-	GetAllProposals() ([]types.Proposal, *types.QueryError)
+	GetAllProposals(prevHeight int64) ([]types.Proposal, int64, *types.QueryError)
 	GetVote(proposal, voter string, prevHeight int64) (*types.Vote, int64, *types.QueryError)
 	GetTallies() (types.ChainTallyInfos, error)
 
