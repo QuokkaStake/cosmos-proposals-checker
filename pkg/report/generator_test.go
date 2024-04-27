@@ -3,6 +3,8 @@ package report
 import (
 	"errors"
 	"main/pkg/events"
+	"main/pkg/fs"
+	"os"
 	"testing"
 
 	"main/pkg/logger"
@@ -12,10 +14,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type TestFS struct{}
+
+func (fs *TestFS) ReadFile(name string) ([]byte, error) {
+	return []byte{}, nil
+}
+
+func (fs *TestFS) WriteFile(name string, data []byte, perms os.FileMode) error {
+	return nil
+}
+
+func (fs *TestFS) Create(path string) (fs.File, error) {
+	return nil, nil
+}
+
 func TestReportGeneratorWithProposalError(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", logger.GetDefaultLogger())
+	stateManager := state.NewStateManager("./state.json", &TestFS{}, logger.GetDefaultLogger())
 
 	oldState := state.NewState()
 	newState := state.State{
@@ -43,7 +59,7 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 func TestReportGeneratorWithVoteError(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", logger.GetDefaultLogger())
+	stateManager := state.NewStateManager("./state.json", &TestFS{}, logger.GetDefaultLogger())
 
 	oldState := state.NewState()
 	newState := state.State{
@@ -82,7 +98,7 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 func TestReportGeneratorWithNotVoted(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", logger.GetDefaultLogger())
+	stateManager := state.NewStateManager("./state.json", &TestFS{}, logger.GetDefaultLogger())
 
 	oldState := state.NewState()
 	newState := state.State{
@@ -117,7 +133,7 @@ func TestReportGeneratorWithNotVoted(t *testing.T) {
 func TestReportGeneratorWithVoted(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", logger.GetDefaultLogger())
+	stateManager := state.NewStateManager("./state.json", &TestFS{}, logger.GetDefaultLogger())
 
 	oldState := state.State{
 		ChainInfos: map[string]*state.ChainInfo{
@@ -171,7 +187,7 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 func TestReportGeneratorWithRevoted(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", logger.GetDefaultLogger())
+	stateManager := state.NewStateManager("./state.json", &TestFS{}, logger.GetDefaultLogger())
 
 	oldState := state.State{
 		ChainInfos: map[string]*state.ChainInfo{

@@ -2,22 +2,24 @@ package mutesmanager
 
 import (
 	"encoding/json"
-	"os"
+	"main/pkg/fs"
 
 	"github.com/rs/zerolog"
 )
 
 type Manager struct {
-	MutesPath string
-	Logger    zerolog.Logger
-	Mutes     Mutes
+	Filesystem fs.FS
+	MutesPath  string
+	Logger     zerolog.Logger
+	Mutes      Mutes
 }
 
-func NewMutesManager(mutesPath string, logger *zerolog.Logger) *Manager {
+func NewMutesManager(mutesPath string, filesystem fs.FS, logger *zerolog.Logger) *Manager {
 	return &Manager{
-		MutesPath: mutesPath,
-		Logger:    logger.With().Str("component", "mutes_manager").Logger(),
-		Mutes:     Mutes{},
+		Filesystem: filesystem,
+		MutesPath:  mutesPath,
+		Logger:     logger.With().Str("component", "mutes_manager").Logger(),
+		Mutes:      Mutes{},
 	}
 }
 
@@ -27,7 +29,7 @@ func (m *Manager) Load() {
 		return
 	}
 
-	content, err := os.ReadFile(m.MutesPath)
+	content, err := m.Filesystem.ReadFile(m.MutesPath)
 	if err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not load mutes")
 		return
@@ -54,7 +56,7 @@ func (m *Manager) Save() {
 		return
 	}
 
-	if err = os.WriteFile(m.MutesPath, content, 0o600); err != nil {
+	if err = m.Filesystem.WriteFile(m.MutesPath, content, 0o600); err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not save mutes")
 		return
 	}
