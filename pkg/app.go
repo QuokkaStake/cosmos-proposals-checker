@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"main/pkg/data"
+	"main/pkg/fs"
 	"main/pkg/logger"
 	mutes "main/pkg/mutes"
 	"main/pkg/report"
@@ -26,8 +27,8 @@ type App struct {
 	Reporters       []reportersPkg.Reporter
 }
 
-func NewApp(configPath string, version string) *App {
-	config, err := GetConfig(configPath)
+func NewApp(configPath string, filesystem fs.FS, version string) *App {
+	config, err := GetConfig(filesystem, configPath)
 	if err != nil {
 		logger.GetDefaultLogger().Fatal().Err(err).Msg("Could not load config")
 	}
@@ -38,8 +39,8 @@ func NewApp(configPath string, version string) *App {
 
 	log := logger.GetLogger(config.LogConfig)
 
-	stateManager := state.NewStateManager(config.StatePath, log)
-	mutesManager := mutes.NewMutesManager(config.MutesPath, log)
+	stateManager := state.NewStateManager(config.StatePath, filesystem, log)
+	mutesManager := mutes.NewMutesManager(config.MutesPath, filesystem, log)
 	reportGenerator := report.NewReportGenerator(stateManager, log, config.Chains)
 	stateGenerator := state.NewStateGenerator(log, config.Chains)
 	dataManager := data.NewManager(log, config.Chains)

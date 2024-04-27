@@ -2,7 +2,9 @@ package main
 
 import (
 	"main/pkg"
+	"main/pkg/fs"
 	"main/pkg/logger"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -11,8 +13,24 @@ var (
 	version = "unknown"
 )
 
+type OsFS struct {
+}
+
+func (fs *OsFS) ReadFile(name string) ([]byte, error) {
+	return os.ReadFile(name)
+}
+
+func (fs *OsFS) WriteFile(name string, data []byte, perms os.FileMode) error {
+	return os.WriteFile(name, data, perms)
+}
+
+func (fs *OsFS) Create(path string) (fs.File, error) {
+	return os.Create(path)
+}
+
 func Execute(configPath string) {
-	app := pkg.NewApp(configPath, version)
+	filesystem := &OsFS{}
+	app := pkg.NewApp(configPath, filesystem, version)
 	app.Start()
 }
 

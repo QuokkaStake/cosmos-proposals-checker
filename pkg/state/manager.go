@@ -2,27 +2,29 @@ package state
 
 import (
 	"encoding/json"
-	"os"
+	"main/pkg/fs"
 
 	"github.com/rs/zerolog"
 )
 
 type Manager struct {
-	StatePath string
-	Logger    zerolog.Logger
-	State     State
+	Filesystem fs.FS
+	StatePath  string
+	Logger     zerolog.Logger
+	State      State
 }
 
-func NewStateManager(path string, logger *zerolog.Logger) *Manager {
+func NewStateManager(path string, filesystem fs.FS, logger *zerolog.Logger) *Manager {
 	return &Manager{
-		StatePath: path,
-		Logger:    logger.With().Str("component", "state_manager").Logger(),
-		State:     NewState(),
+		StatePath:  path,
+		Filesystem: filesystem,
+		Logger:     logger.With().Str("component", "state_manager").Logger(),
+		State:      NewState(),
 	}
 }
 
 func (m *Manager) Load() {
-	content, err := os.ReadFile(m.StatePath)
+	content, err := m.Filesystem.ReadFile(m.StatePath)
 	if err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not load state")
 		return
@@ -45,7 +47,7 @@ func (m *Manager) Save() {
 		return
 	}
 
-	if err = os.WriteFile(m.StatePath, content, 0o600); err != nil {
+	if err = m.Filesystem.WriteFile(m.StatePath, content, 0o600); err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not save state")
 		return
 	}

@@ -2,16 +2,16 @@ package pkg
 
 import (
 	"fmt"
+	"main/pkg/fs"
 	"main/pkg/logger"
 	"main/pkg/types"
-	"os"
 
 	"github.com/BurntSushi/toml"
 	"github.com/creasty/defaults"
 )
 
-func GetConfig(path string) (*types.Config, error) {
-	configBytes, err := os.ReadFile(path)
+func GetConfig(filesystem fs.FS, path string) (*types.Config, error) {
+	configBytes, err := filesystem.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
