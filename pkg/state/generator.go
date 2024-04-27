@@ -54,6 +54,7 @@ func (g *Generator) ProcessChain(
 		defer g.Mutex.Unlock()
 
 		state.SetChainProposalsError(chain, err)
+		state.SetChainProposalsHeight(chain, prevHeight)
 
 		stateChain, found := oldState.ChainInfos[chain.Name]
 		if found {
@@ -132,6 +133,9 @@ func (g *Generator) ProcessProposalAndWallet(
 
 	if err != nil {
 		proposalVote.Error = err
+		if found {
+			proposalVote.Height = oldVote.Height
+		}
 	} else {
 		proposalVote.Vote = vote
 		proposalVote.Height = voteHeight
