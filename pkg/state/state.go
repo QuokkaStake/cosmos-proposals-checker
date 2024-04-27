@@ -25,9 +25,10 @@ type WalletVotes struct {
 }
 
 type ChainInfo struct {
-	Chain          *types.Chain
-	ProposalVotes  map[string]WalletVotes
-	ProposalsError *types.QueryError
+	Chain           *types.Chain
+	ProposalVotes   map[string]WalletVotes
+	ProposalsError  *types.QueryError
+	ProposalsHeight int64
 }
 
 func (c ChainInfo) HasProposalsError() bool {
@@ -41,6 +42,14 @@ type State struct {
 func NewState() State {
 	return State{
 		ChainInfos: make(map[string]*ChainInfo),
+	}
+}
+
+func (s *State) GetLastProposalsHeight(chain *types.Chain) int64 {
+	if chainInfo, ok := s.ChainInfos[chain.Name]; !ok {
+		return 0
+	} else {
+		return chainInfo.ProposalsHeight
 	}
 }
 
@@ -69,7 +78,25 @@ func (s *State) SetChainProposalsError(chain *types.Chain, err *types.QueryError
 	}
 }
 
-func (s *State) SetChainVotes(chain *types.Chain, votes map[string]WalletVotes) {
+func (s *State) SetChainProposalsHeight(
+	chain *types.Chain,
+	height int64,
+) {
+	if _, ok := s.ChainInfos[chain.Name]; !ok {
+		s.ChainInfos[chain.Name] = &ChainInfo{
+			Chain:         chain,
+			ProposalVotes: make(map[string]WalletVotes),
+		}
+	}
+
+	stateChain := s.ChainInfos[chain.Name]
+	stateChain.ProposalsHeight = height
+}
+
+func (s *State) SetChainVotes(
+	chain *types.Chain,
+	votes map[string]WalletVotes,
+) {
 	stateChain := s.ChainInfos[chain.Name]
 	stateChain.ProposalVotes = votes
 }

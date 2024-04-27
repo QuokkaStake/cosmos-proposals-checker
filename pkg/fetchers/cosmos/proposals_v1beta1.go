@@ -8,9 +8,13 @@ import (
 	"main/pkg/utils"
 )
 
-func (rpc *RPC) GetAllV1beta1Proposals() ([]types.Proposal, *types.QueryError) {
+func (rpc *RPC) GetAllV1beta1Proposals(
+	prevHeight int64,
+) ([]types.Proposal, int64, *types.QueryError) {
 	proposals := []types.Proposal{}
 	offset := 0
+
+	lastHeight := prevHeight
 
 	for {
 		url := fmt.Sprintf(
@@ -21,18 +25,32 @@ func (rpc *RPC) GetAllV1beta1Proposals() ([]types.Proposal, *types.QueryError) {
 		)
 
 		var batchProposals responses.V1Beta1ProposalsRPCResponse
-		if errs := rpc.Client.Get(url, &batchProposals); len(errs) > 0 {
-			return nil, &types.QueryError{
+		errs, header := rpc.Client.GetWithPredicate(
+			url,
+			&batchProposals,
+			types.HTTPPredicateCheckHeightAfter(lastHeight),
+		)
+		if len(errs) > 0 {
+			return nil, 0, &types.QueryError{
 				QueryError: nil,
 				NodeErrors: errs,
 			}
 		}
 
+		height, err := utils.GetBlockHeightFromHeader(header)
+		if err != nil {
+			return nil, 0, &types.QueryError{
+				QueryError: errors.New("got error when parsing proposals height"),
+			}
+		}
+
 		if batchProposals.Message != "" {
-			return nil, &types.QueryError{
+			return nil, height, &types.QueryError{
 				QueryError: errors.New(batchProposals.Message),
 			}
 		}
+
+		lastHeight = height
 
 		parsedProposals := utils.Map(batchProposals.Proposals, func(p responses.V1beta1Proposal) types.Proposal {
 			return p.ToProposal()
@@ -45,5 +63,5 @@ func (rpc *RPC) GetAllV1beta1Proposals() ([]types.Proposal, *types.QueryError) {
 		offset += PaginationLimit
 	}
 
-	return proposals, nil
+	return proposals, lastHeight, nil
 }
