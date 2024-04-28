@@ -8,6 +8,8 @@ import (
 type TestFetcher struct {
 	WithProposals      bool
 	WithProposalsError bool
+	WithVote           bool
+	WithVoteError      bool
 }
 
 func (f *TestFetcher) GetAllProposals(
@@ -34,6 +36,20 @@ func (f *TestFetcher) GetVote(
 	proposal, voter string,
 	prevHeight int64,
 ) (*types.Vote, int64, *types.QueryError) {
+	if f.WithVoteError {
+		return nil, 456, &types.QueryError{
+			QueryError: errors.New("error"),
+		}
+	}
+
+	if f.WithVote {
+		return &types.Vote{
+			ProposalID: "1",
+			Voter:      "me",
+			Options:    types.VoteOptions{},
+		}, 456, nil
+	}
+
 	return nil, 456, nil
 }
 

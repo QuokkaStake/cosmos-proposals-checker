@@ -120,33 +120,37 @@ func (g *Generator) ProcessProposalAndWallet(
 	oldVote, _, found := oldState.GetVoteAndProposal(chain.Name, proposal.ID, wallet.Address)
 	vote, voteHeight, err := fetcher.GetVote(proposal.ID, wallet.Address, oldVote.Height)
 
-	if found && oldVote.HasVoted() && vote == nil {
+	proposalVote := ProposalVote{
+		Wallet: wallet,
+	}
+
+	if err != nil {
+		// 1. If error occurred - store the error, but preserve the older height and vote.
+		g.Logger.Trace().
+			Str("chain", chain.Name).
+			Str("proposal", proposal.ID).
+			Str("wallet", wallet.Address).
+			Int64("height", voteHeight).
+			Err(err).
+			Msg("Error fetching wallet vote - preserving the older height and vote")
+
+		proposalVote.Error = err
+		if found {
+			proposalVote.Height = oldVote.Height
+			proposalVote.Vote = oldVote.Vote
+		}
+	} else if found && oldVote.HasVoted() && vote == nil {
+		// 2. If there's no newer vote while there's an older vote - preserve the older vote
 		g.Logger.Trace().
 			Str("chain", chain.Name).
 			Str("proposal", proposal.ID).
 			Str("wallet", wallet.Address).
 			Msg("Wallet has voted and there's no vote in the new state - using old vote")
 
-		g.Mutex.Lock()
-		state.SetVote(
-			chain,
-			proposal,
-			wallet,
-			oldVote,
-		)
-		g.Mutex.Unlock()
-	}
-
-	proposalVote := ProposalVote{
-		Wallet: wallet,
-	}
-
-	if err != nil {
-		proposalVote.Error = err
-		if found {
-			proposalVote.Height = oldVote.Height
-		}
+		proposalVote.Vote = oldVote.Vote
+		proposalVote.Height = voteHeight
 	} else {
+		// 3. Wallet voted (or hadn't voted and hadn't voted before) - use the older vote.
 		proposalVote.Vote = vote
 		proposalVote.Height = voteHeight
 	}
