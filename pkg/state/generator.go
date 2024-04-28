@@ -1,7 +1,7 @@
 package state
 
 import (
-	"main/pkg/fetchers"
+	fetchersPkg "main/pkg/fetchers"
 	"main/pkg/types"
 	"sync"
 
@@ -9,15 +9,23 @@ import (
 )
 
 type Generator struct {
-	Logger zerolog.Logger
-	Chains types.Chains
-	Mutex  sync.Mutex
+	Logger   zerolog.Logger
+	Chains   types.Chains
+	Fetchers map[string]fetchersPkg.Fetcher
+	Mutex    sync.Mutex
 }
 
 func NewStateGenerator(logger *zerolog.Logger, chains types.Chains) *Generator {
+	fetchers := make(map[string]fetchersPkg.Fetcher, len(chains))
+
+	for _, chain := range chains {
+		fetchers[chain.Name] = fetchersPkg.GetFetcher(chain, *logger)
+	}
+
 	return &Generator{
-		Logger: logger.With().Str("component", "state_generator").Logger(),
-		Chains: chains,
+		Logger:   logger.With().Str("component", "state_generator").Logger(),
+		Chains:   chains,
+		Fetchers: fetchers,
 	}
 }
 
@@ -29,8 +37,11 @@ func (g *Generator) GetState(oldState State) State {
 
 	for _, chain := range g.Chains {
 		g.Logger.Info().Str("name", chain.Name).Msg("Processing a chain")
+
+		fetcher := g.Fetchers[chain.Name]
+
 		go func(c *types.Chain) {
-			g.ProcessChain(c, state, oldState)
+			g.ProcessChain(c, state, oldState, fetcher)
 			wg.Done()
 		}(chain)
 	}
@@ -43,9 +54,8 @@ func (g *Generator) ProcessChain(
 	chain *types.Chain,
 	state State,
 	oldState State,
+	fetcher fetchersPkg.Fetcher,
 ) {
-	fetcher := fetchers.GetFetcher(chain, g.Logger)
-
 	prevHeight := oldState.GetLastProposalsHeight(chain)
 	proposals, proposalsHeight, err := fetcher.GetAllProposals(prevHeight)
 	if err != nil {
@@ -102,7 +112,7 @@ func (g *Generator) ProcessChain(
 func (g *Generator) ProcessProposalAndWallet(
 	chain *types.Chain,
 	proposal types.Proposal,
-	fetcher fetchers.Fetcher,
+	fetcher fetchersPkg.Fetcher,
 	wallet *types.Wallet,
 	state State,
 	oldState State,
