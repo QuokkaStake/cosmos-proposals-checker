@@ -4,7 +4,6 @@ import (
 	"errors"
 	"main/pkg/events"
 	"main/pkg/fs"
-	"os"
 	"testing"
 
 	"main/pkg/logger"
@@ -14,24 +13,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type TestFS struct{}
-
-func (fs *TestFS) ReadFile(name string) ([]byte, error) {
-	return []byte{}, nil
-}
-
-func (fs *TestFS) WriteFile(name string, data []byte, perms os.FileMode) error {
-	return nil
-}
-
-func (fs *TestFS) Create(path string) (fs.File, error) {
-	return nil, nil
-}
-
 func TestReportGeneratorWithProposalError(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", &TestFS{}, logger.GetDefaultLogger())
+	stateManager := state.NewStateManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
 
 	oldState := state.NewState()
 	newState := state.State{
@@ -44,7 +29,7 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 		},
 	}
 
-	generator := NewReportGenerator(stateManager, logger.GetDefaultLogger(), types.Chains{
+	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
 		&types.Chain{Name: "chain"},
 	})
 
@@ -59,7 +44,7 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 func TestReportGeneratorWithVoteError(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", &TestFS{}, logger.GetDefaultLogger())
+	stateManager := state.NewStateManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
 
 	oldState := state.NewState()
 	newState := state.State{
@@ -83,7 +68,7 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 		},
 	}
 
-	generator := NewReportGenerator(stateManager, logger.GetDefaultLogger(), types.Chains{
+	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
 		&types.Chain{Name: "chain"},
 	})
 
@@ -98,7 +83,7 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 func TestReportGeneratorWithNotVoted(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", &TestFS{}, logger.GetDefaultLogger())
+	stateManager := state.NewStateManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
 
 	oldState := state.NewState()
 	newState := state.State{
@@ -118,7 +103,7 @@ func TestReportGeneratorWithNotVoted(t *testing.T) {
 		},
 	}
 
-	generator := NewReportGenerator(stateManager, logger.GetDefaultLogger(), types.Chains{
+	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
 		&types.Chain{Name: "chain"},
 	})
 
@@ -133,7 +118,7 @@ func TestReportGeneratorWithNotVoted(t *testing.T) {
 func TestReportGeneratorWithVoted(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", &TestFS{}, logger.GetDefaultLogger())
+	stateManager := state.NewStateManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
 
 	oldState := state.State{
 		ChainInfos: map[string]*state.ChainInfo{
@@ -172,7 +157,7 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 		},
 	}
 
-	generator := NewReportGenerator(stateManager, logger.GetDefaultLogger(), types.Chains{
+	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
 		&types.Chain{Name: "chain"},
 	})
 
@@ -187,7 +172,7 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 func TestReportGeneratorWithRevoted(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", &TestFS{}, logger.GetDefaultLogger())
+	stateManager := state.NewStateManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
 
 	oldState := state.State{
 		ChainInfos: map[string]*state.ChainInfo{
@@ -230,7 +215,7 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 		},
 	}
 
-	generator := NewReportGenerator(stateManager, logger.GetDefaultLogger(), types.Chains{
+	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
 		&types.Chain{Name: "chain"},
 	})
 
