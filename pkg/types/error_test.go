@@ -4,6 +4,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,4 +37,31 @@ func TestQueryErrorSerializeWithoutQueryError(t *testing.T) {
 		serializedError,
 		"Error mismatch!",
 	)
+}
+
+func TestJsonErrorMarshalJson(t *testing.T) {
+	t.Parallel()
+
+	jsonErr := JSONError{error: "error"}
+	value, err := jsonErr.MarshalJSON()
+
+	require.NoError(t, err)
+	assert.Equal(t, []byte("\"error\""), value)
+}
+
+func TestJsonErrorUnmarshalJson(t *testing.T) {
+	t.Parallel()
+
+	jsonErr := JSONError{}
+	err := jsonErr.UnmarshalJSON([]byte("error"))
+
+	require.NoError(t, err)
+	assert.Equal(t, "error", jsonErr.error)
+}
+
+func TestJsonErrorToString(t *testing.T) {
+	t.Parallel()
+
+	jsonErr := JSONError{error: "error"}
+	assert.Equal(t, "error", jsonErr.Error())
 }
