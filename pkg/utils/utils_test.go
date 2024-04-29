@@ -1,11 +1,14 @@
 package utils
 
 import (
-	"github.com/stretchr/testify/assert"
 	"main/pkg/constants"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFilter(t *testing.T) {
@@ -60,7 +63,7 @@ func TestGetBlockFromHeaderNoValue(t *testing.T) {
 	header := http.Header{}
 	value, err := GetBlockHeightFromHeader(header)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(0), value)
 }
 
@@ -72,7 +75,7 @@ func TestGetBlockFromHeaderInvalidValue(t *testing.T) {
 	}
 	value, err := GetBlockHeightFromHeader(header)
 
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Equal(t, int64(0), value)
 }
 
@@ -84,6 +87,6 @@ func TestGetBlockFromHeaderValidValue(t *testing.T) {
 	}
 	value, err := GetBlockHeightFromHeader(header)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(123), value)
 }
