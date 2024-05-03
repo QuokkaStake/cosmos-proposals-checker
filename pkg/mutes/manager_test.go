@@ -1,11 +1,12 @@
 package mutesmanager
 
 import (
-	"github.com/stretchr/testify/assert"
 	"main/pkg/fs"
 	"main/pkg/logger"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMuteManagerLoadWithoutPath(t *testing.T) {
