@@ -1,6 +1,7 @@
 package fs
 
 import (
+	"main/assets"
 	"os"
 )
 
@@ -18,7 +19,7 @@ func (f *TestFile) Close() error {
 }
 
 func (fs *TestFS) ReadFile(name string) ([]byte, error) {
-	return []byte{}, nil
+	return assets.EmbedFS.ReadFile(name)
 }
 
 func (fs *TestFS) WriteFile(name string, data []byte, perms os.FileMode) error {

@@ -3,7 +3,6 @@ package pkg
 import (
 	"fmt"
 	"main/pkg/fs"
-	"main/pkg/logger"
 	"main/pkg/types"
 
 	"github.com/BurntSushi/toml"
@@ -23,9 +22,7 @@ func GetConfig(filesystem fs.FS, path string) (*types.Config, error) {
 		return nil, err
 	}
 
-	if err := defaults.Set(configStruct); err != nil {
-		logger.GetDefaultLogger().Fatal().Err(err).Msg("Error setting default config values")
-	}
+	defaults.MustSet(configStruct)
 
 	for _, chain := range configStruct.Chains {
 		if chain.MintscanPrefix != "" {
