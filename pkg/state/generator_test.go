@@ -31,7 +31,27 @@ func TestReportGeneratorProcessChain(t *testing.T) {
 		Logger: *log,
 		Chains: chains,
 		Fetchers: map[string]fetchers.Fetcher{
-			"chain": &fetchers.TestFetcher{},
+			"chain": &fetchers.TestFetcher{WithPassedProposals: true},
+		},
+	}
+
+	oldState := NewState()
+	newState := generator.GetState(oldState)
+	assert.Len(t, newState.ChainInfos, 1)
+}
+
+func TestReportGeneratorProcessProposalsWithPassed(t *testing.T) {
+	t.Parallel()
+
+	log := logger.GetNopLogger()
+	chain := &types.Chain{Name: "chain", Type: "cosmos"}
+	chains := types.Chains{chain}
+
+	generator := Generator{
+		Logger: *log,
+		Chains: chains,
+		Fetchers: map[string]fetchers.Fetcher{
+			"chain": &fetchers.TestFetcher{WithPassedProposals: true},
 		},
 	}
 
