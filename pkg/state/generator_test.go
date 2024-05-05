@@ -58,7 +58,7 @@ func TestReportGeneratorProcessProposalWithError(t *testing.T) {
 
 	oldVotes := map[string]WalletVotes{
 		"1": {
-			Proposal: types.Proposal{ID: "1"},
+			Proposal: types.Proposal{ID: "1", Status: types.ProposalStatusVoting},
 		},
 	}
 
@@ -103,7 +103,7 @@ func TestReportGeneratorProcessProposalWithoutError(t *testing.T) {
 
 	oldVotes := map[string]WalletVotes{
 		"1": {
-			Proposal: types.Proposal{ID: "1"},
+			Proposal: types.Proposal{ID: "1", Status: types.ProposalStatusVoting},
 		},
 	}
 
@@ -139,7 +139,7 @@ func TestReportGeneratorProcessVoteWithError(t *testing.T) {
 	chains := types.Chains{chain}
 	fetcher := &fetchers.TestFetcher{WithProposals: true, WithVoteError: true}
 
-	proposal := types.Proposal{ID: "1"}
+	proposal := types.Proposal{ID: "1", Status: types.ProposalStatusVoting}
 	generator := Generator{
 		Logger: *log,
 		Chains: chains,
@@ -196,7 +196,7 @@ func TestReportGeneratorProcessVoteWithDisappearedVote(t *testing.T) {
 	chains := types.Chains{chain}
 	fetcher := &fetchers.TestFetcher{WithProposals: true}
 
-	proposal := types.Proposal{ID: "1"}
+	proposal := types.Proposal{ID: "1", Status: types.ProposalStatusVoting}
 	generator := Generator{
 		Logger: *log,
 		Chains: chains,
@@ -253,7 +253,7 @@ func TestReportGeneratorProcessVoteWithOkVote(t *testing.T) {
 	chains := types.Chains{chain}
 	fetcher := &fetchers.TestFetcher{WithProposals: true, WithVote: true}
 
-	proposal := types.Proposal{ID: "1"}
+	proposal := types.Proposal{ID: "1", Status: types.ProposalStatusVoting}
 	generator := Generator{
 		Logger: *log,
 		Chains: chains,
