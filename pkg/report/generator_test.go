@@ -53,7 +53,8 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							ID: "proposal",
+							ID:     "proposal",
+							Status: types.ProposalStatusVoting,
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
@@ -92,7 +93,8 @@ func TestReportGeneratorWithNotVoted(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							ID: "proposal",
+							ID:     "proposal",
+							Status: types.ProposalStatusVoting,
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {},
@@ -126,7 +128,8 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							ID: "proposal",
+							ID:     "proposal",
+							Status: types.ProposalStatusVoting,
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {},
@@ -142,7 +145,8 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							ID: "proposal",
+							ID:     "proposal",
+							Status: types.ProposalStatusVoting,
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
@@ -180,7 +184,8 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							ID: "proposal",
+							ID:     "proposal",
+							Status: types.ProposalStatusVoting,
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
@@ -200,7 +205,8 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							ID: "proposal",
+							ID:     "proposal",
+							Status: types.ProposalStatusVoting,
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
