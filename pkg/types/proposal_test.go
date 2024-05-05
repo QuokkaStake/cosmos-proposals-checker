@@ -33,5 +33,4 @@ func TestProposalStatusSerialize(t *testing.T) {
 	assert.Equal(t, "🙅‍Rejected", Proposal{Status: ProposalStatusRejected}.SerializeStatus())
 	assert.Equal(t, "🤦‍Failed", Proposal{Status: ProposalStatusFailed}.SerializeStatus())
 	assert.Equal(t, "test", Proposal{Status: ProposalStatus("test")}.SerializeStatus())
-
 }
