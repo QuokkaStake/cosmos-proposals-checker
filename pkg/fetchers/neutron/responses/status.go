@@ -4,8 +4,6 @@ import "main/pkg/types"
 
 func ParseProposalStatus(status string) types.ProposalStatus {
 	switch status {
-	case "PROPOSAL_STATUS_DEPOSIT_PERIOD":
-		return types.ProposalStatusDeposit
 	case "open":
 		return types.ProposalStatusVoting
 	case "executed":
