@@ -36,13 +36,9 @@ type ProposalsResponse struct {
 }
 
 func (p ProposalsResponse) ToProposals() ([]types.Proposal, error) {
-	allProposals := utils.Filter(p.Data.Proposals, func(p ProposalWithID) bool {
-		return p.Proposal.Status == "open"
-	})
+	proposals := make([]types.Proposal, len(p.Data.Proposals))
 
-	proposals := make([]types.Proposal, len(allProposals))
-
-	for index, proposal := range allProposals {
+	for index, proposal := range p.Data.Proposals {
 		proposalParsed, err := proposal.ToProposal()
 		if err != nil {
 			return nil, err
@@ -65,6 +61,7 @@ func (p ProposalWithID) ToProposal() (types.Proposal, error) {
 		Title:       p.Proposal.Title,
 		Description: p.Proposal.Description,
 		EndTime:     time.Unix(0, expiresAt),
+		Status:      ParseProposalStatus(p.Proposal.Status),
 	}, nil
 }
 

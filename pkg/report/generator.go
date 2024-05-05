@@ -46,6 +46,15 @@ func (g *Generator) GenerateReport(oldState, newState state.State) reporters.Rep
 		}
 
 		for proposalID, proposalVotes := range chainInfo.ProposalVotes {
+			if !proposalVotes.Proposal.IsInVoting() {
+				g.Logger.Trace().
+					Str("name", chainName).
+					Str("proposal", proposalID).
+					Str("status", string(proposalVotes.Proposal.Status)).
+					Msg("Proposal is not in voting period - not generating reports for it")
+				continue
+			}
+
 			for wallet := range proposalVotes.Votes {
 				g.Logger.Trace().
 					Str("name", chainName).
