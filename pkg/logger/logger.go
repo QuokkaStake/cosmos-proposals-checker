@@ -26,7 +26,7 @@ func GetLogger(config types.LogConfig) *zerolog.Logger {
 
 	logLevel, err := zerolog.ParseLevel(config.LogLevel)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Could not parse log level")
+		log.Panic().Err(err).Msg("Could not parse log level")
 	}
 
 	zerolog.SetGlobalLevel(logLevel)
