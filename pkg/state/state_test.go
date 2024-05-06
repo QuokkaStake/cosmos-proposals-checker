@@ -300,7 +300,7 @@ func TestGetProposalWithProposalNotPresent(t *testing.T) {
 
 	state := State{
 		ChainInfos: map[string]*ChainInfo{
-			"chain": &ChainInfo{
+			"chain": {
 				ProposalVotes: map[string]WalletVotes{},
 			},
 		},
@@ -315,7 +315,7 @@ func TestGetProposalWithProposalPresent(t *testing.T) {
 
 	state := State{
 		ChainInfos: map[string]*ChainInfo{
-			"chain": &ChainInfo{
+			"chain": {
 				ProposalVotes: map[string]WalletVotes{
 					"proposal": {Proposal: types.Proposal{ID: "proposal"}},
 				},
