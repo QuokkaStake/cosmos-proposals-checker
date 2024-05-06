@@ -81,7 +81,9 @@ func (g *Generator) ProcessChain(
 		Int64("height", proposalsHeight).
 		Msg("Got proposals")
 
+	g.Mutex.Lock()
 	state.SetChainProposalsHeight(chain, proposalsHeight)
+	g.Mutex.Unlock()
 
 	var wg sync.WaitGroup
 
@@ -114,7 +116,9 @@ func (g *Generator) ProcessProposal(
 			Str("name", chain.Name).
 			Str("proposal", proposal.ID).
 			Msg("Proposal is not in voting period - not processing it")
+		g.Mutex.Lock()
 		state.SetProposal(chain, proposal)
+		g.Mutex.Unlock()
 		return
 	}
 
@@ -145,7 +149,7 @@ func (g *Generator) ProcessProposalAndWallet(
 	state State,
 	oldState State,
 ) {
-	oldVote, _, found := oldState.GetVoteAndProposal(chain.Name, proposal.ID, wallet.Address)
+	oldVote, found := oldState.GetVote(chain.Name, proposal.ID, wallet.Address)
 	vote, voteHeight, err := fetcher.GetVote(proposal.ID, wallet.Address, oldVote.Height)
 
 	proposalVote := ProposalVote{

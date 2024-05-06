@@ -284,3 +284,55 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 	assert.True(t, ok, "Expected to have revoted type!")
 	assert.Equal(t, "proposal", entry.Proposal.ID, "Proposal ID mismatch!")
 }
+
+func TestReportGeneratorWithFinishedVoting(t *testing.T) {
+	t.Parallel()
+
+	stateManager := state.NewStateManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
+
+	oldState := state.State{
+		ChainInfos: map[string]*state.ChainInfo{
+			"chain": {
+				ProposalVotes: map[string]state.WalletVotes{
+					"proposal": {
+						Proposal: types.Proposal{
+							ID:     "proposal",
+							Status: types.ProposalStatusVoting,
+						},
+						Votes: map[string]state.ProposalVote{
+							"wallet": {},
+						},
+					},
+				},
+			},
+		},
+	}
+	newState := state.State{
+		ChainInfos: map[string]*state.ChainInfo{
+			"chain": {
+				ProposalVotes: map[string]state.WalletVotes{
+					"proposal": {
+						Proposal: types.Proposal{
+							ID:     "proposal",
+							Status: types.ProposalStatusPassed,
+						},
+						Votes: map[string]state.ProposalVote{
+							"wallet": {},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
+		&types.Chain{Name: "chain"},
+	})
+
+	report := generator.GenerateReport(oldState, newState)
+	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
+
+	entry, ok := report.Entries[0].(events.FinishedVotingEvent)
+	assert.True(t, ok, "Expected to have not voted type!")
+	assert.Equal(t, "proposal", entry.Proposal.ID, "Proposal ID mismatch!")
+}

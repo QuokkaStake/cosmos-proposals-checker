@@ -13,7 +13,7 @@ func TestSetVoteWithoutChainInfo(t *testing.T) {
 	t.Parallel()
 
 	state := NewState()
-	_, _, found := state.GetVoteAndProposal("chain", "proposal", "wallet")
+	_, found := state.GetVote("chain", "proposal", "wallet")
 	assert.False(t, found, "Vote should not be presented!")
 
 	state.SetVote(
@@ -27,7 +27,7 @@ func TestSetVoteWithoutChainInfo(t *testing.T) {
 		},
 	)
 
-	vote, _, found2 := state.GetVoteAndProposal("chain", "proposal", "wallet")
+	vote, found2 := state.GetVote("chain", "proposal", "wallet")
 	assert.True(t, found2, "Vote should be presented!")
 	assert.True(t, vote.HasVoted(), "Vote should be presented!")
 	assert.False(t, vote.IsError(), "There should be no error!")
@@ -122,7 +122,7 @@ func TestGetVoteWithoutChainInfo(t *testing.T) {
 
 	state := State{}
 
-	_, _, found := state.GetVoteAndProposal("chain", "proposal", "wallet")
+	_, found := state.GetVote("chain", "proposal", "wallet")
 	assert.False(t, found, "There should be no vote!")
 }
 
@@ -137,7 +137,7 @@ func TestGetVoteWithoutProposalVotes(t *testing.T) {
 		},
 	}
 
-	_, _, found := state.GetVoteAndProposal("chain", "proposal", "wallet")
+	_, found := state.GetVote("chain", "proposal", "wallet")
 	assert.False(t, found, "There should be no vote!")
 }
 
@@ -154,7 +154,7 @@ func TestGetVoteWithWalletVoteNotPresent(t *testing.T) {
 		},
 	}
 
-	_, _, found := state.GetVoteAndProposal("chain", "proposal", "wallet")
+	_, found := state.GetVote("chain", "proposal", "wallet")
 	assert.False(t, found, "There should be no vote!")
 }
 
@@ -175,7 +175,7 @@ func TestGetVoteWithWalletVotePresent(t *testing.T) {
 		},
 	}
 
-	_, _, found := state.GetVoteAndProposal("chain", "proposal", "wallet")
+	_, found := state.GetVote("chain", "proposal", "wallet")
 	assert.True(t, found, "There should be a vote!")
 }
 
@@ -282,4 +282,48 @@ func TestSetProposal(t *testing.T) {
 	proposalInfo, ok := chainInfo.ProposalVotes["id"]
 	assert.True(t, ok)
 	assert.NotNil(t, proposalInfo)
+}
+
+func TestGetProposalWithChainNotPresent(t *testing.T) {
+	t.Parallel()
+
+	state := State{
+		ChainInfos: map[string]*ChainInfo{},
+	}
+
+	_, found := state.GetProposal("chain", "proposal")
+	assert.False(t, found)
+}
+
+func TestGetProposalWithProposalNotPresent(t *testing.T) {
+	t.Parallel()
+
+	state := State{
+		ChainInfos: map[string]*ChainInfo{
+			"chain": &ChainInfo{
+				ProposalVotes: map[string]WalletVotes{},
+			},
+		},
+	}
+
+	_, found := state.GetProposal("chain", "proposal")
+	assert.False(t, found)
+}
+
+func TestGetProposalWithProposalPresent(t *testing.T) {
+	t.Parallel()
+
+	state := State{
+		ChainInfos: map[string]*ChainInfo{
+			"chain": &ChainInfo{
+				ProposalVotes: map[string]WalletVotes{
+					"proposal": {Proposal: types.Proposal{ID: "proposal"}},
+				},
+			},
+		},
+	}
+
+	proposal, found := state.GetProposal("chain", "proposal")
+	assert.True(t, found)
+	assert.Equal(t, "proposal", proposal.ID)
 }
