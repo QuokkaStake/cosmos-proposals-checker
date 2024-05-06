@@ -31,5 +31,6 @@ func (p V1beta1Proposal) ToProposal() types.Proposal {
 		Title:       p.Content.Title,
 		Description: p.Content.Description,
 		EndTime:     p.VotingEndTime,
+		Status:      ParseProposalStatus(p.Status),
 	}
 }

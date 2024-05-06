@@ -19,7 +19,7 @@ func (rpc *RPC) GetAllV1beta1Proposals(
 	for {
 		url := fmt.Sprintf(
 			// 2 is for PROPOSAL_STATUS_VOTING_PERIOD
-			"/cosmos/gov/v1beta1/proposals?pagination.limit=%d&pagination.offset=%d&proposal_status=2",
+			"/cosmos/gov/v1beta1/proposals?pagination.limit=%d&pagination.offset=%d",
 			PaginationLimit,
 			offset,
 		)

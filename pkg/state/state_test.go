@@ -263,3 +263,23 @@ func TestHasVotedWithWalletVotePresent(t *testing.T) {
 	voted := state.HasVoted("chain", "proposal", "wallet")
 	assert.True(t, voted, "There should be a vote!")
 }
+
+func TestSetProposal(t *testing.T) {
+	t.Parallel()
+
+	state := NewState()
+	proposal := types.Proposal{ID: "id"}
+	chain := &types.Chain{Name: "chain"}
+	assert.Empty(t, state.ChainInfos)
+
+	state.SetProposal(chain, proposal)
+	assert.NotEmpty(t, state.ChainInfos)
+
+	chainInfo, ok := state.ChainInfos["chain"]
+	assert.True(t, ok)
+	assert.NotNil(t, chainInfo)
+
+	proposalInfo, ok := chainInfo.ProposalVotes["id"]
+	assert.True(t, ok)
+	assert.NotNil(t, proposalInfo)
+}

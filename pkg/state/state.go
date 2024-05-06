@@ -53,6 +53,20 @@ func (s *State) GetLastProposalsHeight(chain *types.Chain) int64 {
 	}
 }
 
+func (s *State) SetProposal(chain *types.Chain, proposal types.Proposal) {
+	if _, ok := s.ChainInfos[chain.Name]; !ok {
+		s.ChainInfos[chain.Name] = &ChainInfo{
+			Chain:         chain,
+			ProposalVotes: make(map[string]WalletVotes),
+		}
+	}
+
+	s.ChainInfos[chain.Name].ProposalVotes[proposal.ID] = WalletVotes{
+		Proposal: proposal,
+		Votes:    make(map[string]ProposalVote),
+	}
+}
+
 func (s *State) SetVote(chain *types.Chain, proposal types.Proposal, wallet *types.Wallet, vote ProposalVote) {
 	if _, ok := s.ChainInfos[chain.Name]; !ok {
 		s.ChainInfos[chain.Name] = &ChainInfo{

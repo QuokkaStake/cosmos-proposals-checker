@@ -53,7 +53,8 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							ID: "proposal",
+							ID:     "proposal",
+							Status: types.ProposalStatusVoting,
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
@@ -80,6 +81,58 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 	assert.Equal(t, "proposal", entry.Proposal.ID, "Proposal ID mismatch!")
 }
 
+func TestReportGeneratorWithProposalNotInVotingPeriod(t *testing.T) {
+	t.Parallel()
+
+	stateManager := state.NewStateManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
+
+	oldState := state.State{
+		ChainInfos: map[string]*state.ChainInfo{
+			"chain": {
+				ProposalVotes: map[string]state.WalletVotes{
+					"proposal": {
+						Proposal: types.Proposal{
+							ID:     "proposal",
+							Status: types.ProposalStatusPassed,
+						},
+						Votes: map[string]state.ProposalVote{
+							"wallet": {},
+						},
+					},
+				},
+			},
+		},
+	}
+	newState := state.State{
+		ChainInfos: map[string]*state.ChainInfo{
+			"chain": {
+				ProposalVotes: map[string]state.WalletVotes{
+					"proposal": {
+						Proposal: types.Proposal{
+							ID:     "proposal",
+							Status: types.ProposalStatusPassed,
+						},
+						Votes: map[string]state.ProposalVote{
+							"wallet": {
+								Vote: &types.Vote{
+									Options: []types.VoteOption{{Option: "YES", Weight: 1}},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
+		&types.Chain{Name: "chain"},
+	})
+
+	report := generator.GenerateReport(oldState, newState)
+	assert.Empty(t, report.Entries)
+}
+
 func TestReportGeneratorWithNotVoted(t *testing.T) {
 	t.Parallel()
 
@@ -92,7 +145,8 @@ func TestReportGeneratorWithNotVoted(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							ID: "proposal",
+							ID:     "proposal",
+							Status: types.ProposalStatusVoting,
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {},
@@ -126,7 +180,8 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							ID: "proposal",
+							ID:     "proposal",
+							Status: types.ProposalStatusVoting,
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {},
@@ -142,7 +197,8 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							ID: "proposal",
+							ID:     "proposal",
+							Status: types.ProposalStatusVoting,
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
@@ -180,7 +236,8 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							ID: "proposal",
+							ID:     "proposal",
+							Status: types.ProposalStatusVoting,
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {
@@ -200,7 +257,8 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 				ProposalVotes: map[string]state.WalletVotes{
 					"proposal": {
 						Proposal: types.Proposal{
-							ID: "proposal",
+							ID:     "proposal",
+							Status: types.ProposalStatusVoting,
 						},
 						Votes: map[string]state.ProposalVote{
 							"wallet": {

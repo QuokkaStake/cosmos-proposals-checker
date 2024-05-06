@@ -6,10 +6,11 @@ import (
 )
 
 type TestFetcher struct {
-	WithProposals      bool
-	WithProposalsError bool
-	WithVote           bool
-	WithVoteError      bool
+	WithProposals       bool
+	WithPassedProposals bool
+	WithProposalsError  bool
+	WithVote            bool
+	WithVoteError       bool
 }
 
 func (f *TestFetcher) GetAllProposals(
@@ -21,10 +22,20 @@ func (f *TestFetcher) GetAllProposals(
 		}
 	}
 
+	if f.WithPassedProposals {
+		return []types.Proposal{
+			{
+				ID:     "1",
+				Status: types.ProposalStatusPassed,
+			},
+		}, 123, nil
+	}
+
 	if f.WithProposals {
 		return []types.Proposal{
 			{
-				ID: "1",
+				ID:     "1",
+				Status: types.ProposalStatusVoting,
 			},
 		}, 123, nil
 	}

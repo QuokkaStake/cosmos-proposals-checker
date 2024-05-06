@@ -86,24 +86,52 @@ func (g *Generator) ProcessChain(
 	var wg sync.WaitGroup
 
 	for _, proposal := range proposals {
+		wg.Add(1)
+
+		go func(p types.Proposal) {
+			g.ProcessProposal(chain, p, fetcher, state, oldState)
+			wg.Done()
+		}(proposal)
+	}
+
+	wg.Wait()
+}
+
+func (g *Generator) ProcessProposal(
+	chain *types.Chain,
+	proposal types.Proposal,
+	fetcher fetchersPkg.Fetcher,
+	state State,
+	oldState State,
+) {
+	g.Logger.Trace().
+		Str("name", chain.Name).
+		Str("proposal", proposal.ID).
+		Msg("Processing a proposal")
+
+	if !proposal.IsInVoting() {
 		g.Logger.Trace().
 			Str("name", chain.Name).
 			Str("proposal", proposal.ID).
-			Msg("Processing a proposal")
+			Msg("Proposal is not in voting period - not processing it")
+		state.SetProposal(chain, proposal)
+		return
+	}
 
-		for _, wallet := range chain.Wallets {
-			g.Logger.Trace().
-				Str("name", chain.Name).
-				Str("proposal", proposal.ID).
-				Str("wallet", wallet.Address).
-				Msg("Processing wallet vote")
-			wg.Add(1)
+	var wg sync.WaitGroup
 
-			go func(p types.Proposal, w *types.Wallet) {
-				g.ProcessProposalAndWallet(chain, p, fetcher, w, state, oldState)
-				wg.Done()
-			}(proposal, wallet)
-		}
+	for _, wallet := range chain.Wallets {
+		g.Logger.Trace().
+			Str("name", chain.Name).
+			Str("proposal", proposal.ID).
+			Str("wallet", wallet.Address).
+			Msg("Processing wallet vote")
+		wg.Add(1)
+
+		go func(p types.Proposal, w *types.Wallet) {
+			g.ProcessProposalAndWallet(chain, p, fetcher, w, state, oldState)
+			wg.Done()
+		}(proposal, wallet)
 	}
 
 	wg.Wait()

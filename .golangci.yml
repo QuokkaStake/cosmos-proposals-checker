@@ -45,3 +45,4 @@ linters:
     - ireturn
     - godox
     - perfsprint
+    - mnd
