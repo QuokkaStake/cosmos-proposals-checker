@@ -90,3 +90,24 @@ func TestGetBlockFromHeaderValidValue(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, int64(123), value)
 }
+
+func TestMustMarshallPanic(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			require.Fail(t, "Expected to have a panic here!")
+		}
+	}()
+
+	// see https://stackoverflow.com/a/33964549/1206421
+	MustMarshal(make(chan int))
+}
+
+func TestMustMarshallValid(t *testing.T) {
+	t.Parallel()
+
+	str := "test"
+	content := MustMarshal(str)
+	assert.Equal(t, []byte("\"test\""), content)
+}

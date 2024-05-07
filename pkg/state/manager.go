@@ -3,6 +3,7 @@ package state
 import (
 	"encoding/json"
 	"main/pkg/fs"
+	"main/pkg/utils"
 
 	"github.com/rs/zerolog"
 )
@@ -41,13 +42,9 @@ func (m *Manager) Load() {
 }
 
 func (m *Manager) Save() {
-	content, err := json.Marshal(m.State)
-	if err != nil {
-		m.Logger.Warn().Err(err).Msg("Could not marshal state")
-		return
-	}
+	content := utils.MustMarshal(m.State)
 
-	if err = m.Filesystem.WriteFile(m.StatePath, content, 0o600); err != nil {
+	if err := m.Filesystem.WriteFile(m.StatePath, content, 0o600); err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not save state")
 		return
 	}
