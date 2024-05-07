@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"main/pkg/constants"
 	"math"
@@ -84,4 +85,12 @@ func GetBlockHeightFromHeader(header http.Header) (int64, error) {
 	}
 
 	return value, nil
+}
+
+func MustMarshal(v any) []byte {
+	if content, err := json.Marshal(v); err != nil {
+		panic(err)
+	} else {
+		return content
+	}
 }

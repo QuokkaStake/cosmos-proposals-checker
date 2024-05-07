@@ -3,6 +3,7 @@ package mutesmanager
 import (
 	"encoding/json"
 	"main/pkg/fs"
+	"main/pkg/utils"
 
 	"github.com/rs/zerolog"
 )
@@ -50,13 +51,9 @@ func (m *Manager) Save() {
 		return
 	}
 
-	content, err := json.Marshal(m.Mutes)
-	if err != nil {
-		m.Logger.Warn().Err(err).Msg("Could not marshal mutes")
-		return
-	}
+	content := utils.MustMarshal(m.Mutes)
 
-	if err = m.Filesystem.WriteFile(m.MutesPath, content, 0o600); err != nil {
+	if err := m.Filesystem.WriteFile(m.MutesPath, content, 0o600); err != nil {
 		m.Logger.Warn().Err(err).Msg("Could not save mutes")
 		return
 	}

@@ -115,19 +115,32 @@ func (s *State) SetChainVotes(
 	stateChain.ProposalVotes = votes
 }
 
-func (s *State) GetVoteAndProposal(chain, proposalID, wallet string) (ProposalVote, types.Proposal, bool) {
+func (s *State) GetProposal(chain, proposalID string) (types.Proposal, bool) {
 	if _, ok := s.ChainInfos[chain]; !ok {
-		return ProposalVote{}, types.Proposal{}, false
+		return types.Proposal{}, false
 	}
 	chainInfo := s.ChainInfos[chain]
 
 	if _, ok := chainInfo.ProposalVotes[proposalID]; !ok {
-		return ProposalVote{}, types.Proposal{}, false
+		return types.Proposal{}, false
+	}
+
+	return chainInfo.ProposalVotes[proposalID].Proposal, true
+}
+
+func (s *State) GetVote(chain, proposalID, wallet string) (ProposalVote, bool) {
+	if _, ok := s.ChainInfos[chain]; !ok {
+		return ProposalVote{}, false
+	}
+	chainInfo := s.ChainInfos[chain]
+
+	if _, ok := chainInfo.ProposalVotes[proposalID]; !ok {
+		return ProposalVote{}, false
 	}
 	proposalVotes := chainInfo.ProposalVotes[proposalID]
 
 	vote, found := proposalVotes.Votes[wallet]
-	return vote, proposalVotes.Proposal, found
+	return vote, found
 }
 
 func (s *State) HasVoted(chain, proposal, wallet string) bool {

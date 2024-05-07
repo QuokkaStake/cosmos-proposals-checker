@@ -27,8 +27,8 @@ func (p Proposal) GetTimeLeft() string {
 	return utils.FormatDuration(time.Until(p.EndTime).Round(time.Second))
 }
 
-func (p Proposal) SerializeStatus() string {
-	switch p.Status {
+func (p ProposalStatus) String() string {
+	switch p {
 	case ProposalStatusVoting:
 		return "🗳️Voting"
 	case ProposalStatusDeposit:
@@ -40,7 +40,7 @@ func (p Proposal) SerializeStatus() string {
 	case ProposalStatusFailed:
 		return "🤦‍Failed"
 	default:
-		return string(p.Status)
+		return string(p)
 	}
 }
 
