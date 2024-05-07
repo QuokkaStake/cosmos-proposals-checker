@@ -1,11 +1,12 @@
 package state
 
 import (
-	"github.com/stretchr/testify/assert"
 	"main/pkg/fs"
 	"main/pkg/logger"
 	"main/pkg/types"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestStateManagerLoadNotExisting(t *testing.T) {
