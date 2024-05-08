@@ -166,10 +166,6 @@ func (s *State) ToRenderedState() RenderedState {
 	renderedChainInfos := map[string]RenderedChainInfo{}
 
 	for chainName, chainInfo := range s.ChainInfos {
-		if !chainInfo.HasProposalsError() && len(chainInfo.ProposalVotes) == 0 {
-			continue
-		}
-
 		proposalsKeys := make([]string, 0)
 		renderedProposals := map[string]RenderedProposalVotes{}
 
@@ -202,6 +198,11 @@ func (s *State) ToRenderedState() RenderedState {
 			for index, key := range votesKeys {
 				renderedProposals[proposalID].Votes[index] = renderedVotes[key]
 			}
+		}
+
+		// might be all the proposals are not in voting
+		if !chainInfo.HasProposalsError() && len(renderedProposals) == 0 {
+			continue
 		}
 
 		keys = append(keys, chainName)
