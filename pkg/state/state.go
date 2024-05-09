@@ -2,6 +2,8 @@ package state
 
 import (
 	"main/pkg/types"
+	"sort"
+	"strconv"
 )
 
 type ProposalVote struct {
@@ -157,4 +159,87 @@ func (s *State) HasVoted(chain, proposal, wallet string) bool {
 	}
 
 	return s.ChainInfos[chain].ProposalVotes[proposal].Votes[wallet].HasVoted()
+}
+
+func (s *State) ToRenderedState() RenderedState {
+	keys := make([]string, 0)
+	renderedChainInfos := map[string]RenderedChainInfo{}
+
+	for chainName, chainInfo := range s.ChainInfos {
+		proposalsKeys := make([]string, 0)
+		renderedProposals := map[string]RenderedProposalVotes{}
+
+		for proposalID, proposalVotes := range chainInfo.ProposalVotes {
+			if !proposalVotes.Proposal.IsInVoting() {
+				continue
+			}
+
+			votesKeys := make([]string, 0)
+			renderedVotes := map[string]RenderedWalletVote{}
+
+			for wallet, walletVote := range proposalVotes.Votes {
+				votesKeys = append(votesKeys, wallet)
+				renderedVotes[wallet] = RenderedWalletVote{
+					Wallet: walletVote.Wallet,
+					Vote:   walletVote.Vote,
+					Error:  walletVote.Error,
+				}
+			}
+
+			// sorting wallets votes by wallet name desc
+			sort.Strings(votesKeys)
+
+			proposalsKeys = append(proposalsKeys, proposalID)
+			renderedProposals[proposalID] = RenderedProposalVotes{
+				Proposal: proposalVotes.Proposal,
+				Votes:    make([]RenderedWalletVote, len(votesKeys)),
+			}
+
+			for index, key := range votesKeys {
+				renderedProposals[proposalID].Votes[index] = renderedVotes[key]
+			}
+		}
+
+		// might be all the proposals are not in voting
+		if !chainInfo.HasProposalsError() && len(renderedProposals) == 0 {
+			continue
+		}
+
+		keys = append(keys, chainName)
+		renderedChainInfos[chainName] = RenderedChainInfo{
+			Chain:          chainInfo.Chain,
+			ProposalsError: chainInfo.ProposalsError,
+			ProposalVotes:  make([]RenderedProposalVotes, len(proposalsKeys)),
+		}
+
+		// sorting proposals by ID desc
+		sort.Slice(proposalsKeys, func(i, j int) bool {
+			first, firstErr := strconv.Atoi(proposalsKeys[i])
+			second, secondErr := strconv.Atoi(proposalsKeys[j])
+
+			// if it's faulty - doesn't matter how we sort it out
+			if firstErr != nil || secondErr != nil {
+				return true
+			}
+
+			return first > second
+		})
+
+		for index, key := range proposalsKeys {
+			renderedChainInfos[chainName].ProposalVotes[index] = renderedProposals[key]
+		}
+	}
+
+	// sorting chains by chain name desc
+	sort.Strings(keys)
+
+	renderedState := RenderedState{
+		ChainInfos: make([]RenderedChainInfo, len(keys)),
+	}
+
+	for index, key := range keys {
+		renderedState.ChainInfos[index] = renderedChainInfos[key]
+	}
+
+	return renderedState
 }

@@ -14,10 +14,12 @@ func (reporter *Reporter) HandleProposals(c tele.Context) error {
 		Msg("Got proposals list query")
 
 	state := reporter.StateGenerator.GetState(statePkg.NewState())
+	renderedState := state.ToRenderedState()
+
 	template, _ := reporter.GetTemplate("proposals")
 	var buffer bytes.Buffer
-	if err := template.Execute(&buffer, state); err != nil {
-		reporter.Logger.Error().Err(err).Msg("Error rendering votes template")
+	if err := template.Execute(&buffer, renderedState); err != nil {
+		reporter.Logger.Error().Err(err).Msg("Error rendering proposals template")
 		return err
 	}
 

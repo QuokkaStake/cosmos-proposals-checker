@@ -184,7 +184,7 @@ func (reporter *Reporter) BotReply(c tele.Context, msg string) error {
 
 	for _, line := range msgsByNewline {
 		if sb.Len()+len(line) > MaxMessageSize {
-			if err := c.Reply(sb.String(), tele.ModeHTML); err != nil {
+			if err := c.Reply(sb.String(), tele.ModeHTML, tele.NoPreview); err != nil {
 				reporter.Logger.Error().Err(err).Msg("Could not send Telegram message")
 				return err
 			}
@@ -195,7 +195,7 @@ func (reporter *Reporter) BotReply(c tele.Context, msg string) error {
 		sb.WriteString(line + "\n")
 	}
 
-	if err := c.Reply(sb.String(), tele.ModeHTML); err != nil {
+	if err := c.Reply(sb.String(), tele.ModeHTML, tele.NoPreview); err != nil {
 		reporter.Logger.Error().Err(err).Msg("Could not send Telegram message")
 		return err
 	}
