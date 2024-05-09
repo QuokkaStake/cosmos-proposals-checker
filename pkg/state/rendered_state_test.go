@@ -1,9 +1,10 @@
 package state
 
 import (
-	"github.com/stretchr/testify/assert"
 	"main/pkg/types"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestToRenderedStateFilteredChain(t *testing.T) {
