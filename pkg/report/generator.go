@@ -74,7 +74,7 @@ func (g *Generator) GenerateReport(oldState, newState state.State) reporters.Rep
 					})
 					continue
 				} else if !oldProposal.IsInVoting() && !newProposal.IsInVoting() { // case 2
-					g.Logger.Debug().
+					g.Logger.Trace().
 						Str("chain", chainName).
 						Str("proposal", proposalID).
 						Msg("Previously proposal was and is not in voting period - ignoring.")
