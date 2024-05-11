@@ -3,12 +3,13 @@ package templates
 import (
 	"bytes"
 	"fmt"
-	"github.com/rs/zerolog"
 	"html/template"
 	"main/pkg/types"
 	"main/pkg/utils"
 	"main/templates"
 	"time"
+
+	"github.com/rs/zerolog"
 )
 
 type TelegramTemplatesManager struct {
