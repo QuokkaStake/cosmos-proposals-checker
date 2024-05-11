@@ -300,7 +300,9 @@ func TestReportGeneratorWithFinishedVoting(t *testing.T) {
 							Status: types.ProposalStatusVoting,
 						},
 						Votes: map[string]state.ProposalVote{
-							"wallet": {},
+							"wallet": {
+								Vote: &types.Vote{Options: types.VoteOptions{{Option: "Yes"}}},
+							},
 						},
 					},
 				},
@@ -316,9 +318,7 @@ func TestReportGeneratorWithFinishedVoting(t *testing.T) {
 							ID:     "proposal",
 							Status: types.ProposalStatusPassed,
 						},
-						Votes: map[string]state.ProposalVote{
-							"wallet": {},
-						},
+						Votes: map[string]state.ProposalVote{},
 					},
 				},
 			},
