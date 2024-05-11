@@ -1,8 +1,6 @@
 package telegram
 
 import (
-	"bytes"
-
 	tele "gopkg.in/telebot.v3"
 )
 
@@ -12,12 +10,11 @@ func (reporter *Reporter) HandleHelp(c tele.Context) error {
 		Str("text", c.Text()).
 		Msg("Got help query")
 
-	template, _ := reporter.GetTemplate("help")
-	var buffer bytes.Buffer
-	if err := template.Execute(&buffer, reporter.Version); err != nil {
-		reporter.Logger.Error().Err(err).Msg("Error rendering help template")
-		return err
+	template, err := reporter.TemplatesManager.Render("help", reporter.Version)
+	if err != nil {
+		reporter.Logger.Error().Err(err).Msg("Error rendering template")
+		return reporter.BotReply(c, "Error rendering template")
 	}
 
-	return reporter.BotReply(c, buffer.String())
+	return reporter.BotReply(c, template)
 }

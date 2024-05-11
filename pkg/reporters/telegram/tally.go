@@ -1,7 +1,6 @@
 package telegram
 
 import (
-	"bytes"
 	"fmt"
 
 	tele "gopkg.in/telebot.v3"
@@ -22,19 +21,11 @@ func (reporter *Reporter) HandleTally(c tele.Context) error {
 		return reporter.BotReply(c, fmt.Sprintf("Error getting tallies info: %s", err))
 	}
 
-	template, err := reporter.GetTemplate("tally")
+	template, err := reporter.TemplatesManager.Render("tally", tallies)
 	if err != nil {
-		reporter.Logger.Error().
-			Err(err).
-			Msg("Error rendering tallies template")
-		return reporter.BotReply(c, "Error rendering tallies template")
+		reporter.Logger.Error().Err(err).Msg("Error rendering template")
+		return reporter.BotReply(c, "Error rendering template")
 	}
 
-	var buffer bytes.Buffer
-	if err := template.Execute(&buffer, tallies); err != nil {
-		reporter.Logger.Error().Err(err).Msg("Error rendering votes template")
-		return err
-	}
-
-	return reporter.BotReply(c, buffer.String())
+	return reporter.BotReply(c, template)
 }
