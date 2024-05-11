@@ -1,12 +1,15 @@
 package templates
 
 import (
-	"github.com/stretchr/testify/assert"
 	templatePkg "html/template"
 	loggerPkg "main/pkg/logger"
 	"main/pkg/types"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTelegramGetTemplateNotExisting(t *testing.T) {
@@ -17,7 +20,7 @@ func TestTelegramGetTemplateNotExisting(t *testing.T) {
 	manager := NewTelegramTemplatesManager(logger, timezone)
 
 	template, err := manager.GetTemplate("not-existing")
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Nil(t, template)
 }
 
@@ -29,12 +32,12 @@ func TestTelegramGetTemplateExistingAndCached(t *testing.T) {
 	manager := NewTelegramTemplatesManager(logger, timezone)
 
 	template, err := manager.GetTemplate("help")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, template)
 
 	// this time it should be loaded from cache
 	template2, err2 := manager.GetTemplate("help")
-	assert.NoError(t, err2)
+	require.NoError(t, err2)
 	assert.NotNil(t, template2)
 }
 
@@ -46,7 +49,7 @@ func TestTelegramRenderTemplateError(t *testing.T) {
 	manager := NewTelegramTemplatesManager(logger, timezone)
 
 	template, err := manager.Render("not-existing", nil)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Empty(t, template)
 }
 
@@ -60,7 +63,7 @@ func TestTelegramRenderTemplateRenderError(t *testing.T) {
 	value := map[string]interface{}{}
 
 	template, err := manager.Render("voted", value)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Empty(t, template)
 }
 
@@ -72,7 +75,7 @@ func TestTelegramRenderTemplateRenderSuccess(t *testing.T) {
 	manager := NewTelegramTemplatesManager(logger, timezone)
 
 	template, err := manager.Render("help", "1.0.0")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, template)
 }
 
