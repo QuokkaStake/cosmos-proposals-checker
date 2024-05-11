@@ -1,7 +1,6 @@
 package telegram
 
 import (
-	"bytes"
 	statePkg "main/pkg/state"
 
 	tele "gopkg.in/telebot.v3"
@@ -16,12 +15,11 @@ func (reporter *Reporter) HandleProposals(c tele.Context) error {
 	state := reporter.StateGenerator.GetState(statePkg.NewState())
 	renderedState := state.ToRenderedState()
 
-	template, _ := reporter.GetTemplate("proposals")
-	var buffer bytes.Buffer
-	if err := template.Execute(&buffer, renderedState); err != nil {
-		reporter.Logger.Error().Err(err).Msg("Error rendering proposals template")
-		return err
+	template, err := reporter.TemplatesManager.Render("proposals", renderedState)
+	if err != nil {
+		reporter.Logger.Error().Err(err).Msg("Error rendering template")
+		return reporter.BotReply(c, "Error rendering template")
 	}
 
-	return reporter.BotReply(c, buffer.String())
+	return reporter.BotReply(c, template)
 }

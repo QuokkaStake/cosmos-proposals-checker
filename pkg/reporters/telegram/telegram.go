@@ -1,38 +1,34 @@
 package telegram
 
 import (
-	"bytes"
 	"fmt"
-	"html/template"
 	"main/pkg/data"
 	mutes "main/pkg/mutes"
 	"main/pkg/report/entry"
 	"main/pkg/state"
-	"main/pkg/utils"
+	"main/pkg/templates"
 	"strings"
 	"time"
 
 	"main/pkg/reporters"
 	"main/pkg/types"
-	"main/templates"
 
 	"github.com/rs/zerolog"
 	tele "gopkg.in/telebot.v3"
 )
 
 type Reporter struct {
-	TelegramToken  string
-	TelegramChat   int64
-	MutesManager   *mutes.Manager
-	StateGenerator *state.Generator
-	DataManager    *data.Manager
+	TelegramToken    string
+	TelegramChat     int64
+	MutesManager     *mutes.Manager
+	StateGenerator   *state.Generator
+	DataManager      *data.Manager
+	TemplatesManager templates.Manager
 
 	TelegramBot *tele.Bot
 	Logger      zerolog.Logger
-	Templates   map[string]*template.Template
 
-	Version  string
-	Timezone *time.Location
+	Version string
 }
 
 const (
@@ -49,15 +45,14 @@ func NewTelegramReporter(
 	timezone *time.Location,
 ) *Reporter {
 	return &Reporter{
-		TelegramToken:  config.TelegramToken,
-		TelegramChat:   config.TelegramChat,
-		MutesManager:   mutesManager,
-		StateGenerator: stateGenerator,
-		DataManager:    dataManager,
-		Logger:         logger.With().Str("component", "telegram_reporter").Logger(),
-		Templates:      make(map[string]*template.Template, 0),
-		Version:        version,
-		Timezone:       timezone,
+		TelegramToken:    config.TelegramToken,
+		TelegramChat:     config.TelegramChat,
+		MutesManager:     mutesManager,
+		StateGenerator:   stateGenerator,
+		DataManager:      dataManager,
+		Logger:           logger.With().Str("component", "telegram_reporter").Logger(),
+		TemplatesManager: templates.NewTelegramTemplatesManager(logger, timezone),
+		Version:          version,
 	}
 }
 
@@ -95,45 +90,8 @@ func (reporter *Reporter) Enabled() bool {
 	return reporter.TelegramToken != "" && reporter.TelegramChat != 0
 }
 
-func (reporter *Reporter) GetTemplate(tmlpType string) (*template.Template, error) {
-	if cachedTemplate, ok := reporter.Templates[tmlpType]; ok {
-		reporter.Logger.Trace().Str("type", tmlpType).Msg("Using cached template")
-		return cachedTemplate, nil
-	}
-
-	reporter.Logger.Trace().Str("type", tmlpType).Msg("Loading template")
-
-	filename := tmlpType + ".html"
-
-	t, err := template.New(filename).Funcs(template.FuncMap{
-		"SerializeLink":  reporter.SerializeLink,
-		"SerializeDate":  reporter.SerializeDate,
-		"FormatDuration": utils.FormatDuration,
-	}).ParseFS(templates.TemplatesFs, "telegram/"+filename)
-	if err != nil {
-		return nil, err
-	}
-
-	reporter.Templates[tmlpType] = t
-
-	return t, nil
-}
-
 func (reporter *Reporter) SerializeReportEntry(e entry.ReportEntry) (string, error) {
-	parsedTemplate, err := reporter.GetTemplate(e.Name())
-	if err != nil {
-		reporter.Logger.Error().Err(err).Str("type", e.Name()).Msg("Error loading template")
-		return "", err
-	}
-
-	var buffer bytes.Buffer
-	err = parsedTemplate.Execute(&buffer, e)
-	if err != nil {
-		reporter.Logger.Error().Err(err).Str("type", e.Name()).Msg("Error rendering template")
-		return "", err
-	}
-
-	return buffer.String(), nil
+	return reporter.TemplatesManager.Render(e.Name(), e)
 }
 
 func (reporter *Reporter) SendReport(report reporters.Report) error {
@@ -246,16 +204,4 @@ func ParseMuteOptions(query string, c tele.Context) (*mutes.Mute, string) {
 	}
 
 	return mute, ""
-}
-
-func (reporter *Reporter) SerializeLink(link types.Link) template.HTML {
-	if link.Href != "" {
-		return template.HTML(fmt.Sprintf("<a href='%s'>%s</a>", link.Href, link.Name))
-	}
-
-	return template.HTML(link.Name)
-}
-
-func (reporter *Reporter) SerializeDate(date time.Time) string {
-	return date.In(reporter.Timezone).Format(time.RFC1123)
 }

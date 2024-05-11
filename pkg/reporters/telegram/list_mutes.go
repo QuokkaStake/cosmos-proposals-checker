@@ -1,7 +1,6 @@
 package telegram
 
 import (
-	"bytes"
 	mutes "main/pkg/mutes"
 	"main/pkg/utils"
 
@@ -18,12 +17,11 @@ func (reporter *Reporter) HandleListMutes(c tele.Context) error {
 		return !m.IsExpired()
 	})
 
-	template, _ := reporter.GetTemplate("mutes")
-	var buffer bytes.Buffer
-	if err := template.Execute(&buffer, filteredMutes); err != nil {
-		reporter.Logger.Error().Err(err).Msg("Error rendering votes template")
-		return err
+	template, err := reporter.TemplatesManager.Render("mutes", filteredMutes)
+	if err != nil {
+		reporter.Logger.Error().Err(err).Msg("Error rendering template")
+		return reporter.BotReply(c, "Error rendering template")
 	}
 
-	return reporter.BotReply(c, buffer.String())
+	return reporter.BotReply(c, template)
 }
