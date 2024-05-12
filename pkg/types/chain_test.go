@@ -20,30 +20,6 @@ func TestWalletAddressOrAliasWithAlias(t *testing.T) {
 	assert.Equal(t, "alias", wallet.AddressOrAlias(), "Wrong value!")
 }
 
-func TestFindChainByNameIfPresent(t *testing.T) {
-	t.Parallel()
-
-	chains := Chains{
-		{Name: "chain1"},
-		{Name: "chain2"},
-	}
-
-	chain := chains.FindByName("chain2")
-	assert.NotNil(t, chain, "Chain should be presented!")
-}
-
-func TestFindChainByNameIfNotPresent(t *testing.T) {
-	t.Parallel()
-
-	chains := Chains{
-		{Name: "chain1"},
-		{Name: "chain2"},
-	}
-
-	chain := chains.FindByName("chain3")
-	assert.Nil(t, chain, "Chain should not be presented!")
-}
-
 func TestGetLinksEmpty(t *testing.T) {
 	t.Parallel()
 
@@ -124,4 +100,34 @@ func TestGetWalletLinkWithAlias(t *testing.T) {
 
 	assert.Equal(t, "alias", link.Name, "Wrong value!")
 	assert.Equal(t, "example.com/wallet", link.Href, "Wrong value!")
+}
+
+func TestSetExplorerMintscan(t *testing.T) {
+	t.Parallel()
+
+	chain := Chain{MintscanPrefix: "test"}
+	explorer := chain.GetExplorer()
+
+	assert.NotNil(t, explorer)
+	assert.Equal(t, "https://mintscan.io/test/account/%s", explorer.WalletLinkPattern)
+	assert.Equal(t, "https://mintscan.io/test/proposals/%s", explorer.ProposalLinkPattern)
+}
+
+func TestSetExplorerPing(t *testing.T) {
+	t.Parallel()
+
+	chain := Chain{PingPrefix: "test", PingHost: "https://example.com"}
+	explorer := chain.GetExplorer()
+
+	assert.NotNil(t, explorer)
+	assert.Equal(t, "https://example.com/test/account/%s", explorer.WalletLinkPattern)
+	assert.Equal(t, "https://example.com/test/gov/%s", explorer.ProposalLinkPattern)
+}
+
+func TestSetExplorerEmpty(t *testing.T) {
+	t.Parallel()
+
+	chain := Chain{}
+	explorer := chain.GetExplorer()
+	assert.Nil(t, explorer)
 }
