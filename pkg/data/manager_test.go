@@ -37,7 +37,7 @@ func TestDataManagerGetTallyWithError(t *testing.T) {
 	assert.Empty(t, tallies)
 }
 
-func TestDataManagerGetTallyOk(t *testing.T) {
+func TestDataManagerGetTallyEmpty(t *testing.T) {
 	t.Parallel()
 
 	log := logger.GetNopLogger()
@@ -47,8 +47,24 @@ func TestDataManagerGetTallyOk(t *testing.T) {
 		Fetchers: []fetchersPkg.Fetcher{&fetchersPkg.TestFetcher{}},
 	}
 
-	_, err := dataManager.GetTallies()
+	tallies, err := dataManager.GetTallies()
 	require.NoError(t, err)
+	assert.Empty(t, tallies)
+}
+
+func TestDataManagerGetTallyOk(t *testing.T) {
+	t.Parallel()
+
+	log := logger.GetNopLogger()
+	dataManager := &Manager{
+		Logger:   *log,
+		Chains:   types.Chains{{Name: "chain"}},
+		Fetchers: []fetchersPkg.Fetcher{&fetchersPkg.TestFetcher{WithTallyNotEmpty: true}},
+	}
+
+	tallies, err := dataManager.GetTallies()
+	require.NoError(t, err)
+	assert.NotEmpty(t, tallies)
 }
 
 func TestDataManagerGetParamsWithError(t *testing.T) {

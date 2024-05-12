@@ -11,6 +11,7 @@ type TestFetcher struct {
 	WithVote            bool
 	WithVoteError       bool
 	WithTallyError      bool
+	WithTallyNotEmpty   bool
 	WithParamsError     bool
 }
 
@@ -66,6 +67,18 @@ func (f *TestFetcher) GetTallies() (types.ChainTallyInfos, error) {
 		return types.ChainTallyInfos{}, &types.QueryError{
 			QueryError: errors.New("error"),
 		}
+	}
+
+	if f.WithTallyNotEmpty {
+		return types.ChainTallyInfos{
+			Chain: &types.Chain{Name: "test"},
+			TallyInfos: []types.TallyInfo{
+				{
+					Proposal: types.Proposal{ID: "id"},
+					Tally:    types.Tally{},
+				},
+			},
+		}, nil
 	}
 
 	return types.ChainTallyInfos{}, nil
