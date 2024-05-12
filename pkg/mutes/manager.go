@@ -66,17 +66,13 @@ func (m *Manager) IsEntryMuted(reportEntry entry.ReportEntry) bool {
 		return false
 	}
 
-	chain := entryConverted.GetChain()
-	proposal := entryConverted.GetProposal()
-	return m.IsMuted(chain.Name, proposal.ID)
-}
-
-func (m *Manager) IsMuted(chain string, proposalID string) bool {
 	if m.MutesPath == "" {
 		return false
 	}
 
-	return m.Mutes.IsMuted(chain, proposalID)
+	chain := entryConverted.GetChain()
+	proposal := entryConverted.GetProposal()
+	return m.Mutes.IsMuted(chain.Name, proposal.ID)
 }
 
 func (m *Manager) AddMute(mute *Mute) {
