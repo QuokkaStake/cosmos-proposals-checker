@@ -60,11 +60,14 @@ func (d *Dispatcher) SendReport(report reportersPkg.Report) {
 			Str("name", reporter.Name()).
 			Msg("Sending report...")
 
-		if err := reporter.SendReport(report); err != nil {
-			d.Logger.Error().
-				Err(err).
-				Str("name", reporter.Name()).
-				Msg("Failed to send report")
+		for _, reportEntry := range report.Entries {
+			if err := reporter.SendReportEntry(reportEntry); err != nil {
+				d.Logger.Error().
+					Err(err).
+					Str("name", reporter.Name()).
+					Str("entry", reportEntry.Name()).
+					Msg("Failed to send report entry")
+			}
 		}
 	}
 }

@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"main/pkg/reporters"
 	"main/pkg/types"
 
 	"github.com/rs/zerolog"
@@ -94,31 +93,28 @@ func (reporter *Reporter) SerializeReportEntry(e entry.ReportEntry) (string, err
 	return reporter.TemplatesManager.Render(e.Name(), e)
 }
 
-func (reporter *Reporter) SendReport(report reporters.Report) error {
-	for _, reportEntry := range report.Entries {
-		if reporter.MutesManager.IsEntryMuted(reportEntry) {
-			reporter.Logger.Debug().Msg("Notifications are muted, not sending.")
-			continue
-		}
+func (reporter *Reporter) SendReportEntry(reportEntry entry.ReportEntry) error {
+	if reporter.MutesManager.IsEntryMuted(reportEntry) {
+		reporter.Logger.Debug().Msg("Notifications are muted, not sending.")
+	}
 
-		serializedEntry, err := reporter.SerializeReportEntry(reportEntry)
-		if err != nil {
-			reporter.Logger.Err(err).Msg("Could not serialize report entry")
-			return err
-		}
+	serializedEntry, err := reporter.SerializeReportEntry(reportEntry)
+	if err != nil {
+		reporter.Logger.Err(err).Msg("Could not serialize report entry")
+		return err
+	}
 
-		_, err = reporter.TelegramBot.Send(
-			&tele.User{
-				ID: reporter.TelegramChat,
-			},
-			serializedEntry,
-			tele.ModeHTML,
-			tele.NoPreview,
-		)
-		if err != nil {
-			reporter.Logger.Err(err).Msg("Could not send Telegram message")
-			return err
-		}
+	_, err = reporter.TelegramBot.Send(
+		&tele.User{
+			ID: reporter.TelegramChat,
+		},
+		serializedEntry,
+		tele.ModeHTML,
+		tele.NoPreview,
+	)
+	if err != nil {
+		reporter.Logger.Err(err).Msg("Could not send Telegram message")
+		return err
 	}
 
 	return nil
