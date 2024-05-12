@@ -65,7 +65,9 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 
 func (a *App) Start() {
 	a.StateManager.Load()
-	a.ReportDispatcher.Init()
+	if err := a.ReportDispatcher.Init(); err != nil {
+		a.Logger.Panic().Err(err).Msg("Error initializing reporters")
+	}
 
 	c := cron.New()
 	if _, err := c.AddFunc(a.Config.Interval, func() {
