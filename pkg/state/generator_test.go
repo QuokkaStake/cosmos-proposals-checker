@@ -111,7 +111,7 @@ func TestReportGeneratorProcessProposalWithoutError(t *testing.T) {
 		Wallets: []*types.Wallet{{Address: "me"}},
 	}
 	chains := types.Chains{chain}
-	fetcher := &fetchers.TestFetcher{WithProposals: true, WithVote: true}
+	fetcher := &fetchers.TestFetcher{WithVote: true}
 
 	generator := Generator{
 		Logger: *log,
@@ -157,7 +157,7 @@ func TestReportGeneratorProcessVoteWithError(t *testing.T) {
 		Wallets: []*types.Wallet{wallet},
 	}
 	chains := types.Chains{chain}
-	fetcher := &fetchers.TestFetcher{WithProposals: true, WithVoteError: true}
+	fetcher := &fetchers.TestFetcher{WithVoteError: true}
 
 	proposal := types.Proposal{ID: "1", Status: types.ProposalStatusVoting}
 	generator := Generator{
@@ -214,7 +214,7 @@ func TestReportGeneratorProcessVoteWithDisappearedVote(t *testing.T) {
 		Wallets: []*types.Wallet{wallet},
 	}
 	chains := types.Chains{chain}
-	fetcher := &fetchers.TestFetcher{WithProposals: true}
+	fetcher := &fetchers.TestFetcher{}
 
 	proposal := types.Proposal{ID: "1", Status: types.ProposalStatusVoting}
 	generator := Generator{
@@ -271,7 +271,7 @@ func TestReportGeneratorProcessVoteWithOkVote(t *testing.T) {
 		Wallets: []*types.Wallet{wallet},
 	}
 	chains := types.Chains{chain}
-	fetcher := &fetchers.TestFetcher{WithProposals: true, WithVote: true}
+	fetcher := &fetchers.TestFetcher{WithVote: true}
 
 	proposal := types.Proposal{ID: "1", Status: types.ProposalStatusVoting}
 	generator := Generator{

@@ -16,7 +16,7 @@ type Fetcher interface {
 	GetChainParams() (*types.ChainWithVotingParams, []error)
 }
 
-func GetFetcher(chainConfig *types.Chain, logger zerolog.Logger) Fetcher {
+func GetFetcher(chainConfig *types.Chain, logger *zerolog.Logger) Fetcher {
 	if chainConfig.Type == "neutron" {
 		return neutron.NewFetcher(chainConfig, logger)
 	}

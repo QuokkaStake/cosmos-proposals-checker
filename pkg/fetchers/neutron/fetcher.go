@@ -17,7 +17,7 @@ type Fetcher struct {
 	Client      *http.Client
 }
 
-func NewFetcher(chainConfig *types.Chain, logger zerolog.Logger) *Fetcher {
+func NewFetcher(chainConfig *types.Chain, logger *zerolog.Logger) *Fetcher {
 	return &Fetcher{
 		ChainConfig: chainConfig,
 		Logger:      logger.With().Str("component", "neutron_fetcher").Logger(),

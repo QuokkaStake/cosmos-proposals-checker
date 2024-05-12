@@ -14,7 +14,7 @@ type Client struct {
 	Logger zerolog.Logger
 }
 
-func NewClient(chainName string, hosts []string, logger zerolog.Logger) *Client {
+func NewClient(chainName string, hosts []string, logger *zerolog.Logger) *Client {
 	return &Client{
 		Hosts: hosts,
 		Logger: logger.With().

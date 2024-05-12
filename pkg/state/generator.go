@@ -19,7 +19,7 @@ func NewStateGenerator(logger *zerolog.Logger, chains types.Chains) *Generator {
 	fetchers := make(map[string]fetchersPkg.Fetcher, len(chains))
 
 	for _, chain := range chains {
-		fetchers[chain.Name] = fetchersPkg.GetFetcher(chain, *logger)
+		fetchers[chain.Name] = fetchersPkg.GetFetcher(chain, logger)
 	}
 
 	return &Generator{
