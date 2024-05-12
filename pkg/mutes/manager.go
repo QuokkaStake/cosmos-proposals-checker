@@ -3,6 +3,7 @@ package mutesmanager
 import (
 	"encoding/json"
 	"main/pkg/fs"
+	"main/pkg/report/entry"
 	"main/pkg/utils"
 
 	"github.com/rs/zerolog"
@@ -57,6 +58,17 @@ func (m *Manager) Save() {
 		m.Logger.Warn().Err(err).Msg("Could not save mutes")
 		return
 	}
+}
+
+func (m *Manager) IsEntryMuted(reportEntry entry.ReportEntry) bool {
+	entryConverted, ok := reportEntry.(entry.ReportEntryNotError)
+	if !ok {
+		return false
+	}
+
+	chain := entryConverted.GetChain()
+	proposal := entryConverted.GetProposal()
+	return m.IsMuted(chain.Name, proposal.ID)
 }
 
 func (m *Manager) IsMuted(chain string, proposalID string) bool {

@@ -96,16 +96,9 @@ func (reporter *Reporter) SerializeReportEntry(e entry.ReportEntry) (string, err
 
 func (reporter *Reporter) SendReport(report reporters.Report) error {
 	for _, reportEntry := range report.Entries {
-		if entryConverted, ok := reportEntry.(entry.ReportEntryNotError); ok {
-			chain := entryConverted.GetChain()
-			proposal := entryConverted.GetProposal()
-			if reporter.MutesManager.IsMuted(chain.Name, proposal.ID) {
-				reporter.Logger.Debug().
-					Str("chain", chain.Name).
-					Str("proposal", proposal.ID).
-					Msg("Notifications are muted, not sending.")
-				continue
-			}
+		if reporter.MutesManager.IsEntryMuted(reportEntry) {
+			reporter.Logger.Debug().Msg("Notifications are muted, not sending.")
+			continue
 		}
 
 		serializedEntry, err := reporter.SerializeReportEntry(reportEntry)
