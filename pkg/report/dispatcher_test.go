@@ -1,7 +1,6 @@
 package report
 
 import (
-	"github.com/stretchr/testify/require"
 	"main/pkg/events"
 	"main/pkg/fs"
 	"main/pkg/logger"
@@ -11,6 +10,8 @@ import (
 	"main/pkg/types"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestReportDispatcherInitFail(t *testing.T) {
