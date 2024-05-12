@@ -3,6 +3,7 @@ package mutesmanager
 import (
 	"encoding/json"
 	"main/pkg/fs"
+	"main/pkg/report/entry"
 	"main/pkg/utils"
 
 	"github.com/rs/zerolog"
@@ -59,12 +60,19 @@ func (m *Manager) Save() {
 	}
 }
 
-func (m *Manager) IsMuted(chain string, proposalID string) bool {
+func (m *Manager) IsEntryMuted(reportEntry entry.ReportEntry) bool {
+	entryConverted, ok := reportEntry.(entry.ReportEntryNotError)
+	if !ok {
+		return false
+	}
+
 	if m.MutesPath == "" {
 		return false
 	}
 
-	return m.Mutes.IsMuted(chain, proposalID)
+	chain := entryConverted.GetChain()
+	proposal := entryConverted.GetProposal()
+	return m.Mutes.IsMuted(chain.Name, proposal.ID)
 }
 
 func (m *Manager) AddMute(mute *Mute) {

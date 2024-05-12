@@ -12,8 +12,6 @@ import (
 	"os"
 	"time"
 
-	"main/pkg/reporters"
-
 	"github.com/rs/zerolog"
 )
 
@@ -132,26 +130,17 @@ func (r Reporter) Name() string {
 	return "pagerduty-reporter"
 }
 
-func (r Reporter) SendReport(report reporters.Report) error {
-	var err error
-
-	for _, reportEntry := range report.Entries {
-		if !reportEntry.IsAlert() {
-			continue
-		}
-
-		alert, alertCreateErr := r.NewAlertFromReportEntry(reportEntry)
-		if alertCreateErr != nil {
-			err = alertCreateErr
-			continue
-		}
-
-		if alertErr := r.SendAlert(alert); alertErr != nil {
-			err = alertErr
-		}
+func (r Reporter) SendReportEntry(reportEntry entry.ReportEntry) error {
+	if !reportEntry.IsAlert() {
+		return nil
 	}
 
-	return err
+	alert, alertCreateErr := r.NewAlertFromReportEntry(reportEntry)
+	if alertCreateErr != nil {
+		return alertCreateErr
+	}
+
+	return r.SendAlert(alert)
 }
 
 func (r Reporter) SendAlert(alert Alert) error {

@@ -7,7 +7,7 @@ import (
 type Reporter interface {
 	Init() error
 	Enabled() bool
-	SendReport(report Report) error
+	SendReportEntry(entry entry.ReportEntry) error
 	Name() string
 }
 

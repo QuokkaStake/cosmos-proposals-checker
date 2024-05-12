@@ -18,13 +18,12 @@ import (
 )
 
 type App struct {
-	Logger          *zerolog.Logger
-	Config          *types.Config
-	StateManager    *state.Manager
-	MutesManager    *mutes.Manager
-	ReportGenerator *report.Generator
-	StateGenerator  *state.Generator
-	Reporters       []reportersPkg.Reporter
+	Logger           *zerolog.Logger
+	Config           *types.Config
+	StateManager     *state.Manager
+	ReportGenerator  *report.Generator
+	StateGenerator   *state.Generator
+	ReportDispatcher *report.Dispatcher
 }
 
 func NewApp(configPath string, filesystem fs.FS, version string) *App {
@@ -47,31 +46,27 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 
 	timeZone, _ := time.LoadLocation(config.Timezone)
 
+	reporters := []reportersPkg.Reporter{
+		pagerduty.NewPagerDutyReporter(config.PagerDutyConfig, log),
+		telegram.NewTelegramReporter(config.TelegramConfig, mutesManager, stateGenerator, dataManager, log, version, timeZone),
+	}
+
+	reportDispatcher := report.NewDispatcher(log, mutesManager, reporters)
+
 	return &App{
-		Logger:          log,
-		Config:          config,
-		StateManager:    stateManager,
-		MutesManager:    mutesManager,
-		ReportGenerator: reportGenerator,
-		StateGenerator:  stateGenerator,
-		Reporters: []reportersPkg.Reporter{
-			pagerduty.NewPagerDutyReporter(config.PagerDutyConfig, log),
-			telegram.NewTelegramReporter(config.TelegramConfig, mutesManager, stateGenerator, dataManager, log, version, timeZone),
-		},
+		Logger:           log,
+		Config:           config,
+		StateManager:     stateManager,
+		ReportGenerator:  reportGenerator,
+		StateGenerator:   stateGenerator,
+		ReportDispatcher: reportDispatcher,
 	}
 }
 
 func (a *App) Start() {
 	a.StateManager.Load()
-	a.MutesManager.Load()
-
-	for _, reporter := range a.Reporters {
-		if err := reporter.Init(); err != nil {
-			a.Logger.Fatal().Err(err).Str("name", reporter.Name()).Msg("Error initializing reporter")
-		}
-		if reporter.Enabled() {
-			a.Logger.Info().Str("name", reporter.Name()).Msg("Init reporter")
-		}
+	if err := a.ReportDispatcher.Init(); err != nil {
+		a.Logger.Panic().Err(err).Msg("Error initializing reporters")
 	}
 
 	c := cron.New()
@@ -89,20 +84,5 @@ func (a *App) Start() {
 func (a *App) Report() {
 	newState := a.StateGenerator.GetState(a.StateManager.State)
 	generatedReport := a.ReportGenerator.GenerateReport(a.StateManager.State, newState)
-
-	if generatedReport.Empty() {
-		a.Logger.Debug().Msg("Empty report, not sending.")
-		return
-	}
-
-	a.Logger.Debug().Int("len", len(generatedReport.Entries)).Msg("Got non-empty report")
-
-	for _, reporter := range a.Reporters {
-		if reporter.Enabled() {
-			a.Logger.Debug().Str("name", reporter.Name()).Msg("Sending report...")
-			if err := reporter.SendReport(generatedReport); err != nil {
-				a.Logger.Error().Err(err).Str("name", reporter.Name()).Msg("Failed to send report")
-			}
-		}
-	}
+	a.ReportDispatcher.SendReport(generatedReport)
 }
