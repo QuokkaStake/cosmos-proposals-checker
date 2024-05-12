@@ -5,11 +5,6 @@ import (
 	"main/pkg/utils"
 )
 
-type Explorer struct {
-	ProposalLinkPattern string `toml:"proposal-link-pattern"`
-	WalletLinkPattern   string `toml:"wallet-link-pattern"`
-}
-
 type Wallet struct {
 	Address string `toml:"address"`
 	Alias   string `toml:"alias"`
@@ -28,9 +23,11 @@ type Chain struct {
 	PrettyName     string    `toml:"pretty-name"`
 	KeplrName      string    `toml:"keplr-name"`
 	LCDEndpoints   []string  `toml:"lcd-endpoints"`
-	ProposalsType  string    `default:"v1beta1"      toml:"proposals-type"`
+	ProposalsType  string    `default:"v1beta1"          toml:"proposals-type"`
 	Wallets        []*Wallet `toml:"wallets"`
 	MintscanPrefix string    `toml:"mintscan-prefix"`
+	PingPrefix     string    `toml:"ping-prefix"`
+	PingHost       string    `default:"https://ping.pub" toml:"ping-host"`
 	Explorer       *Explorer `toml:"explorer"`
 
 	Type                 string `default:"cosmos"                                                             toml:"type"`
@@ -75,7 +72,7 @@ func (c Chain) GetName() string {
 	return c.Name
 }
 
-func (c Chain) GetExplorerProposalsLinks(proposalID string) []Link {
+func (c *Chain) GetExplorerProposalsLinks(proposalID string) []Link {
 	links := []Link{}
 
 	if c.KeplrName != "" {
@@ -119,14 +116,20 @@ func (c Chain) GetWalletLink(wallet *Wallet) Link {
 	return link
 }
 
-type Chains []*Chain
-
-func (c Chains) FindByName(name string) *Chain {
-	for _, chain := range c {
-		if chain.Name == name {
-			return chain
+func (c *Chain) GetExplorer() *Explorer {
+	if c.MintscanPrefix != "" {
+		return &Explorer{
+			ProposalLinkPattern: fmt.Sprintf("https://mintscan.io/%s/proposals/%%s", c.MintscanPrefix),
+			WalletLinkPattern:   fmt.Sprintf("https://mintscan.io/%s/account/%%s", c.MintscanPrefix),
 		}
 	}
 
-	return nil
+	if c.PingPrefix != "" {
+		return &Explorer{
+			ProposalLinkPattern: fmt.Sprintf("%s/%s/gov/%%s", c.PingHost, c.PingPrefix),
+			WalletLinkPattern:   fmt.Sprintf("%s/%s/account/%%s", c.PingHost, c.PingPrefix),
+		}
+	}
+
+	return c.Explorer
 }

@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"fmt"
 	"main/pkg/fs"
 	"main/pkg/types"
 
@@ -25,12 +24,7 @@ func GetConfig(filesystem fs.FS, path string) (*types.Config, error) {
 	defaults.MustSet(configStruct)
 
 	for _, chain := range configStruct.Chains {
-		if chain.MintscanPrefix != "" {
-			chain.Explorer = &types.Explorer{
-				ProposalLinkPattern: fmt.Sprintf("https://mintscan.io/%s/proposals/%%s", chain.MintscanPrefix),
-				WalletLinkPattern:   fmt.Sprintf("https://mintscan.io/%s/account/%%s", chain.MintscanPrefix),
-			}
-		}
+		chain.Explorer = chain.GetExplorer()
 	}
 
 	return configStruct, nil
