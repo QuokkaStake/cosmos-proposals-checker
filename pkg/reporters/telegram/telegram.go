@@ -94,10 +94,6 @@ func (reporter *Reporter) SerializeReportEntry(e entry.ReportEntry) (string, err
 }
 
 func (reporter *Reporter) SendReportEntry(reportEntry entry.ReportEntry) error {
-	if reporter.MutesManager.IsEntryMuted(reportEntry) {
-		reporter.Logger.Debug().Msg("Notifications are muted, not sending.")
-	}
-
 	serializedEntry, err := reporter.SerializeReportEntry(reportEntry)
 	if err != nil {
 		reporter.Logger.Err(err).Msg("Could not serialize report entry")

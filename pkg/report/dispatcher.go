@@ -61,6 +61,13 @@ func (d *Dispatcher) SendReport(report reportersPkg.Report) {
 			Msg("Sending report...")
 
 		for _, reportEntry := range report.Entries {
+			if d.MutesManager.IsEntryMuted(reportEntry) {
+				d.Logger.Debug().
+					Str("entry", reportEntry.Name()).
+					Msg("Notifications are muted, not sending.")
+				continue
+			}
+
 			if err := reporter.SendReportEntry(reportEntry); err != nil {
 				d.Logger.Error().
 					Err(err).
