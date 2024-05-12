@@ -2,7 +2,6 @@ package responses
 
 import (
 	"main/pkg/types"
-	"main/pkg/utils"
 	"strconv"
 	"time"
 
@@ -66,16 +65,16 @@ func (p ProposalWithID) ToProposal() (types.Proposal, error) {
 }
 
 func (p ProposalsResponse) ToTally() ([]types.TallyInfo, error) {
-	allProposals := utils.Filter(p.Data.Proposals, func(p ProposalWithID) bool {
-		return p.Proposal.Status == "open"
-	})
+	tallyInfos := make([]types.TallyInfo, 0)
 
-	tallyInfos := make([]types.TallyInfo, len(allProposals))
-
-	for index, proposal := range allProposals {
+	for _, proposal := range p.Data.Proposals {
 		proposalParsed, err := proposal.ToProposal()
 		if err != nil {
 			return []types.TallyInfo{}, err
+		}
+
+		if !proposalParsed.IsInVoting() {
+			continue
 		}
 
 		yesVotes, err := math.LegacyNewDecFromStr(proposal.Proposal.Votes.Yes)
@@ -98,7 +97,7 @@ func (p ProposalsResponse) ToTally() ([]types.TallyInfo, error) {
 			return []types.TallyInfo{}, err
 		}
 
-		tallyInfos[index] = types.TallyInfo{
+		tallyInfos = append(tallyInfos, types.TallyInfo{
 			Proposal: proposalParsed,
 			Tally: types.Tally{
 				{Option: "Yes", Voted: yesVotes},
@@ -106,7 +105,7 @@ func (p ProposalsResponse) ToTally() ([]types.TallyInfo, error) {
 				{Option: "Abstain", Voted: abstainVotes},
 			},
 			TotalVotingPower: totalVotes,
-		}
+		})
 	}
 
 	return tallyInfos, nil

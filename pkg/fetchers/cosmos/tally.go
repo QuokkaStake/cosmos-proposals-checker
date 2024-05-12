@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"main/pkg/fetchers/cosmos/responses"
 	"main/pkg/types"
+	"main/pkg/utils"
 	"sync"
 
 	"cosmossdk.io/math"
@@ -61,7 +62,10 @@ func (rpc *RPC) GetTallies() (types.ChainTallyInfos, error) {
 	go func() {
 		defer wg.Done()
 
-		chainProposals, _, err := rpc.GetAllProposals(0)
+		chainProposalsAll, _, err := rpc.GetAllProposals(0)
+		chainProposals := utils.Filter(chainProposalsAll, func(p types.Proposal) bool {
+			return p.IsInVoting()
+		})
 
 		mutex.Lock()
 

@@ -2,7 +2,7 @@ package data
 
 import (
 	"fmt"
-	"main/pkg/fetchers"
+	fetchersPkg "main/pkg/fetchers"
 	"main/pkg/types"
 	"sync"
 
@@ -10,14 +10,22 @@ import (
 )
 
 type Manager struct {
-	Logger zerolog.Logger
-	Chains types.Chains
+	Logger   zerolog.Logger
+	Chains   types.Chains
+	Fetchers []fetchersPkg.Fetcher
 }
 
 func NewManager(logger *zerolog.Logger, chains types.Chains) *Manager {
+	fetchers := make([]fetchersPkg.Fetcher, len(chains))
+
+	for index, chain := range chains {
+		fetchers[index] = fetchersPkg.GetFetcher(chain, logger)
+	}
+
 	return &Manager{
-		Logger: logger.With().Str("component", "data_manager").Logger(),
-		Chains: chains,
+		Logger:   logger.With().Str("component", "data_manager").Logger(),
+		Chains:   chains,
+		Fetchers: fetchers,
 	}
 }
 
@@ -28,11 +36,11 @@ func (m *Manager) GetTallies() (map[string]types.ChainTallyInfos, error) {
 	errors := make([]error, 0)
 	tallies := make(map[string]types.ChainTallyInfos)
 
-	for _, chain := range m.Chains {
-		fetcher := fetchers.GetFetcher(chain, m.Logger)
+	for index, chain := range m.Chains {
+		fetcher := m.Fetchers[index]
 
 		wg.Add(1)
-		go func(c *types.Chain, fetcher fetchers.Fetcher) {
+		go func(c *types.Chain, fetcher fetchersPkg.Fetcher) {
 			defer wg.Done()
 
 			talliesForChain, err := fetcher.GetTallies()
@@ -40,9 +48,9 @@ func (m *Manager) GetTallies() (map[string]types.ChainTallyInfos, error) {
 			mutex.Lock()
 
 			if err != nil {
-				m.Logger.Error().Err(err).Str("chain", c.Name).Msg("Error fetching staking pool")
+				m.Logger.Error().Err(err).Str("chain", c.Name).Msg("Error fetching tallies")
 				errors = append(errors, err)
-			} else {
+			} else if len(talliesForChain.TallyInfos) > 0 {
 				tallies[c.Name] = talliesForChain
 			}
 			mutex.Unlock()
@@ -66,13 +74,13 @@ func (m *Manager) GetParams() (map[string]types.ChainWithVotingParams, error) {
 	params := make(map[string]types.ChainWithVotingParams)
 	errors := make([]error, 0)
 
-	for _, chain := range m.Chains {
+	for index := range m.Chains {
+		fetcher := m.Fetchers[index]
+
 		wg.Add(1)
 
-		go func(chain *types.Chain) {
+		go func(fetcher fetchersPkg.Fetcher) {
 			defer wg.Done()
-
-			fetcher := fetchers.GetFetcher(chain, m.Logger)
 
 			chainParams, errs := fetcher.GetChainParams()
 			mutex.Lock()
@@ -84,7 +92,7 @@ func (m *Manager) GetParams() (map[string]types.ChainWithVotingParams, error) {
 			}
 
 			params[chainParams.Chain.Name] = *chainParams
-		}(chain)
+		}(fetcher)
 	}
 
 	wg.Wait()

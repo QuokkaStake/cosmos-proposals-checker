@@ -17,7 +17,7 @@ type RPC struct {
 	Logger        zerolog.Logger
 }
 
-func NewRPC(chainConfig *types.Chain, logger zerolog.Logger) *RPC {
+func NewRPC(chainConfig *types.Chain, logger *zerolog.Logger) *RPC {
 	return &RPC{
 		ChainConfig:   chainConfig,
 		ProposalsType: chainConfig.ProposalsType,

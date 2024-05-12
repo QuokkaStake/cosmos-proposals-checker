@@ -6,11 +6,12 @@ import (
 )
 
 type TestFetcher struct {
-	WithProposals       bool
 	WithPassedProposals bool
 	WithProposalsError  bool
 	WithVote            bool
 	WithVoteError       bool
+	WithTallyError      bool
+	WithParamsError     bool
 }
 
 func (f *TestFetcher) GetAllProposals(
@@ -31,16 +32,12 @@ func (f *TestFetcher) GetAllProposals(
 		}, 123, nil
 	}
 
-	if f.WithProposals {
-		return []types.Proposal{
-			{
-				ID:     "1",
-				Status: types.ProposalStatusVoting,
-			},
-		}, 123, nil
-	}
-
-	return []types.Proposal{}, 123, nil
+	return []types.Proposal{
+		{
+			ID:     "1",
+			Status: types.ProposalStatusVoting,
+		},
+	}, 123, nil
 }
 
 func (f *TestFetcher) GetVote(
@@ -65,9 +62,23 @@ func (f *TestFetcher) GetVote(
 }
 
 func (f *TestFetcher) GetTallies() (types.ChainTallyInfos, error) {
+	if f.WithTallyError {
+		return types.ChainTallyInfos{}, &types.QueryError{
+			QueryError: errors.New("error"),
+		}
+	}
+
 	return types.ChainTallyInfos{}, nil
 }
 
 func (f *TestFetcher) GetChainParams() (*types.ChainWithVotingParams, []error) {
-	return nil, []error{}
+	if f.WithParamsError {
+		return &types.ChainWithVotingParams{}, []error{
+			errors.New("test"),
+		}
+	}
+
+	return &types.ChainWithVotingParams{
+		Chain: &types.Chain{Name: "test"},
+	}, []error{}
 }
