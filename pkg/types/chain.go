@@ -27,7 +27,7 @@ type Chain struct {
 	Wallets        []*Wallet `toml:"wallets"`
 	MintscanPrefix string    `toml:"mintscan-prefix"`
 	PingPrefix     string    `toml:"ping-prefix"`
-	PingHost       string    `default:"https://ping.pub" toml:"ping-prefix"`
+	PingHost       string    `default:"https://ping.pub" toml:"ping-host"`
 	Explorer       *Explorer `toml:"explorer"`
 
 	Type                 string `default:"cosmos"                                                             toml:"type"`
@@ -72,7 +72,7 @@ func (c Chain) GetName() string {
 	return c.Name
 }
 
-func (c Chain) GetExplorerProposalsLinks(proposalID string) []Link {
+func (c *Chain) GetExplorerProposalsLinks(proposalID string) []Link {
 	links := []Link{}
 
 	if c.KeplrName != "" {
