@@ -15,5 +15,5 @@ func (e VoteQueryError) Name() string {
 }
 
 func (e VoteQueryError) IsAlert() bool {
-	return true
+	return false
 }
