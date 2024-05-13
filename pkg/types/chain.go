@@ -133,3 +133,25 @@ func (c *Chain) GetExplorer() *Explorer {
 
 	return c.Explorer
 }
+
+func (c *Chain) DisplayWarnings() []Warning {
+	warnings := make([]Warning, 0)
+
+	if c.Explorer == nil {
+		warnings = append(warnings, Warning{
+			Labels:  map[string]string{"chain": c.Name},
+			Message: "explorer is not set, cannot generate links",
+		})
+	} else {
+		warnings = append(warnings, c.Explorer.DisplayWarnings(c.Name)...)
+	}
+
+	if c.KeplrName == "" {
+		warnings = append(warnings, Warning{
+			Labels:  map[string]string{"chain": c.Name},
+			Message: "keplr-name is not set, cannot generate Keplr link to proposal",
+		})
+	}
+
+	return warnings
+}

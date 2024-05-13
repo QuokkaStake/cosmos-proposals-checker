@@ -36,6 +36,12 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 		logger.GetDefaultLogger().Fatal().Err(err).Msg("Provided config is invalid!")
 	}
 
+	if warnings := config.DisplayWarnings(); len(warnings) > 0 {
+		config.LogWarnings(logger.GetDefaultLogger(), warnings)
+	} else {
+		logger.GetDefaultLogger().Info().Msg("Provided config is valid.")
+	}
+
 	log := logger.GetLogger(config.LogConfig)
 
 	stateManager := state.NewStateManager(config.StatePath, filesystem, log)

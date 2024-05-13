@@ -71,7 +71,7 @@ keplr-name = "sentinel"
 mintscan-prefix = "sentinel"
 lcd-endpoints = ["https://lcd-sentinel-app.cosmostation.io", "https://lcd-sentinel.whispernode.com"]
 wallets = [
-    "sent1rw9wtyhsus7jvx55v3qv5nzun054ma6kas4u3l"
+    { address = "sent1rw9wtyhsus7jvx55v3qv5nzun054ma6kas4u3l" }
 ]
 
 # PagerDuty notifier config.

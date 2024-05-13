@@ -3,6 +3,8 @@ package types
 import (
 	"fmt"
 	"time"
+
+	"github.com/rs/zerolog"
 )
 
 type Config struct {
@@ -42,4 +44,40 @@ func (c *Config) Validate() error {
 	}
 
 	return nil
+}
+
+func (c *Config) DisplayWarnings() []Warning {
+	warnings := make([]Warning, 0)
+
+	for _, chain := range c.Chains {
+		warnings = append(warnings, chain.DisplayWarnings()...)
+	}
+
+	if c.MutesPath == "" {
+		warnings = append(warnings, Warning{
+			Labels:  map[string]string{},
+			Message: "mutes-path is not set, cannot persist proposals mutes on disk.",
+		})
+	}
+
+	if c.StatePath == "" {
+		warnings = append(warnings, Warning{
+			Labels:  map[string]string{},
+			Message: "state-path is not set, cannot persist proposals state on disk.",
+		})
+	}
+
+	return warnings
+}
+
+func (c *Config) LogWarnings(logger *zerolog.Logger, warnings []Warning) {
+	for _, warning := range warnings {
+		entry := logger.Warn()
+
+		for key, label := range warning.Labels {
+			entry = entry.Str(key, label)
+		}
+
+		entry.Msg(warning.Message)
+	}
 }

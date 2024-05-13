@@ -131,3 +131,30 @@ func TestSetExplorerEmpty(t *testing.T) {
 	explorer := chain.GetExplorer()
 	assert.Nil(t, explorer)
 }
+
+func TestChainDisplayWarningsEmptyExplorer(t *testing.T) {
+	t.Parallel()
+
+	chain := Chain{KeplrName: "test"}
+	warnings := chain.DisplayWarnings()
+	assert.Len(t, warnings, 1)
+}
+
+func TestChainDisplayWarningsEmptyKeplrName(t *testing.T) {
+	t.Parallel()
+
+	chain := Chain{Explorer: &Explorer{ProposalLinkPattern: "test", WalletLinkPattern: "test"}}
+	warnings := chain.DisplayWarnings()
+	assert.Len(t, warnings, 1)
+}
+
+func TestChainDisplayWarningsOk(t *testing.T) {
+	t.Parallel()
+
+	chain := Chain{
+		Explorer:  &Explorer{ProposalLinkPattern: "test", WalletLinkPattern: "test"},
+		KeplrName: "test",
+	}
+	warnings := chain.DisplayWarnings()
+	assert.Empty(t, warnings)
+}
