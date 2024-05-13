@@ -3,6 +3,8 @@ package types
 import (
 	"testing"
 
+	"github.com/rs/zerolog"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
@@ -201,4 +203,87 @@ func TestValidateConfigValidChain(t *testing.T) {
 	}
 	err := config.Validate()
 	require.NoError(t, err, "Error should not be presented!")
+}
+
+func TestConfigDisplayWarningInvalidChain(t *testing.T) {
+	t.Parallel()
+
+	config := Config{
+		Timezone:  "Europe/Moscow",
+		StatePath: "test",
+		MutesPath: "test",
+		Chains: []*Chain{
+			{
+				KeplrName: "test",
+			},
+		},
+	}
+	warnings := config.DisplayWarnings()
+	assert.Len(t, warnings, 1)
+}
+
+func TestConfigDisplayWarningNoStatePath(t *testing.T) {
+	t.Parallel()
+
+	config := Config{
+		Timezone:  "Europe/Moscow",
+		MutesPath: "test",
+		Chains: []*Chain{
+			{
+				KeplrName: "test",
+				Explorer:  &Explorer{WalletLinkPattern: "test", ProposalLinkPattern: "test"},
+			},
+		},
+	}
+	warnings := config.DisplayWarnings()
+	assert.Len(t, warnings, 1)
+}
+
+func TestConfigDisplayWarningNoMutesPath(t *testing.T) {
+	t.Parallel()
+
+	config := Config{
+		Timezone:  "Europe/Moscow",
+		StatePath: "test",
+		Chains: []*Chain{
+			{
+				KeplrName: "test",
+				Explorer:  &Explorer{WalletLinkPattern: "test", ProposalLinkPattern: "test"},
+			},
+		},
+	}
+	warnings := config.DisplayWarnings()
+	assert.Len(t, warnings, 1)
+}
+
+func TestConfigDisplayWarningOk(t *testing.T) {
+	t.Parallel()
+
+	config := Config{
+		Timezone:  "Europe/Moscow",
+		StatePath: "test",
+		MutesPath: "test",
+		Chains: []*Chain{
+			{
+				KeplrName: "test",
+				Explorer:  &Explorer{WalletLinkPattern: "test", ProposalLinkPattern: "test"},
+			},
+		},
+	}
+	warnings := config.DisplayWarnings()
+	assert.Empty(t, warnings)
+}
+
+func TestConfigLogWarnings(t *testing.T) {
+	t.Parallel()
+
+	config := Config{
+		Timezone: "Europe/Moscow",
+		Chains: []*Chain{
+			{},
+		},
+	}
+	warnings := config.DisplayWarnings()
+	logger := zerolog.Nop()
+	config.LogWarnings(&logger, warnings)
 }
