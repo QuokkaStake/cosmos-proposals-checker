@@ -2,6 +2,7 @@ package pagerduty
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,8 @@ import (
 	"os"
 	"time"
 
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/rs/zerolog"
 )
 
@@ -19,6 +22,7 @@ type Reporter struct {
 	PagerDutyURL string
 	APIKey       string
 	Logger       zerolog.Logger
+	Tracer       trace.Tracer
 }
 
 type AlertPayload struct {
@@ -110,11 +114,16 @@ func (r *Reporter) NewAlertFromReportEntry(eventRaw entry.ReportEntry) (Alert, e
 	}, nil
 }
 
-func NewPagerDutyReporter(config types.PagerDutyConfig, logger *zerolog.Logger) Reporter {
+func NewPagerDutyReporter(
+	config types.PagerDutyConfig,
+	logger *zerolog.Logger,
+	tracer trace.Tracer,
+) Reporter {
 	return Reporter{
 		PagerDutyURL: config.PagerDutyURL,
 		APIKey:       config.APIKey,
 		Logger:       logger.With().Str("component", "pagerduty_reporter").Logger(),
+		Tracer:       tracer,
 	}
 }
 
@@ -130,7 +139,10 @@ func (r Reporter) Name() string {
 	return "pagerduty-reporter"
 }
 
-func (r Reporter) SendReportEntry(reportEntry entry.ReportEntry) error {
+func (r Reporter) SendReportEntry(reportEntry entry.ReportEntry, ctx context.Context) error {
+	_, span := r.Tracer.Start(ctx, "Sending Pagerduty report entry")
+	defer span.End()
+
 	if !reportEntry.IsAlert() {
 		return nil
 	}

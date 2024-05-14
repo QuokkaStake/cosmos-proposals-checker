@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"context"
 	"fmt"
 	"main/pkg/data"
 	mutes "main/pkg/mutes"
@@ -9,6 +10,8 @@ import (
 	"main/pkg/templates"
 	"strings"
 	"time"
+
+	"go.opentelemetry.io/otel/trace"
 
 	"main/pkg/types"
 
@@ -23,6 +26,7 @@ type Reporter struct {
 	StateGenerator   *state.Generator
 	DataManager      *data.Manager
 	TemplatesManager templates.Manager
+	Tracer           trace.Tracer
 
 	TelegramBot *tele.Bot
 	Logger      zerolog.Logger
@@ -42,6 +46,7 @@ func NewTelegramReporter(
 	logger *zerolog.Logger,
 	version string,
 	timezone *time.Location,
+	tracer trace.Tracer,
 ) *Reporter {
 	return &Reporter{
 		TelegramToken:    config.TelegramToken,
@@ -52,6 +57,7 @@ func NewTelegramReporter(
 		Logger:           logger.With().Str("component", "telegram_reporter").Logger(),
 		TemplatesManager: templates.NewTelegramTemplatesManager(logger, timezone),
 		Version:          version,
+		Tracer:           tracer,
 	}
 }
 
@@ -93,7 +99,10 @@ func (reporter *Reporter) SerializeReportEntry(e entry.ReportEntry) (string, err
 	return reporter.TemplatesManager.Render(e.Name(), e)
 }
 
-func (reporter *Reporter) SendReportEntry(reportEntry entry.ReportEntry) error {
+func (reporter *Reporter) SendReportEntry(reportEntry entry.ReportEntry, ctx context.Context) error {
+	_, span := reporter.Tracer.Start(ctx, "Sending Telegram report entry")
+	defer span.End()
+
 	serializedEntry, err := reporter.SerializeReportEntry(reportEntry)
 	if err != nil {
 		reporter.Logger.Err(err).Msg("Could not serialize report entry")

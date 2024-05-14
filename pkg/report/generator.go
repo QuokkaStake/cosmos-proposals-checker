@@ -1,12 +1,15 @@
 package report
 
 import (
+	"context"
 	"main/pkg/events"
 	"main/pkg/fetchers/cosmos"
 	"main/pkg/report/entry"
 	"main/pkg/reporters"
 	"main/pkg/state"
 	"main/pkg/types"
+
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/rs/zerolog"
 )
@@ -16,21 +19,27 @@ type Generator struct {
 	Chains       types.Chains
 	RPC          *cosmos.RPC
 	Logger       zerolog.Logger
+	Tracer       trace.Tracer
 }
 
 func NewReportGenerator(
 	manager *state.Manager,
 	logger *zerolog.Logger,
 	chains types.Chains,
+	tracer trace.Tracer,
 ) *Generator {
 	return &Generator{
 		StateManager: manager,
 		Chains:       chains,
 		Logger:       logger.With().Str("component", "report_generator").Logger(),
+		Tracer:       tracer,
 	}
 }
 
-func (g *Generator) GenerateReport(oldState, newState state.State) reporters.Report {
+func (g *Generator) GenerateReport(oldState, newState state.State, ctx context.Context) reporters.Report {
+	_, span := g.Tracer.Start(ctx, "Generating report")
+	defer span.End()
+
 	entries := []entry.ReportEntry{}
 
 	for chainName, chainInfo := range newState.ChainInfos {

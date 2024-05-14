@@ -1,8 +1,11 @@
 package report
 
 import (
+	"context"
 	mutes "main/pkg/mutes"
 	reportersPkg "main/pkg/reporters"
+
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/rs/zerolog"
 )
@@ -11,17 +14,20 @@ type Dispatcher struct {
 	Logger       zerolog.Logger
 	MutesManager *mutes.Manager
 	Reporters    []reportersPkg.Reporter
+	Tracer       trace.Tracer
 }
 
 func NewDispatcher(
 	logger *zerolog.Logger,
 	mutesManager *mutes.Manager,
 	reporters []reportersPkg.Reporter,
+	tracer trace.Tracer,
 ) *Dispatcher {
 	return &Dispatcher{
 		Logger:       logger.With().Str("component", "report_dispatcher").Logger(),
 		MutesManager: mutesManager,
 		Reporters:    reporters,
+		Tracer:       tracer,
 	}
 }
 
@@ -43,7 +49,10 @@ func (d *Dispatcher) Init() error {
 	return nil
 }
 
-func (d *Dispatcher) SendReport(report reportersPkg.Report) {
+func (d *Dispatcher) SendReport(report reportersPkg.Report, ctx context.Context) {
+	childCtx, span := d.Tracer.Start(ctx, "Sending report")
+	defer span.End()
+
 	if report.Empty() {
 		d.Logger.Debug().Msg("Empty report, not sending.")
 		return
@@ -71,7 +80,7 @@ func (d *Dispatcher) SendReport(report reportersPkg.Report) {
 				continue
 			}
 
-			if err := reporter.SendReportEntry(reportEntry); err != nil {
+			if err := reporter.SendReportEntry(reportEntry, childCtx); err != nil {
 				d.Logger.Error().
 					Err(err).
 					Str("name", reporter.Name()).

@@ -1,6 +1,7 @@
 package cosmos
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"main/pkg/fetchers/cosmos/responses"
@@ -11,14 +12,14 @@ import (
 	"cosmossdk.io/math"
 )
 
-func (rpc *RPC) GetTally(proposal string) (*types.Tally, *types.QueryError) {
+func (rpc *RPC) GetTally(proposal string, ctx context.Context) (*types.Tally, *types.QueryError) {
 	url := fmt.Sprintf(
 		"/cosmos/gov/v1beta1/proposals/%s/tally",
 		proposal,
 	)
 
 	var tally responses.TallyRPCResponse
-	if errs := rpc.Client.Get(url, &tally); len(errs) > 0 {
+	if errs := rpc.Client.Get(url, &tally, ctx); len(errs) > 0 {
 		return nil, &types.QueryError{
 			QueryError: nil,
 			NodeErrors: errs,
@@ -28,7 +29,7 @@ func (rpc *RPC) GetTally(proposal string) (*types.Tally, *types.QueryError) {
 	return tally.Tally.ToTally(), nil
 }
 
-func (rpc *RPC) GetTallies() (types.ChainTallyInfos, error) {
+func (rpc *RPC) GetTallies(ctx context.Context) (types.ChainTallyInfos, error) {
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 
@@ -42,7 +43,7 @@ func (rpc *RPC) GetTallies() (types.ChainTallyInfos, error) {
 	go func() {
 		defer wg.Done()
 
-		poolResponse, err := rpc.GetStakingPool()
+		poolResponse, err := rpc.GetStakingPool(ctx)
 
 		mutex.Lock()
 
@@ -62,7 +63,7 @@ func (rpc *RPC) GetTallies() (types.ChainTallyInfos, error) {
 	go func() {
 		defer wg.Done()
 
-		chainProposalsAll, _, err := rpc.GetAllProposals(0)
+		chainProposalsAll, _, err := rpc.GetAllProposals(0, ctx)
 		chainProposals := utils.Filter(chainProposalsAll, func(p types.Proposal) bool {
 			return p.IsInVoting()
 		})
@@ -89,7 +90,7 @@ func (rpc *RPC) GetTallies() (types.ChainTallyInfos, error) {
 			go func(p types.Proposal) {
 				defer internalWg.Done()
 
-				tally, err := rpc.GetTally(p.ID)
+				tally, err := rpc.GetTally(p.ID, ctx)
 
 				mutex.Lock()
 				defer mutex.Unlock()

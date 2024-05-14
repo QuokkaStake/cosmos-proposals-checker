@@ -1,15 +1,16 @@
 package neutron
 
 import (
+	"context"
 	"main/pkg/fetchers/neutron/responses"
 	"main/pkg/types"
 )
 
-func (fetcher *Fetcher) GetTallies() (types.ChainTallyInfos, error) {
+func (fetcher *Fetcher) GetTallies(ctx context.Context) (types.ChainTallyInfos, error) {
 	query := "{\"reverse_proposals\": {\"limit\": 1000}}"
 
 	var proposals responses.ProposalsResponse
-	if _, err := fetcher.GetSmartContractState(query, &proposals, 0); err != nil {
+	if _, err := fetcher.GetSmartContractState(query, &proposals, 0, ctx); err != nil {
 		return types.ChainTallyInfos{}, err
 	}
 

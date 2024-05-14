@@ -1,9 +1,11 @@
 package report
 
 import (
+	"context"
 	"errors"
 	"main/pkg/events"
 	"main/pkg/fs"
+	"main/pkg/tracing"
 	"testing"
 
 	"main/pkg/logger"
@@ -31,9 +33,9 @@ func TestReportGeneratorWithProposalError(t *testing.T) {
 
 	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
 		&types.Chain{Name: "chain"},
-	})
+	}, tracing.InitNoopTracer())
 
-	report := generator.GenerateReport(oldState, newState)
+	report := generator.GenerateReport(oldState, newState, context.Background())
 	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
 
 	entry, ok := report.Entries[0].(events.ProposalsQueryErrorEvent)
@@ -71,9 +73,9 @@ func TestReportGeneratorWithVoteError(t *testing.T) {
 
 	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
 		&types.Chain{Name: "chain"},
-	})
+	}, tracing.InitNoopTracer())
 
-	report := generator.GenerateReport(oldState, newState)
+	report := generator.GenerateReport(oldState, newState, context.Background())
 	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
 
 	entry, ok := report.Entries[0].(events.VoteQueryError)
@@ -127,9 +129,9 @@ func TestReportGeneratorWithProposalNotInVotingPeriod(t *testing.T) {
 
 	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
 		&types.Chain{Name: "chain"},
-	})
+	}, tracing.InitNoopTracer())
 
-	report := generator.GenerateReport(oldState, newState)
+	report := generator.GenerateReport(oldState, newState, context.Background())
 	assert.Empty(t, report.Entries)
 }
 
@@ -159,9 +161,9 @@ func TestReportGeneratorWithNotVoted(t *testing.T) {
 
 	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
 		&types.Chain{Name: "chain"},
-	})
+	}, tracing.InitNoopTracer())
 
-	report := generator.GenerateReport(oldState, newState)
+	report := generator.GenerateReport(oldState, newState, context.Background())
 	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
 
 	entry, ok := report.Entries[0].(events.NotVotedEvent)
@@ -215,9 +217,9 @@ func TestReportGeneratorWithVoted(t *testing.T) {
 
 	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
 		&types.Chain{Name: "chain"},
-	})
+	}, tracing.InitNoopTracer())
 
-	report := generator.GenerateReport(oldState, newState)
+	report := generator.GenerateReport(oldState, newState, context.Background())
 	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
 
 	entry, ok := report.Entries[0].(events.VotedEvent)
@@ -275,9 +277,9 @@ func TestReportGeneratorWithRevoted(t *testing.T) {
 
 	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
 		&types.Chain{Name: "chain"},
-	})
+	}, tracing.InitNoopTracer())
 
-	report := generator.GenerateReport(oldState, newState)
+	report := generator.GenerateReport(oldState, newState, context.Background())
 	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
 
 	entry, ok := report.Entries[0].(events.RevotedEvent)
@@ -327,9 +329,9 @@ func TestReportGeneratorWithFinishedVoting(t *testing.T) {
 
 	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
 		&types.Chain{Name: "chain"},
-	})
+	}, tracing.InitNoopTracer())
 
-	report := generator.GenerateReport(oldState, newState)
+	report := generator.GenerateReport(oldState, newState, context.Background())
 	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
 
 	entry, ok := report.Entries[0].(events.FinishedVotingEvent)

@@ -1,6 +1,7 @@
 package fetchers
 
 import (
+	"context"
 	"errors"
 	"main/pkg/types"
 )
@@ -17,6 +18,7 @@ type TestFetcher struct {
 
 func (f *TestFetcher) GetAllProposals(
 	prevHeight int64,
+	ctx context.Context,
 ) ([]types.Proposal, int64, *types.QueryError) {
 	if f.WithProposalsError {
 		return []types.Proposal{}, 123, &types.QueryError{
@@ -44,6 +46,7 @@ func (f *TestFetcher) GetAllProposals(
 func (f *TestFetcher) GetVote(
 	proposal, voter string,
 	prevHeight int64,
+	ctx context.Context,
 ) (*types.Vote, int64, *types.QueryError) {
 	if f.WithVoteError {
 		return nil, 456, &types.QueryError{
@@ -62,7 +65,7 @@ func (f *TestFetcher) GetVote(
 	return nil, 456, nil
 }
 
-func (f *TestFetcher) GetTallies() (types.ChainTallyInfos, error) {
+func (f *TestFetcher) GetTallies(ctx context.Context) (types.ChainTallyInfos, error) {
 	if f.WithTallyError {
 		return types.ChainTallyInfos{}, &types.QueryError{
 			QueryError: errors.New("error"),
@@ -84,7 +87,7 @@ func (f *TestFetcher) GetTallies() (types.ChainTallyInfos, error) {
 	return types.ChainTallyInfos{}, nil
 }
 
-func (f *TestFetcher) GetChainParams() (*types.ChainWithVotingParams, []error) {
+func (f *TestFetcher) GetChainParams(ctx context.Context) (*types.ChainWithVotingParams, []error) {
 	if f.WithParamsError {
 		return &types.ChainWithVotingParams{}, []error{
 			errors.New("test"),

@@ -1,34 +1,46 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"main/pkg/types"
 	"net/http"
 	"time"
 
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/rs/zerolog"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 type Client struct {
 	Hosts  []string
 	Logger zerolog.Logger
+	Tracer trace.Tracer
 }
 
-func NewClient(chainName string, hosts []string, logger *zerolog.Logger) *Client {
+func NewClient(
+	chainName string,
+	hosts []string,
+	logger *zerolog.Logger,
+	tracer trace.Tracer,
+) *Client {
 	return &Client{
 		Hosts: hosts,
 		Logger: logger.With().
 			Str("component", "http").
 			Str("chain", chainName).
 			Logger(),
+		Tracer: tracer,
 	}
 }
 
 func (client *Client) Get(
 	url string,
 	target interface{},
+	ctx context.Context,
 ) []types.NodeError {
-	errs, _ := client.GetWithPredicate(url, target, types.HTTPPredicateAlwaysPass())
+	errs, _ := client.GetWithPredicate(url, target, types.HTTPPredicateAlwaysPass(), ctx)
 	return errs
 }
 
@@ -36,7 +48,11 @@ func (client *Client) GetWithPredicate(
 	url string,
 	target interface{},
 	predicate types.HTTPPredicate,
+	ctx context.Context,
 ) ([]types.NodeError, http.Header) {
+	childCtx, span := client.Tracer.Start(ctx, "HTTP request on all nodes")
+	defer span.End()
+
 	nodeErrors := make([]types.NodeError, len(client.Hosts))
 
 	for index, lcd := range client.Hosts {
@@ -47,6 +63,7 @@ func (client *Client) GetWithPredicate(
 			fullURL,
 			target,
 			predicate,
+			childCtx,
 		)
 
 		if err == nil {
@@ -68,11 +85,19 @@ func (client *Client) GetFull(
 	url string,
 	target interface{},
 	predicate types.HTTPPredicate,
+	ctx context.Context,
 ) (http.Header, error) {
-	httpClient := &http.Client{Timeout: 300 * time.Second}
+	childCtx, span := client.Tracer.Start(ctx, "HTTP request")
+	defer span.End()
+
+	httpClient := &http.Client{
+		Timeout:   10 * time.Second,
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
+	}
+
 	start := time.Now()
 
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(childCtx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}

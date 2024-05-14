@@ -1,6 +1,7 @@
 package cosmos
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"main/pkg/fetchers/cosmos/responses"
@@ -9,7 +10,11 @@ import (
 	"strings"
 )
 
-func (rpc *RPC) GetVote(proposal, voter string, prevHeight int64) (*types.Vote, int64, *types.QueryError) {
+func (rpc *RPC) GetVote(
+	proposal, voter string,
+	prevHeight int64,
+	ctx context.Context,
+) (*types.Vote, int64, *types.QueryError) {
 	url := fmt.Sprintf(
 		"/cosmos/gov/v1beta1/proposals/%s/votes/%s",
 		proposal,
@@ -21,6 +26,7 @@ func (rpc *RPC) GetVote(proposal, voter string, prevHeight int64) (*types.Vote, 
 		url,
 		&vote,
 		types.HTTPPredicateCheckHeightAfter(prevHeight),
+		ctx,
 	)
 	if len(errs) > 0 {
 		return nil, 0, &types.QueryError{

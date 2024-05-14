@@ -1,9 +1,12 @@
 package cosmos
 
 import (
+	"context"
 	"main/pkg/fetchers/cosmos/responses"
 	"main/pkg/http"
 	"main/pkg/types"
+
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/rs/zerolog"
 )
@@ -17,28 +20,28 @@ type RPC struct {
 	Logger        zerolog.Logger
 }
 
-func NewRPC(chainConfig *types.Chain, logger *zerolog.Logger) *RPC {
+func NewRPC(chainConfig *types.Chain, logger *zerolog.Logger, tracer trace.Tracer) *RPC {
 	return &RPC{
 		ChainConfig:   chainConfig,
 		ProposalsType: chainConfig.ProposalsType,
 		Logger:        logger.With().Str("component", "rpc").Logger(),
-		Client:        http.NewClient(chainConfig.Name, chainConfig.LCDEndpoints, logger),
+		Client:        http.NewClient(chainConfig.Name, chainConfig.LCDEndpoints, logger, tracer),
 	}
 }
 
-func (rpc *RPC) GetAllProposals(prevHeight int64) ([]types.Proposal, int64, *types.QueryError) {
+func (rpc *RPC) GetAllProposals(prevHeight int64, ctx context.Context) ([]types.Proposal, int64, *types.QueryError) {
 	if rpc.ProposalsType == "v1" {
-		return rpc.GetAllV1Proposals(prevHeight)
+		return rpc.GetAllV1Proposals(prevHeight, ctx)
 	}
 
-	return rpc.GetAllV1beta1Proposals(prevHeight)
+	return rpc.GetAllV1beta1Proposals(prevHeight, ctx)
 }
 
-func (rpc *RPC) GetStakingPool() (*responses.PoolRPCResponse, *types.QueryError) {
+func (rpc *RPC) GetStakingPool(ctx context.Context) (*responses.PoolRPCResponse, *types.QueryError) {
 	url := "/cosmos/staking/v1beta1/pool"
 
 	var pool responses.PoolRPCResponse
-	if errs := rpc.Client.Get(url, &pool); len(errs) > 0 {
+	if errs := rpc.Client.Get(url, &pool, ctx); len(errs) > 0 {
 		return nil, &types.QueryError{
 			QueryError: nil,
 			NodeErrors: errs,

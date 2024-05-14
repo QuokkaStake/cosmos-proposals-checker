@@ -1,35 +1,44 @@
 package state
 
 import (
+	"context"
 	fetchersPkg "main/pkg/fetchers"
 	"main/pkg/types"
 	"sync"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/rs/zerolog"
 )
 
 type Generator struct {
+	Tracer   trace.Tracer
 	Logger   zerolog.Logger
 	Chains   types.Chains
 	Fetchers map[string]fetchersPkg.Fetcher
 	Mutex    sync.Mutex
 }
 
-func NewStateGenerator(logger *zerolog.Logger, chains types.Chains) *Generator {
+func NewStateGenerator(logger *zerolog.Logger, tracer trace.Tracer, chains types.Chains) *Generator {
 	fetchers := make(map[string]fetchersPkg.Fetcher, len(chains))
 
 	for _, chain := range chains {
-		fetchers[chain.Name] = fetchersPkg.GetFetcher(chain, logger)
+		fetchers[chain.Name] = fetchersPkg.GetFetcher(chain, logger, tracer)
 	}
 
 	return &Generator{
 		Logger:   logger.With().Str("component", "state_generator").Logger(),
+		Tracer:   tracer,
 		Chains:   chains,
 		Fetchers: fetchers,
 	}
 }
 
-func (g *Generator) GetState(oldState State) State {
+func (g *Generator) GetState(oldState State, ctx context.Context) State {
+	childCtx, span := g.Tracer.Start(ctx, "State generation")
+	defer span.End()
+
 	state := NewState()
 
 	var wg sync.WaitGroup
@@ -41,7 +50,7 @@ func (g *Generator) GetState(oldState State) State {
 		fetcher := g.Fetchers[chain.Name]
 
 		go func(c *types.Chain) {
-			g.ProcessChain(c, state, oldState, fetcher)
+			g.ProcessChain(c, state, oldState, fetcher, childCtx)
 			wg.Done()
 		}(chain)
 	}
@@ -55,9 +64,14 @@ func (g *Generator) ProcessChain(
 	state State,
 	oldState State,
 	fetcher fetchersPkg.Fetcher,
+	ctx context.Context,
 ) {
+	childCtx, span := g.Tracer.Start(ctx, "Processing chain")
+	span.SetAttributes(attribute.String("chain", chain.Name))
+	defer span.End()
+
 	prevHeight := oldState.GetLastProposalsHeight(chain)
-	proposals, proposalsHeight, err := fetcher.GetAllProposals(prevHeight)
+	proposals, proposalsHeight, err := fetcher.GetAllProposals(prevHeight, childCtx)
 	if err != nil {
 		g.Logger.Warn().Err(err).Msg("Error processing proposals")
 		g.Mutex.Lock()
@@ -91,7 +105,7 @@ func (g *Generator) ProcessChain(
 		wg.Add(1)
 
 		go func(p types.Proposal) {
-			g.ProcessProposal(chain, p, fetcher, state, oldState)
+			g.ProcessProposal(chain, p, fetcher, state, oldState, childCtx)
 			wg.Done()
 		}(proposal)
 	}
@@ -105,7 +119,13 @@ func (g *Generator) ProcessProposal(
 	fetcher fetchersPkg.Fetcher,
 	state State,
 	oldState State,
+	ctx context.Context,
 ) {
+	childCtx, span := g.Tracer.Start(ctx, "Processing proposal")
+	span.SetAttributes(attribute.String("chain", chain.Name))
+	span.SetAttributes(attribute.String("proposal", proposal.ID))
+	defer span.End()
+
 	g.Logger.Trace().
 		Str("name", chain.Name).
 		Str("proposal", proposal.ID).
@@ -133,7 +153,7 @@ func (g *Generator) ProcessProposal(
 		wg.Add(1)
 
 		go func(p types.Proposal, w *types.Wallet) {
-			g.ProcessProposalAndWallet(chain, p, fetcher, w, state, oldState)
+			g.ProcessProposalAndWallet(chain, p, fetcher, w, state, oldState, childCtx)
 			wg.Done()
 		}(proposal, wallet)
 	}
@@ -148,9 +168,16 @@ func (g *Generator) ProcessProposalAndWallet(
 	wallet *types.Wallet,
 	state State,
 	oldState State,
+	ctx context.Context,
 ) {
+	childCtx, span := g.Tracer.Start(ctx, "Processing vote")
+	span.SetAttributes(attribute.String("chain", chain.Name))
+	span.SetAttributes(attribute.String("proposal", proposal.ID))
+	span.SetAttributes(attribute.String("wallet", wallet.Address))
+	defer span.End()
+
 	oldVote, found := oldState.GetVote(chain.Name, proposal.ID, wallet.Address)
-	vote, voteHeight, err := fetcher.GetVote(proposal.ID, wallet.Address, oldVote.Height)
+	vote, voteHeight, err := fetcher.GetVote(proposal.ID, wallet.Address, oldVote.Height, childCtx)
 
 	proposalVote := ProposalVote{
 		Wallet: wallet,

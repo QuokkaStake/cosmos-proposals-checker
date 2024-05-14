@@ -1,16 +1,17 @@
 package cosmos
 
 import (
+	"context"
 	"main/pkg/fetchers/cosmos/responses"
 	"main/pkg/types"
 	"sync"
 )
 
-func (rpc *RPC) GetGovParams(paramsType string) (*responses.ParamsResponse, *types.QueryError) {
+func (rpc *RPC) GetGovParams(paramsType string, ctx context.Context) (*responses.ParamsResponse, *types.QueryError) {
 	url := "/cosmos/gov/v1beta1/params/" + paramsType
 
 	var params responses.ParamsResponse
-	if errs := rpc.Client.Get(url, &params); len(errs) > 0 {
+	if errs := rpc.Client.Get(url, &params, ctx); len(errs) > 0 {
 		return nil, &types.QueryError{
 			QueryError: nil,
 			NodeErrors: errs,
@@ -20,7 +21,7 @@ func (rpc *RPC) GetGovParams(paramsType string) (*responses.ParamsResponse, *typ
 	return &params, nil
 }
 
-func (rpc *RPC) GetChainParams() (*types.ChainWithVotingParams, []error) {
+func (rpc *RPC) GetChainParams(ctx context.Context) (*types.ChainWithVotingParams, []error) {
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 
@@ -32,7 +33,7 @@ func (rpc *RPC) GetChainParams() (*types.ChainWithVotingParams, []error) {
 	go func() {
 		defer wg.Done()
 
-		votingParams, err := rpc.GetGovParams("voting")
+		votingParams, err := rpc.GetGovParams("voting", ctx)
 		mutex.Lock()
 		defer mutex.Unlock()
 
@@ -47,7 +48,7 @@ func (rpc *RPC) GetChainParams() (*types.ChainWithVotingParams, []error) {
 	go func() {
 		defer wg.Done()
 
-		depositParams, err := rpc.GetGovParams("deposit")
+		depositParams, err := rpc.GetGovParams("deposit", ctx)
 		mutex.Lock()
 		defer mutex.Unlock()
 
@@ -62,7 +63,7 @@ func (rpc *RPC) GetChainParams() (*types.ChainWithVotingParams, []error) {
 	go func() {
 		defer wg.Done()
 
-		tallyingParams, err := rpc.GetGovParams("tallying")
+		tallyingParams, err := rpc.GetGovParams("tallying", ctx)
 		mutex.Lock()
 		defer mutex.Unlock()
 

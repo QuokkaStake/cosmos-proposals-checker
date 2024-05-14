@@ -11,6 +11,7 @@ type Config struct {
 	PagerDutyConfig PagerDutyConfig `toml:"pagerduty"`
 	TelegramConfig  TelegramConfig  `toml:"telegram"`
 	LogConfig       LogConfig       `toml:"log"`
+	TracingConfig   TracingConfig   `toml:"tracing"`
 	StatePath       string          `toml:"state-path"`
 	MutesPath       string          `toml:"mutes-path"`
 	Chains          Chains          `toml:"chains"`
