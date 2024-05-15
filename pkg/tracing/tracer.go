@@ -45,22 +45,14 @@ func InitTracer(config types.TracingConfig, version string) (trace.Tracer, error
 		return nil, fmt.Errorf("error creating exporter: %w", err)
 	}
 
-	tp, err := NewTraceProvider(exporter, version)
-	if err != nil {
-		return nil, fmt.Errorf("error initializizng provider: %w", err)
-	}
-
+	tp := NewTraceProvider(exporter, version)
 	otel.SetTracerProvider(tp)
 
 	return tp.Tracer("main"), nil
 }
 
 func InitNoopTracer() trace.Tracer {
-	tp, err := NewTraceProvider(NewNoopExporter(), "1.2.3")
-	if err != nil {
-		panic(err)
-	}
-
+	tp := NewTraceProvider(NewNoopExporter(), "1.2.3")
 	otel.SetTracerProvider(tp)
 
 	return tp.Tracer("main")
