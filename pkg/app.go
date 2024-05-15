@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"context"
 	"main/pkg/data"
 	"main/pkg/fs"
 	"main/pkg/logger"
@@ -10,14 +11,17 @@ import (
 	"main/pkg/reporters/pagerduty"
 	"main/pkg/reporters/telegram"
 	"main/pkg/state"
+	"main/pkg/tracing"
 	"main/pkg/types"
 	"time"
 
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type App struct {
+	Tracer           trace.Tracer
 	Logger           *zerolog.Logger
 	Config           *types.Config
 	StateManager     *state.Manager
@@ -42,24 +46,39 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 		logger.GetDefaultLogger().Info().Msg("Provided config is valid.")
 	}
 
+	tracer, err := tracing.InitTracer(config.TracingConfig, version)
+	if err != nil {
+		logger.GetDefaultLogger().Fatal().Err(err).Msg("Error setting up tracing")
+	}
+
 	log := logger.GetLogger(config.LogConfig)
 
 	stateManager := state.NewStateManager(config.StatePath, filesystem, log)
 	mutesManager := mutes.NewMutesManager(config.MutesPath, filesystem, log)
-	reportGenerator := report.NewReportGenerator(stateManager, log, config.Chains)
-	stateGenerator := state.NewStateGenerator(log, config.Chains)
-	dataManager := data.NewManager(log, config.Chains)
+	reportGenerator := report.NewReportGenerator(stateManager, log, config.Chains, tracer)
+	stateGenerator := state.NewStateGenerator(log, tracer, config.Chains)
+	dataManager := data.NewManager(log, config.Chains, tracer)
 
 	timeZone, _ := time.LoadLocation(config.Timezone)
 
 	reporters := []reportersPkg.Reporter{
-		pagerduty.NewPagerDutyReporter(config.PagerDutyConfig, log),
-		telegram.NewTelegramReporter(config.TelegramConfig, mutesManager, stateGenerator, dataManager, log, version, timeZone),
+		pagerduty.NewPagerDutyReporter(config.PagerDutyConfig, log, tracer),
+		telegram.NewTelegramReporter(
+			config.TelegramConfig,
+			mutesManager,
+			stateGenerator,
+			dataManager,
+			log,
+			version,
+			timeZone,
+			tracer,
+		),
 	}
 
-	reportDispatcher := report.NewDispatcher(log, mutesManager, reporters)
+	reportDispatcher := report.NewDispatcher(log, mutesManager, reporters, tracer)
 
 	return &App{
+		Tracer:           tracer,
 		Logger:           log,
 		Config:           config,
 		StateManager:     stateManager,
@@ -88,7 +107,10 @@ func (a *App) Start() {
 }
 
 func (a *App) Report() {
-	newState := a.StateGenerator.GetState(a.StateManager.State)
-	generatedReport := a.ReportGenerator.GenerateReport(a.StateManager.State, newState)
-	a.ReportDispatcher.SendReport(generatedReport)
+	ctx, span := a.Tracer.Start(context.Background(), "report")
+	defer span.End()
+
+	newState := a.StateGenerator.GetState(a.StateManager.State, ctx)
+	generatedReport := a.ReportGenerator.GenerateReport(a.StateManager.State, newState, ctx)
+	a.ReportDispatcher.SendReport(generatedReport, ctx)
 }

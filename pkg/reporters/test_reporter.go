@@ -1,6 +1,7 @@
 package reporters
 
 import (
+	"context"
 	"errors"
 	"main/pkg/report/entry"
 )
@@ -23,7 +24,7 @@ func (r *TestReporter) Enabled() bool {
 	return !r.WithDisabled
 }
 
-func (r *TestReporter) SendReportEntry(entry entry.ReportEntry) error {
+func (r *TestReporter) SendReportEntry(entry entry.ReportEntry, ctx context.Context) error {
 	if r.WithErrorSending {
 		return errors.New("fail")
 	}

@@ -1,13 +1,14 @@
 package reporters
 
 import (
+	"context"
 	"main/pkg/report/entry"
 )
 
 type Reporter interface {
 	Init() error
 	Enabled() bool
-	SendReportEntry(entry entry.ReportEntry) error
+	SendReportEntry(entry entry.ReportEntry, ctx context.Context) error
 	Name() string
 }
 

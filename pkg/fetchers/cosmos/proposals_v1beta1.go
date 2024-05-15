@@ -1,6 +1,7 @@
 package cosmos
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"main/pkg/fetchers/cosmos/responses"
@@ -10,6 +11,7 @@ import (
 
 func (rpc *RPC) GetAllV1beta1Proposals(
 	prevHeight int64,
+	ctx context.Context,
 ) ([]types.Proposal, int64, *types.QueryError) {
 	proposals := []types.Proposal{}
 	offset := 0
@@ -29,6 +31,7 @@ func (rpc *RPC) GetAllV1beta1Proposals(
 			url,
 			&batchProposals,
 			types.HTTPPredicateCheckHeightAfter(lastHeight),
+			ctx,
 		)
 		if len(errs) > 0 {
 			return nil, 0, &types.QueryError{

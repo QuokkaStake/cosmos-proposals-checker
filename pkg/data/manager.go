@@ -1,10 +1,13 @@
 package data
 
 import (
+	"context"
 	"fmt"
 	fetchersPkg "main/pkg/fetchers"
 	"main/pkg/types"
 	"sync"
+
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/rs/zerolog"
 )
@@ -13,23 +16,28 @@ type Manager struct {
 	Logger   zerolog.Logger
 	Chains   types.Chains
 	Fetchers []fetchersPkg.Fetcher
+	Tracer   trace.Tracer
 }
 
-func NewManager(logger *zerolog.Logger, chains types.Chains) *Manager {
+func NewManager(logger *zerolog.Logger, chains types.Chains, tracer trace.Tracer) *Manager {
 	fetchers := make([]fetchersPkg.Fetcher, len(chains))
 
 	for index, chain := range chains {
-		fetchers[index] = fetchersPkg.GetFetcher(chain, logger)
+		fetchers[index] = fetchersPkg.GetFetcher(chain, logger, tracer)
 	}
 
 	return &Manager{
 		Logger:   logger.With().Str("component", "data_manager").Logger(),
 		Chains:   chains,
 		Fetchers: fetchers,
+		Tracer:   tracer,
 	}
 }
 
-func (m *Manager) GetTallies() (map[string]types.ChainTallyInfos, error) {
+func (m *Manager) GetTallies(ctx context.Context) (map[string]types.ChainTallyInfos, error) {
+	childCtx, span := m.Tracer.Start(ctx, "Fetching tallies")
+	defer span.End()
+
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 
@@ -43,7 +51,7 @@ func (m *Manager) GetTallies() (map[string]types.ChainTallyInfos, error) {
 		go func(c *types.Chain, fetcher fetchersPkg.Fetcher) {
 			defer wg.Done()
 
-			talliesForChain, err := fetcher.GetTallies()
+			talliesForChain, err := fetcher.GetTallies(childCtx)
 
 			mutex.Lock()
 
@@ -67,7 +75,10 @@ func (m *Manager) GetTallies() (map[string]types.ChainTallyInfos, error) {
 	return tallies, nil
 }
 
-func (m *Manager) GetParams() (map[string]types.ChainWithVotingParams, error) {
+func (m *Manager) GetParams(ctx context.Context) (map[string]types.ChainWithVotingParams, error) {
+	childCtx, span := m.Tracer.Start(ctx, "Fetching params...")
+	defer span.End()
+
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 
@@ -82,7 +93,7 @@ func (m *Manager) GetParams() (map[string]types.ChainWithVotingParams, error) {
 		go func(fetcher fetchersPkg.Fetcher) {
 			defer wg.Done()
 
-			chainParams, errs := fetcher.GetChainParams()
+			chainParams, errs := fetcher.GetChainParams(childCtx)
 			mutex.Lock()
 			defer mutex.Unlock()
 

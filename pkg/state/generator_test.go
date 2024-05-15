@@ -1,8 +1,10 @@
 package state
 
 import (
+	"context"
 	"main/pkg/fetchers"
 	"main/pkg/logger"
+	"main/pkg/tracing"
 	"main/pkg/types"
 	"testing"
 
@@ -16,7 +18,7 @@ func TestReportGeneratorNew(t *testing.T) {
 	chain := &types.Chain{Name: "chain", Type: "cosmos"}
 	chains := types.Chains{chain}
 
-	generator := NewStateGenerator(log, chains)
+	generator := NewStateGenerator(log, tracing.InitNoopTracer(), chains)
 	assert.NotNil(t, generator)
 }
 
@@ -33,10 +35,11 @@ func TestReportGeneratorProcessChain(t *testing.T) {
 		Fetchers: map[string]fetchers.Fetcher{
 			"chain": &fetchers.TestFetcher{WithPassedProposals: true},
 		},
+		Tracer: tracing.InitNoopTracer(),
 	}
 
 	oldState := NewState()
-	newState := generator.GetState(oldState)
+	newState := generator.GetState(oldState, context.Background())
 	assert.Len(t, newState.ChainInfos, 1)
 }
 
@@ -53,10 +56,11 @@ func TestReportGeneratorProcessProposalsWithPassed(t *testing.T) {
 		Fetchers: map[string]fetchers.Fetcher{
 			"chain": &fetchers.TestFetcher{WithPassedProposals: true},
 		},
+		Tracer: tracing.InitNoopTracer(),
 	}
 
 	oldState := NewState()
-	newState := generator.GetState(oldState)
+	newState := generator.GetState(oldState, context.Background())
 	assert.Len(t, newState.ChainInfos, 1)
 }
 
@@ -74,6 +78,7 @@ func TestReportGeneratorProcessProposalWithError(t *testing.T) {
 		Fetchers: map[string]fetchers.Fetcher{
 			"chain": fetcher,
 		},
+		Tracer: tracing.InitNoopTracer(),
 	}
 
 	oldVotes := map[string]WalletVotes{
@@ -87,7 +92,7 @@ func TestReportGeneratorProcessProposalWithError(t *testing.T) {
 	oldState.SetChainVotes(chain, oldVotes)
 
 	newState := NewState()
-	generator.ProcessChain(chain, newState, oldState, fetcher)
+	generator.ProcessChain(chain, newState, oldState, fetcher, context.Background())
 	assert.Len(t, newState.ChainInfos, 1)
 
 	newVotes, ok := newState.ChainInfos["chain"]
@@ -119,6 +124,7 @@ func TestReportGeneratorProcessProposalWithoutError(t *testing.T) {
 		Fetchers: map[string]fetchers.Fetcher{
 			"chain": fetcher,
 		},
+		Tracer: tracing.InitNoopTracer(),
 	}
 
 	oldVotes := map[string]WalletVotes{
@@ -132,7 +138,7 @@ func TestReportGeneratorProcessProposalWithoutError(t *testing.T) {
 	oldState.SetChainVotes(chain, oldVotes)
 
 	newState := NewState()
-	generator.ProcessChain(chain, newState, oldState, fetcher)
+	generator.ProcessChain(chain, newState, oldState, fetcher, context.Background())
 	assert.Len(t, newState.ChainInfos, 1)
 
 	newVotes, ok := newState.ChainInfos["chain"]
@@ -166,6 +172,7 @@ func TestReportGeneratorProcessVoteWithError(t *testing.T) {
 		Fetchers: map[string]fetchers.Fetcher{
 			"chain": fetcher,
 		},
+		Tracer: tracing.InitNoopTracer(),
 	}
 
 	oldVotes := map[string]WalletVotes{
@@ -185,7 +192,7 @@ func TestReportGeneratorProcessVoteWithError(t *testing.T) {
 	oldState.SetChainVotes(chain, oldVotes)
 
 	newState := NewState()
-	generator.ProcessProposalAndWallet(chain, proposal, fetcher, wallet, newState, oldState)
+	generator.ProcessProposalAndWallet(chain, proposal, fetcher, wallet, newState, oldState, context.Background())
 	assert.Len(t, newState.ChainInfos, 1)
 
 	newVotes, ok := newState.ChainInfos["chain"]
@@ -223,6 +230,7 @@ func TestReportGeneratorProcessVoteWithDisappearedVote(t *testing.T) {
 		Fetchers: map[string]fetchers.Fetcher{
 			"chain": fetcher,
 		},
+		Tracer: tracing.InitNoopTracer(),
 	}
 
 	oldVotes := map[string]WalletVotes{
@@ -242,7 +250,7 @@ func TestReportGeneratorProcessVoteWithDisappearedVote(t *testing.T) {
 	oldState.SetChainVotes(chain, oldVotes)
 
 	newState := NewState()
-	generator.ProcessProposalAndWallet(chain, proposal, fetcher, wallet, newState, oldState)
+	generator.ProcessProposalAndWallet(chain, proposal, fetcher, wallet, newState, oldState, context.Background())
 	assert.Len(t, newState.ChainInfos, 1)
 
 	newVotes, ok := newState.ChainInfos["chain"]
@@ -280,6 +288,7 @@ func TestReportGeneratorProcessVoteWithOkVote(t *testing.T) {
 		Fetchers: map[string]fetchers.Fetcher{
 			"chain": fetcher,
 		},
+		Tracer: tracing.InitNoopTracer(),
 	}
 
 	oldVotes := map[string]WalletVotes{
@@ -299,7 +308,7 @@ func TestReportGeneratorProcessVoteWithOkVote(t *testing.T) {
 	oldState.SetChainVotes(chain, oldVotes)
 
 	newState := NewState()
-	generator.ProcessProposalAndWallet(chain, proposal, fetcher, wallet, newState, oldState)
+	generator.ProcessProposalAndWallet(chain, proposal, fetcher, wallet, newState, oldState, context.Background())
 	assert.Len(t, newState.ChainInfos, 1)
 
 	newVotes, ok := newState.ChainInfos["chain"]
