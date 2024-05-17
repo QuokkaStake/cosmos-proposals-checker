@@ -98,7 +98,7 @@ func TestMuteManagerSaveWithoutError(t *testing.T) {
 	assert.Empty(t, manager.Mutes.Mutes)
 }
 
-func TestMuteManagerAddMuteIsMuted(t *testing.T) {
+func TestMuteManagerAddAndDeleteMuteIsMuted(t *testing.T) {
 	t.Parallel()
 
 	log := logger.GetNopLogger()
@@ -113,6 +113,20 @@ func TestMuteManagerAddMuteIsMuted(t *testing.T) {
 	})
 
 	assert.True(t, manager.IsEntryMuted(events.VotedEvent{
+		Chain:    &types.Chain{Name: "chain"},
+		Proposal: types.Proposal{ID: "proposal"},
+	}))
+	assert.False(t, manager.IsEntryMuted(events.VotedEvent{
+		Chain:    &types.Chain{Name: "chain2"},
+		Proposal: types.Proposal{ID: "proposal"},
+	}))
+
+	deleted := manager.DeleteMute(&Mute{
+		Chain: "chain",
+	})
+	assert.True(t, deleted)
+
+	assert.False(t, manager.IsEntryMuted(events.VotedEvent{
 		Chain:    &types.Chain{Name: "chain"},
 		Proposal: types.Proposal{ID: "proposal"},
 	}))

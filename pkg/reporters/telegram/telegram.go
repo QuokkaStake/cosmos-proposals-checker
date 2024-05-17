@@ -80,6 +80,7 @@ func (reporter *Reporter) Init() error {
 	bot.Handle("/start", reporter.HandleHelp)
 	bot.Handle("/help", reporter.HandleHelp)
 	bot.Handle("/proposals_mute", reporter.HandleAddMute)
+	bot.Handle("/proposals_unmute", reporter.HandleDeleteMute)
 	bot.Handle("/proposals_mutes", reporter.HandleListMutes)
 	bot.Handle("/proposals", reporter.HandleProposals)
 	bot.Handle("/tally", reporter.HandleTally)
@@ -180,6 +181,37 @@ func ParseMuteOptions(query string, c tele.Context) (*mutes.Mute, string) {
 	}
 
 	for index, arg := range args {
+		argSplit := strings.SplitN(arg, "=", 2)
+		if len(argSplit) < 2 {
+			return nil, fmt.Sprintf(
+				"Invalid param at position %d: expected an expression like \"[chain=cosmos]\", but got %s",
+				index+1,
+				arg,
+			)
+		}
+
+		switch argSplit[0] {
+		case "chain":
+			mute.Chain = argSplit[1]
+		case "proposal":
+			mute.ProposalID = argSplit[1]
+		}
+	}
+
+	return mute, ""
+}
+
+func ParseMuteDeleteOptions(query string, c tele.Context) (*mutes.Mute, string) {
+	// we only construct mute with chain/proposal to compare, no need to take care
+	// about the expiration/comment
+	mute := &mutes.Mute{
+		Chain:      "",
+		ProposalID: "",
+		Expires:    time.Now(),
+		Comment:    "",
+	}
+
+	for index, arg := range c.Args() {
 		argSplit := strings.SplitN(arg, "=", 2)
 		if len(argSplit) < 2 {
 			return nil, fmt.Sprintf(

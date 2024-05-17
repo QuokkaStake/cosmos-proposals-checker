@@ -71,3 +71,20 @@ func (m *Mutes) AddMute(mute *Mute) {
 		return !m.IsExpired()
 	})
 }
+
+func (m *Mutes) DeleteMute(mute *Mute) bool {
+	for index, existingMute := range m.Mutes {
+		if existingMute.LabelsEqual(mute) {
+			m.Mutes = append(m.Mutes[:index], m.Mutes[index+1:]...)
+			m.Mutes = utils.Filter(m.Mutes, func(m *Mute) bool {
+				return !m.IsExpired()
+			})
+			return true
+		}
+	}
+
+	m.Mutes = utils.Filter(m.Mutes, func(m *Mute) bool {
+		return !m.IsExpired()
+	})
+	return false
+}
