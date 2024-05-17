@@ -71,7 +71,7 @@ func TestMutesMatchesNotIgnoreActual(t *testing.T) {
 	assert.True(t, muted, "Mute should be muted!")
 }
 
-func TestMutesAddsMute(t *testing.T) {
+func TestMutesAddsMuteNew(t *testing.T) {
 	t.Parallel()
 
 	mutes := Mutes{
@@ -83,4 +83,31 @@ func TestMutesAddsMute(t *testing.T) {
 	mutes.AddMute(&Mute{Chain: "chain2", Expires: time.Now().Add(time.Hour)})
 	assert.Len(t, mutes.Mutes, 1, "There should be 1 mute!")
 	assert.Equal(t, "chain2", mutes.Mutes[0].Chain, "Chain name should match!")
+}
+
+func TestMutesAddsMuteOverride(t *testing.T) {
+	t.Parallel()
+
+	expireTime := time.Now().Add(time.Hour)
+
+	mutes := Mutes{
+		Mutes: []*Mute{
+			{Chain: "chain1", ProposalID: "proposal1", Expires: expireTime, Comment: "comment1"},
+			{Chain: "chain1", ProposalID: "proposal2", Expires: expireTime, Comment: "comment2"},
+		},
+	}
+
+	newExpireTime := time.Now().Add(3 * time.Hour)
+
+	mutes.AddMute(&Mute{
+		Chain:      "chain1",
+		ProposalID: "proposal1",
+		Expires:    newExpireTime,
+		Comment:    "newcomment",
+	})
+	assert.Len(t, mutes.Mutes, 2)
+	assert.Equal(t, "chain1", mutes.Mutes[0].Chain)
+	assert.Equal(t, "proposal1", mutes.Mutes[0].ProposalID)
+	assert.Equal(t, "newcomment", mutes.Mutes[0].Comment)
+	assert.Equal(t, newExpireTime, mutes.Mutes[0].Expires)
 }
