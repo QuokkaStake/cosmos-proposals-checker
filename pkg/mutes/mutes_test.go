@@ -111,3 +111,34 @@ func TestMutesAddsMuteOverride(t *testing.T) {
 	assert.Equal(t, "newcomment", mutes.Mutes[0].Comment)
 	assert.Equal(t, newExpireTime, mutes.Mutes[0].Expires)
 }
+
+func TestMutesDeleteMuteNotExisting(t *testing.T) {
+	t.Parallel()
+
+	mutes := Mutes{
+		Mutes: []*Mute{
+			{Chain: "chain1", Expires: time.Now().Add(time.Hour)},
+		},
+	}
+
+	deleted := mutes.DeleteMute(&Mute{Chain: "chain2"})
+	assert.False(t, deleted)
+	assert.Len(t, mutes.Mutes, 1)
+}
+
+func TestMutesDeleteMuteExisting(t *testing.T) {
+	t.Parallel()
+
+	mutes := Mutes{
+		Mutes: []*Mute{
+			{Chain: "chain2", ProposalID: "proposal1", Expires: time.Now().Add(time.Hour)},
+			{Chain: "chain1", ProposalID: "proposal2", Expires: time.Now().Add(time.Hour)},
+			{Chain: "chain1", ProposalID: "proposal1", Expires: time.Now().Add(time.Hour)},
+			{Chain: "chain2", ProposalID: "proposal2", Expires: time.Now().Add(time.Hour)},
+		},
+	}
+
+	deleted := mutes.DeleteMute(&Mute{Chain: "chain1", ProposalID: "proposal1"})
+	assert.True(t, deleted)
+	assert.Len(t, mutes.Mutes, 3)
+}

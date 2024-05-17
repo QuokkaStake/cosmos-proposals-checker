@@ -20,6 +20,21 @@ level = "trace"
 # solition, like ELK. Defaults to false.
 json = false
 
+# Tracing configuration.
+# If enabled, all reports traces are going to be sent to a remote storage
+# via OpenTelemetry HTTP protocol.
+# You probably don't need this, so feel free to omit this whole block.
+[tracing]
+# Whether tracing reporting is enabled. Defaults to false.
+enabled = false
+# OpenTelemetry HTTP host to send traces to
+open-telemetry-http-host = "localhost:4123"
+# If true, then requests would be done via HTTP rather than HTTPS. Defaults to true.
+open-telemetry-http-insecure = true
+# OTLP login and password, if needed.
+open-telemetry-http-user = "admin"
+open-telemetry-http-password = "password"
+
 # Per-chain config. There can be multiple chains.
 [[chains]]
 # Chain name, used internally. Required. Should be unique.

@@ -105,7 +105,8 @@ To have fancy commands auto-suggestion, go to @BotFather again, select your bot 
 and paste the following:
 ```
 proposals - List proposals and wallets' votes on them
-proposals_mute - Mutes a proposal
+proposals_mute - Mutes notifications on a chain/proposal
+proposals_unmute - Unmutes notifications on a chain/proposal
 proposals_mutes - List active proposal mutes
 tally - Show the tally for proposals that are in voting period
 params - Show chains params related to governance

@@ -79,3 +79,9 @@ func (m *Manager) AddMute(mute *Mute) {
 	m.Mutes.AddMute(mute)
 	m.Save()
 }
+
+func (m *Manager) DeleteMute(mute *Mute) bool {
+	found := m.Mutes.DeleteMute(mute)
+	m.Save()
+	return found
+}
