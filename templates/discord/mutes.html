@@ -1,0 +1,16 @@
+{{- if eq (len .) 0 }}
+No active mutes.
+{{- end }}
+{{ range . }}
+{{- if .Chain }}
+**Chain:** {{ .Chain }}
+{{- else }}
+**Chain:** all chains
+{{- end }}
+{{- if .ProposalID }}
+**Proposal ID:** {{ .ProposalID }}
+{{- else }}
+**Proposal ID:** all proposals
+{{- end }}
+**Expires: **{{ SerializeDate .Expires }}
+{{ end }}

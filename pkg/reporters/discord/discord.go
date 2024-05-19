@@ -90,6 +90,7 @@ func (reporter *Reporter) Init() error {
 		"proposals":        reporter.GetProposalsCommand(),
 		"proposals_mute":   reporter.GetAddMuteCommand(),
 		"proposals_unmute": reporter.GetDeleteMuteCommand(),
+		"proposals_mutes":  reporter.GetMutesCommand(),
 	}
 
 	go reporter.InitCommands()
