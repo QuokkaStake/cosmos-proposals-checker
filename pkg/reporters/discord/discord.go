@@ -86,9 +86,10 @@ func (reporter *Reporter) Init() error {
 	reporter.Logger.Info().Err(err).Msg("Discord bot listening")
 
 	reporter.Commands = map[string]*Command{
-		"help":           reporter.GetHelpCommand(),
-		"proposals":      reporter.GetProposalsCommand(),
-		"proposals_mute": reporter.GetAddMuteCommand(),
+		"help":             reporter.GetHelpCommand(),
+		"proposals":        reporter.GetProposalsCommand(),
+		"proposals_mute":   reporter.GetAddMuteCommand(),
+		"proposals_unmute": reporter.GetDeleteMuteCommand(),
 	}
 
 	go reporter.InitCommands()
