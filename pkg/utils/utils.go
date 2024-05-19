@@ -94,3 +94,22 @@ func MustMarshal(v any) []byte {
 		return content
 	}
 }
+
+func SplitStringIntoChunks(msg string, maxLineLength int) []string {
+	msgsByNewline := strings.Split(msg, "\n")
+	outMessages := []string{}
+
+	var sb strings.Builder
+
+	for _, line := range msgsByNewline {
+		if sb.Len()+len(line) > maxLineLength {
+			outMessages = append(outMessages, sb.String())
+			sb.Reset()
+		}
+
+		sb.WriteString(line + "\n")
+	}
+
+	outMessages = append(outMessages, sb.String())
+	return outMessages
+}

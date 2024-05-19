@@ -10,6 +10,7 @@ import (
 type Config struct {
 	PagerDutyConfig PagerDutyConfig `toml:"pagerduty"`
 	TelegramConfig  TelegramConfig  `toml:"telegram"`
+	DiscordConfig   DiscordConfig   `toml:"discord"`
 	LogConfig       LogConfig       `toml:"log"`
 	TracingConfig   TracingConfig   `toml:"tracing"`
 	StatePath       string          `toml:"state-path"`
@@ -27,6 +28,12 @@ type PagerDutyConfig struct {
 type TelegramConfig struct {
 	TelegramChat  int64  `toml:"chat"`
 	TelegramToken string `toml:"token"`
+}
+
+type DiscordConfig struct {
+	Guild   string `toml:"guild"`
+	Token   string `toml:"token"`
+	Channel string `toml:"channel"`
 }
 
 func (c *Config) Validate() error {
