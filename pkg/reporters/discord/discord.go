@@ -2,6 +2,7 @@ package discord
 
 import (
 	"context"
+	mutes "main/pkg/mutes"
 	"main/pkg/report/entry"
 	statePkg "main/pkg/state"
 	templatesPkg "main/pkg/templates"
@@ -28,6 +29,7 @@ type Reporter struct {
 	Logger           zerolog.Logger
 	Config           *types.Config
 	Manager          *statePkg.Manager
+	MutesManager     *mutes.Manager
 	TemplatesManager templatesPkg.Manager
 	Commands         map[string]*Command
 	Tracer           trace.Tracer
@@ -39,6 +41,7 @@ func NewReporter(
 	version string,
 	logger *zerolog.Logger,
 	manager *statePkg.Manager,
+	mutesManager *mutes.Manager,
 	stateGenerator *statePkg.Generator,
 	timezone *time.Location,
 	tracer trace.Tracer,
@@ -50,6 +53,7 @@ func NewReporter(
 		Config:           config,
 		Logger:           logger.With().Str("component", "discord_reporter").Logger(),
 		Manager:          manager,
+		MutesManager:     mutesManager,
 		StateGenerator:   stateGenerator,
 		TemplatesManager: templatesPkg.NewDiscordTemplatesManager(logger, timezone),
 		Commands:         make(map[string]*Command, 0),
@@ -82,8 +86,9 @@ func (reporter *Reporter) Init() error {
 	reporter.Logger.Info().Err(err).Msg("Discord bot listening")
 
 	reporter.Commands = map[string]*Command{
-		"help":      reporter.GetHelpCommand(),
-		"proposals": reporter.GetProposalsCommand(),
+		"help":           reporter.GetHelpCommand(),
+		"proposals":      reporter.GetProposalsCommand(),
+		"proposals_mute": reporter.GetAddMuteCommand(),
 	}
 
 	go reporter.InitCommands()
