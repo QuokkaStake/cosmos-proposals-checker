@@ -1,0 +1,24 @@
+{{- if not .ChainInfos }}
+**No active proposals**
+{{- end }}
+{{- range .ChainInfos }}
+{{- $chain := .Chain -}}
+**{{ .Chain.GetName }}**
+{{- if .HasProposalsError }}
+❌ Error querying for proposals: {{ .ProposalsError }}
+{{- end }}
+{{- range .ProposalVotes }}
+{{- $proposalLink := $chain.GetProposalLink .Proposal }}
+Proposal #{{ .Proposal.ID }}: {{ SerializeLink $proposalLink }} (voting ends in {{ .Proposal.GetTimeLeft  }})
+{{- range $wallet, $vote := .Votes }}
+{{- $walletLink := $chain.GetWalletLink $vote.Wallet -}}
+{{- if $vote.IsError }}
+❌ Wallet {{ SerializeLink $walletLink }} - error querying: {{ $vote.Error }}
+{{- else if $vote.HasVoted }}
+✅ Wallet {{ SerializeLink $walletLink }} - voted: {{ $vote.Vote.ResolveVote }}
+{{- else }}
+🔴 Wallet {{ SerializeLink $walletLink }} - not voted
+{{- end }}
+{{- end }}
+{{ end }}
+{{ end }}

@@ -79,6 +79,7 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 			version,
 			log,
 			stateManager,
+			stateGenerator,
 			timeZone,
 			tracer,
 		),

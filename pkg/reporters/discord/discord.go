@@ -24,6 +24,7 @@ type Reporter struct {
 	Version string
 
 	DiscordSession   *discordgo.Session
+	StateGenerator   *statePkg.Generator
 	Logger           zerolog.Logger
 	Config           *types.Config
 	Manager          *statePkg.Manager
@@ -38,6 +39,7 @@ func NewReporter(
 	version string,
 	logger *zerolog.Logger,
 	manager *statePkg.Manager,
+	stateGenerator *statePkg.Generator,
 	timezone *time.Location,
 	tracer trace.Tracer,
 ) *Reporter {
@@ -48,6 +50,7 @@ func NewReporter(
 		Config:           config,
 		Logger:           logger.With().Str("component", "discord_reporter").Logger(),
 		Manager:          manager,
+		StateGenerator:   stateGenerator,
 		TemplatesManager: templatesPkg.NewDiscordTemplatesManager(logger, timezone),
 		Commands:         make(map[string]*Command, 0),
 		Version:          version,
@@ -79,7 +82,8 @@ func (reporter *Reporter) Init() error {
 	reporter.Logger.Info().Err(err).Msg("Discord bot listening")
 
 	reporter.Commands = map[string]*Command{
-		"help": reporter.GetHelpCommand(),
+		"help":      reporter.GetHelpCommand(),
+		"proposals": reporter.GetProposalsCommand(),
 	}
 
 	go reporter.InitCommands()
