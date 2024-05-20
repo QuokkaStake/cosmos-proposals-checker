@@ -1,0 +1,7 @@
+{{- range $chainName, $params := . }}
+**Params of chain {{ $params.Chain.GetName }}:**
+{{- range $param := .Params }}
+{{ $param.GetDescription }}: {{ $param.Serialize }}
+{{- end }}
+
+{{ end }}

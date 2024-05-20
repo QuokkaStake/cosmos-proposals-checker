@@ -41,6 +41,59 @@ func Contains[T comparable](slice []T, elt T) bool {
 	return false
 }
 
+// Subtract returns a new slice than includes values that are presented in the first, but not
+// the second array.
+func Subtract[T any, C comparable](first, second []T, predicate func(T) C) []T {
+	valuesMap := make(map[C]bool, len(second))
+	for _, value := range second {
+		valuesMap[predicate(value)] = true
+	}
+
+	newSlice := make([]T, 0)
+
+	for _, value := range first {
+		predicateResult := predicate(value)
+		_, ok := valuesMap[predicateResult]
+		if !ok {
+			newSlice = append(newSlice, value)
+		}
+	}
+
+	return newSlice
+}
+
+func Union[T any, C comparable](first, second []T, predicate func(T) C) []T {
+	valuesMap := make(map[C]bool, len(second))
+	for _, value := range second {
+		valuesMap[predicate(value)] = true
+	}
+
+	newSlice := make([]T, 0)
+
+	for _, value := range first {
+		predicateResult := predicate(value)
+		_, ok := valuesMap[predicateResult]
+		if ok {
+			newSlice = append(newSlice, value)
+		}
+	}
+
+	return newSlice
+}
+
+func MapToArray[K comparable, T any](source map[K]T) []T {
+	newSlice := make([]T, len(source))
+
+	index := 0
+
+	for _, value := range source {
+		newSlice[index] = value
+		index++
+	}
+
+	return newSlice
+}
+
 func FormatDuration(duration time.Duration) string {
 	days := int64(duration.Hours() / 24)
 	hours := int64(math.Mod(duration.Hours(), 24))

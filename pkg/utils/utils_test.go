@@ -147,3 +147,66 @@ func TestSplitStringIntoChunksMoreChunks(t *testing.T) {
 	chunks := SplitStringIntoChunks(str, 10)
 	assert.Len(t, chunks, 3, "There should be 3 chunks!")
 }
+
+func TestSubtract(t *testing.T) {
+	t.Parallel()
+
+	type TestStruct struct {
+		Value string
+	}
+
+	first := []TestStruct{
+		{Value: "1"},
+		{Value: "2"},
+		{Value: "3"},
+	}
+
+	second := []TestStruct{
+		{Value: "2"},
+		{Value: "4"},
+	}
+
+	result := Subtract(first, second, func(v TestStruct) any { return v.Value })
+	assert.Len(t, result, 2)
+	assert.Equal(t, "1", result[0].Value)
+	assert.Equal(t, "3", result[1].Value)
+}
+
+func TestUnion(t *testing.T) {
+	t.Parallel()
+
+	type TestStruct struct {
+		Value string
+	}
+
+	first := []TestStruct{
+		{Value: "1"},
+		{Value: "2"},
+		{Value: "3"},
+	}
+
+	second := []TestStruct{
+		{Value: "2"},
+		{Value: "4"},
+	}
+
+	result := Union(first, second, func(v TestStruct) any { return v.Value })
+	assert.Len(t, result, 1)
+	assert.Equal(t, "2", result[0].Value)
+}
+
+func TestMapToArray(t *testing.T) {
+	t.Parallel()
+
+	testMap := map[string]string{
+		"test1": "1",
+		"test2": "2",
+		"test3": "3",
+	}
+
+	result := MapToArray(testMap)
+	assert.Len(t, result, 3)
+	assert.Equal(t, "1", result[0])
+	assert.Equal(t, "2", result[1])
+	assert.Equal(t, "3", result[2])
+}

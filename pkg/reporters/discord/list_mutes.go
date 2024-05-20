@@ -1,9 +1,10 @@
 package discord
 
 import (
-	"github.com/bwmarrin/discordgo"
 	mutes "main/pkg/mutes"
 	"main/pkg/utils"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 func (reporter *Reporter) GetMutesCommand() *Command {

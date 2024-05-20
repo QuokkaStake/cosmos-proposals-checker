@@ -80,6 +80,7 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 			log,
 			stateManager,
 			mutesManager,
+			dataManager,
 			stateGenerator,
 			timeZone,
 			tracer,
