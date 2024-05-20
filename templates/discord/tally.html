@@ -1,0 +1,18 @@
+{{- if not . }}
+**No active proposals.**
+{{- end }}
+{{- range $chainName, $tallyInfos := . }}
+{{- if $tallyInfos.TallyInfos }}
+**Proposals on chain {{ $tallyInfos.Chain.GetName }}:**
+{{ range $chainIndex, $tallyInfo := $tallyInfos.TallyInfos }}
+{{- $proposalLink := $tallyInfos.Chain.GetProposalLink .Proposal }}
+Proposal #{{ .Proposal.ID }}: {{ SerializeLink $proposalLink }}
+Ends in: {{ .Proposal.GetTimeLeft }}
+- Not voted: {{ .GetNotVoted }}
+- Voted: {{ .GetQuorum }}
+{{- range $tallyOptionIndex, $tallyOption := .Tally }}
+- Voted "{{ $tallyOption.Option }}": {{ $tallyInfo.Tally.GetVoted $tallyOption }}
+{{- end }}
+{{ end }}
+{{- end }}
+{{ end }}

@@ -96,6 +96,7 @@ func (reporter *Reporter) Init() error {
 		"proposals_unmute": reporter.GetDeleteMuteCommand(),
 		"proposals_mutes":  reporter.GetMutesCommand(),
 		"params":           reporter.GetParamsCommand(),
+		"tally":            reporter.GetTallyCommand(),
 	}
 
 	go reporter.InitCommands()
@@ -236,24 +237,31 @@ func (reporter *Reporter) BotRespond(s *discordgo.Session, i *discordgo.Interact
 	chunks := utils.SplitStringIntoChunks(text, 2000)
 	firstChunk, rest := chunks[0], chunks[1:]
 
+	reporter.BotSendInteraction(s, i, firstChunk)
+
+	for _, chunk := range rest {
+		reporter.BotSendFollowup(s, i, chunk)
+	}
+}
+
+func (reporter *Reporter) BotSendInteraction(s *discordgo.Session, i *discordgo.InteractionCreate, text string) {
 	if err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: firstChunk,
+			Content: text,
 		},
 	}); err != nil {
 		reporter.Logger.Error().Err(err).Msg("Error sending response")
 	}
+}
 
-	for index, chunk := range rest {
-		if _, err := s.FollowupMessageCreate(i.Interaction, false, &discordgo.WebhookParams{
-			Content: chunk,
-		}); err != nil {
-			reporter.Logger.Error().
-				Int("chunk", index).
-				Err(err).
-				Msg("Error sending followup message")
-		}
+func (reporter *Reporter) BotSendFollowup(s *discordgo.Session, i *discordgo.InteractionCreate, text string) {
+	if _, err := s.FollowupMessageCreate(i.Interaction, false, &discordgo.WebhookParams{
+		Content: text,
+	}); err != nil {
+		reporter.Logger.Error().
+			Err(err).
+			Msg("Error sending followup message")
 	}
 }
 
