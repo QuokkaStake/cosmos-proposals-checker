@@ -8,6 +8,7 @@ import (
 	mutes "main/pkg/mutes"
 	"main/pkg/report"
 	reportersPkg "main/pkg/reporters"
+	"main/pkg/reporters/discord"
 	"main/pkg/reporters/pagerduty"
 	"main/pkg/reporters/telegram"
 	"main/pkg/state"
@@ -70,6 +71,17 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 			dataManager,
 			log,
 			version,
+			timeZone,
+			tracer,
+		),
+		discord.NewReporter(
+			config,
+			version,
+			log,
+			stateManager,
+			mutesManager,
+			dataManager,
+			stateGenerator,
 			timeZone,
 			tracer,
 		),

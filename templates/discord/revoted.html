@@ -1,0 +1,11 @@
+{{- $walletLink := .Chain.GetWalletLink .Wallet -}}
+↔️ **Wallet {{ SerializeLink $walletLink }} has changed its vote on proposal {{ .Proposal.ID }} on {{ .Chain.GetName }}**
+{{ .Proposal.Title }}
+
+Vote: {{ .Vote.ResolveVote }}
+Old vote: {{ .OldVote.ResolveVote }}
+Voting ends at: {{ SerializeDate .Proposal.EndTime }} (in {{ .Proposal.GetTimeLeft }})
+
+{{ range .Chain.GetExplorerProposalsLinks .Proposal.ID }}{{ SerializeLink .}}
+{{ end }}
+Sent by [cosmos-proposals-checker.](<https://github.com/QuokkaStake/cosmos-proposals-checker>)

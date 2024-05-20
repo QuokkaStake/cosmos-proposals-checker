@@ -2,6 +2,7 @@ package utils
 
 import (
 	"main/pkg/constants"
+	"math/rand"
 	"net/http"
 	"testing"
 	"time"
@@ -10,6 +11,16 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+func StringOfRandomLength(n int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
 
 func TestFilter(t *testing.T) {
 	t.Parallel()
@@ -110,4 +121,92 @@ func TestMustMarshallValid(t *testing.T) {
 	str := "test"
 	content := MustMarshal(str)
 	assert.Equal(t, []byte("\"test\""), content)
+}
+
+func TestSplitStringIntoChunksLessThanOneChunk(t *testing.T) {
+	t.Parallel()
+
+	str := StringOfRandomLength(10)
+	chunks := SplitStringIntoChunks(str, 20)
+	assert.Len(t, chunks, 1, "There should be 1 chunk!")
+}
+
+func TestSplitStringIntoChunksExactlyOneChunk(t *testing.T) {
+	t.Parallel()
+
+	str := StringOfRandomLength(10)
+	chunks := SplitStringIntoChunks(str, 10)
+
+	assert.Len(t, chunks, 1, "There should be 1 chunk!")
+}
+
+func TestSplitStringIntoChunksMoreChunks(t *testing.T) {
+	t.Parallel()
+
+	str := "aaaa\nbbbb\ncccc\ndddd\neeeee\n"
+	chunks := SplitStringIntoChunks(str, 10)
+	assert.Len(t, chunks, 3, "There should be 3 chunks!")
+}
+
+func TestSubtract(t *testing.T) {
+	t.Parallel()
+
+	type TestStruct struct {
+		Value string
+	}
+
+	first := []TestStruct{
+		{Value: "1"},
+		{Value: "2"},
+		{Value: "3"},
+	}
+
+	second := []TestStruct{
+		{Value: "2"},
+		{Value: "4"},
+	}
+
+	result := Subtract(first, second, func(v TestStruct) any { return v.Value })
+	assert.Len(t, result, 2)
+	assert.Equal(t, "1", result[0].Value)
+	assert.Equal(t, "3", result[1].Value)
+}
+
+func TestUnion(t *testing.T) {
+	t.Parallel()
+
+	type TestStruct struct {
+		Value string
+	}
+
+	first := []TestStruct{
+		{Value: "1"},
+		{Value: "2"},
+		{Value: "3"},
+	}
+
+	second := []TestStruct{
+		{Value: "2"},
+		{Value: "4"},
+	}
+
+	result := Union(first, second, func(v TestStruct) any { return v.Value })
+	assert.Len(t, result, 1)
+	assert.Equal(t, "2", result[0].Value)
+}
+
+func TestMapToArray(t *testing.T) {
+	t.Parallel()
+
+	testMap := map[string]string{
+		"test1": "1",
+		"test2": "2",
+		"test3": "3",
+	}
+
+	result := MapToArray(testMap)
+	assert.Len(t, result, 3)
+	assert.Equal(t, "1", result[0])
+	assert.Equal(t, "2", result[1])
+	assert.Equal(t, "3", result[2])
 }
