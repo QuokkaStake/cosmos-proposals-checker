@@ -206,7 +206,7 @@ func TestMapToArray(t *testing.T) {
 
 	result := MapToArray(testMap)
 	assert.Len(t, result, 3)
-	assert.Equal(t, "1", result[0])
-	assert.Equal(t, "2", result[1])
-	assert.Equal(t, "3", result[2])
+	assert.Contains(t, result, "1")
+	assert.Contains(t, result, "2")
+	assert.Contains(t, result, "3")
 }
