@@ -3,7 +3,6 @@ package tracing
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 	"main/pkg/types"
 
 	"go.opentelemetry.io/otel"
@@ -12,7 +11,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func getExporter(config types.TracingConfig) (tracesdk.SpanExporter, error) {
+func getExporter(config types.TracingConfig) tracesdk.SpanExporter {
 	if config.Enabled.Bool {
 		opts := []otlptracehttp.Option{
 			otlptracehttp.WithEndpoint(config.OpenTelemetryHTTPHost),
@@ -30,25 +29,22 @@ func getExporter(config types.TracingConfig) (tracesdk.SpanExporter, error) {
 			}))
 		}
 
-		return otlptracehttp.New(
+		exporter, _ := otlptracehttp.New(
 			context.Background(),
 			opts...,
 		)
+		return exporter
 	}
 
-	return NewNoopExporter(), nil
+	return NewNoopExporter()
 }
 
-func InitTracer(config types.TracingConfig, version string) (trace.Tracer, error) {
-	exporter, err := getExporter(config)
-	if err != nil {
-		return nil, fmt.Errorf("error creating exporter: %w", err)
-	}
-
+func InitTracer(config types.TracingConfig, version string) trace.Tracer {
+	exporter := getExporter(config)
 	tp := NewTraceProvider(exporter, version)
 	otel.SetTracerProvider(tp)
 
-	return tp.Tracer("main"), nil
+	return tp.Tracer("main")
 }
 
 func InitNoopTracer() trace.Tracer {

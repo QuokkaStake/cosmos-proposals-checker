@@ -20,9 +20,8 @@ func (rpc *RPC) GetAllV1beta1Proposals(
 
 	for {
 		url := fmt.Sprintf(
-			// 2 is for PROPOSAL_STATUS_VOTING_PERIOD
-			"/cosmos/gov/v1beta1/proposals?pagination.limit=%d&pagination.offset=%d",
-			PaginationLimit,
+			"/cosmos/gov/v1beta1/proposals?pagination.limit=%d&pagination.offset=%d&pagination.count_total=1",
+			rpc.PaginationLimit,
 			offset,
 		)
 
@@ -40,12 +39,7 @@ func (rpc *RPC) GetAllV1beta1Proposals(
 			}
 		}
 
-		height, err := utils.GetBlockHeightFromHeader(header)
-		if err != nil {
-			return nil, 0, &types.QueryError{
-				QueryError: errors.New("got error when parsing proposals height"),
-			}
-		}
+		height, _ := utils.GetBlockHeightFromHeader(header)
 
 		if batchProposals.Message != "" {
 			return nil, height, &types.QueryError{
@@ -59,11 +53,11 @@ func (rpc *RPC) GetAllV1beta1Proposals(
 			return p.ToProposal()
 		})
 		proposals = append(proposals, parsedProposals...)
-		if len(batchProposals.Proposals) < PaginationLimit {
+		if len(batchProposals.Proposals) < rpc.PaginationLimit {
 			break
 		}
 
-		offset += PaginationLimit
+		offset += rpc.PaginationLimit
 	}
 
 	return proposals, lastHeight, nil

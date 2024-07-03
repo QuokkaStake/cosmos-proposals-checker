@@ -3,8 +3,8 @@ package responses
 import (
 	"main/pkg/types"
 	"main/pkg/utils"
-	"strconv"
-	"time"
+
+	"cosmossdk.io/math"
 )
 
 type ParamsResponse struct {
@@ -14,12 +14,12 @@ type ParamsResponse struct {
 }
 
 type VotingParams struct {
-	VotingPeriod string `json:"voting_period"`
+	VotingPeriod types.Duration `json:"voting_period"`
 }
 
 type DepositParams struct {
-	MinDepositAmount []Amount `json:"min_deposit"`
-	MaxDepositPeriod string   `json:"max_deposit_period"`
+	MinDepositAmount []Amount       `json:"min_deposit"`
+	MaxDepositPeriod types.Duration `json:"max_deposit_period"`
 }
 
 type Amount struct {
@@ -28,42 +28,17 @@ type Amount struct {
 }
 
 type TallyParams struct {
-	Quorum        string `json:"quorum"`
-	Threshold     string `json:"threshold"`
-	VetoThreshold string `json:"veto_threshold"`
+	Quorum        math.LegacyDec `json:"quorum"`
+	Threshold     math.LegacyDec `json:"threshold"`
+	VetoThreshold math.LegacyDec `json:"veto_threshold"`
 }
 
 func (params ParamsResponse) ToParams(chain *types.Chain) (*types.ChainWithVotingParams, []error) {
-	quorum, err := strconv.ParseFloat(params.TallyParams.Quorum, 64)
-	if err != nil {
-		return nil, []error{err}
-	}
-
-	threshold, err := strconv.ParseFloat(params.TallyParams.Threshold, 64)
-	if err != nil {
-		return nil, []error{err}
-	}
-
-	vetoThreshold, err := strconv.ParseFloat(params.TallyParams.VetoThreshold, 64)
-	if err != nil {
-		return nil, []error{err}
-	}
-
-	votingPeriod, err := time.ParseDuration(params.VotingParams.VotingPeriod)
-	if err != nil {
-		return nil, []error{err}
-	}
-
-	maxDepositPeriod, err := time.ParseDuration(params.DepositParams.MaxDepositPeriod)
-	if err != nil {
-		return nil, []error{err}
-	}
-
 	return &types.ChainWithVotingParams{
 		Chain: chain,
 		Params: []types.ChainParam{
-			types.DurationParam{Description: "Voting period", Value: votingPeriod},
-			types.DurationParam{Description: "Max deposit period", Value: maxDepositPeriod},
+			types.DurationParam{Description: "Voting period", Value: params.VotingParams.VotingPeriod.Duration},
+			types.DurationParam{Description: "Max deposit period", Value: params.DepositParams.MaxDepositPeriod.Duration},
 			types.AmountsParam{
 				Description: "Min deposit amount",
 				Value: utils.Map(params.DepositParams.MinDepositAmount, func(amount Amount) types.Amount {
@@ -73,9 +48,9 @@ func (params ParamsResponse) ToParams(chain *types.Chain) (*types.ChainWithVotin
 					}
 				}),
 			},
-			types.PercentParam{Description: "Quorum", Value: quorum},
-			types.PercentParam{Description: "Threshold", Value: threshold},
-			types.PercentParam{Description: "Veto threshold", Value: vetoThreshold},
+			types.PercentParam{Description: "Quorum", Value: params.TallyParams.Quorum.MustFloat64()},
+			types.PercentParam{Description: "Threshold", Value: params.TallyParams.Threshold.MustFloat64()},
+			types.PercentParam{Description: "Veto threshold", Value: params.TallyParams.VetoThreshold.MustFloat64()},
 		},
 	}, nil
 }

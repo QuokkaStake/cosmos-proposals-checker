@@ -47,11 +47,7 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 		logger.GetDefaultLogger().Info().Msg("Provided config is valid.")
 	}
 
-	tracer, err := tracing.InitTracer(config.TracingConfig, version)
-	if err != nil {
-		logger.GetDefaultLogger().Fatal().Err(err).Msg("Error setting up tracing")
-	}
-
+	tracer := tracing.InitTracer(config.TracingConfig, version)
 	log := logger.GetLogger(config.LogConfig)
 
 	stateManager := state.NewStateManager(config.StatePath, filesystem, log)
