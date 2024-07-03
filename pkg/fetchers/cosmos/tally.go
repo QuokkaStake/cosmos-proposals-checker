@@ -2,7 +2,6 @@ package cosmos
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"main/pkg/fetchers/cosmos/responses"
 	"main/pkg/types"
@@ -50,9 +49,6 @@ func (rpc *RPC) GetTallies(ctx context.Context) (types.ChainTallyInfos, error) {
 		if err != nil {
 			rpc.Logger.Error().Err(err).Msg("Error fetching staking pool")
 			errorsList = append(errorsList, err)
-		} else if poolResponse.Pool == nil {
-			rpc.Logger.Error().Err(err).Msg("Staking pool is empty!")
-			errorsList = append(errorsList, errors.New("staking pool is empty"))
 		} else {
 			pool = poolResponse.Pool.BondedTokens
 		}
@@ -101,12 +97,6 @@ func (rpc *RPC) GetTallies(ctx context.Context) (types.ChainTallyInfos, error) {
 						Str("proposal_id", p.ID).
 						Msg("Error fetching tally for proposal")
 					errorsList = append(errorsList, err)
-				} else if tally == nil {
-					rpc.Logger.Error().
-						Err(err).
-						Str("proposal_id", p.ID).
-						Msg("Tally is empty")
-					errorsList = append(errorsList, errors.New("tally is empty"))
 				} else {
 					tallies[p.ID] = *tally
 				}
@@ -129,11 +119,7 @@ func (rpc *RPC) GetTallies(ctx context.Context) (types.ChainTallyInfos, error) {
 	}
 
 	for index, proposal := range proposals {
-		tally, ok := tallies[proposal.ID]
-		if !ok {
-			return types.ChainTallyInfos{}, errors.New("could not get tallies info")
-		}
-
+		tally := tallies[proposal.ID]
 		tallyInfos.TallyInfos[index] = types.TallyInfo{
 			Proposal:         proposal,
 			Tally:            tally,

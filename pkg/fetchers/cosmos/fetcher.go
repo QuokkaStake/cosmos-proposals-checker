@@ -14,18 +14,20 @@ import (
 const PaginationLimit = 1000
 
 type RPC struct {
-	ChainConfig   *types.Chain
-	ProposalsType string
-	Client        *http.Client
-	Logger        zerolog.Logger
+	ChainConfig     *types.Chain
+	ProposalsType   string
+	Client          *http.Client
+	Logger          zerolog.Logger
+	PaginationLimit int
 }
 
 func NewRPC(chainConfig *types.Chain, logger *zerolog.Logger, tracer trace.Tracer) *RPC {
 	return &RPC{
-		ChainConfig:   chainConfig,
-		ProposalsType: chainConfig.ProposalsType,
-		Logger:        logger.With().Str("component", "rpc").Logger(),
-		Client:        http.NewClient(chainConfig.Name, chainConfig.LCDEndpoints, logger, tracer),
+		ChainConfig:     chainConfig,
+		ProposalsType:   chainConfig.ProposalsType,
+		Logger:          logger.With().Str("component", "rpc").Logger(),
+		Client:          http.NewClient(chainConfig.Name, chainConfig.LCDEndpoints, logger, tracer),
+		PaginationLimit: PaginationLimit,
 	}
 }
 

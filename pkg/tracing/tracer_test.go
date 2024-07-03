@@ -12,9 +12,7 @@ func TestTracerGetExporterNoop(t *testing.T) {
 	t.Parallel()
 
 	config := types.TracingConfig{}
-	exporter, err := getExporter(config)
-
-	require.NoError(t, err)
+	exporter := getExporter(config)
 	require.NotNil(t, exporter)
 }
 
@@ -22,9 +20,7 @@ func TestTracerGetExporterHttpBasic(t *testing.T) {
 	t.Parallel()
 
 	config := types.TracingConfig{Enabled: null.BoolFrom(true)}
-	exporter, err := getExporter(config)
-
-	require.NoError(t, err)
+	exporter := getExporter(config)
 	require.NotNil(t, exporter)
 }
 
@@ -38,9 +34,7 @@ func TestTracerGetExporterHttpComplex(t *testing.T) {
 		OpenTelemetryHTTPPassword: "test",
 		OpenTelemetryHTTPInsecure: null.BoolFrom(true),
 	}
-	exporter, err := getExporter(config)
-
-	require.NoError(t, err)
+	exporter := getExporter(config)
 	require.NotNil(t, exporter)
 }
 
@@ -54,9 +48,7 @@ func TestTracerGetTracerOk(t *testing.T) {
 		OpenTelemetryHTTPPassword: "test",
 		OpenTelemetryHTTPInsecure: null.BoolFrom(true),
 	}
-	tracer, err := InitTracer(config, "v1.2.3")
-
-	require.NoError(t, err)
+	tracer := InitTracer(config, "v1.2.3")
 	require.NotNil(t, tracer)
 }
 

@@ -2,7 +2,8 @@ package responses
 
 import (
 	"main/pkg/types"
-	"strconv"
+
+	"cosmossdk.io/math"
 )
 
 // cosmos/gov/v1beta1/proposals/:id/votes/:wallet
@@ -15,8 +16,8 @@ type Vote struct {
 }
 
 type VoteOption struct {
-	Option string `json:"option"`
-	Weight string `json:"weight"`
+	Option string         `json:"option"`
+	Weight math.LegacyDec `json:"weight"`
 }
 
 type VoteRPCResponse struct {
@@ -29,7 +30,7 @@ func (v VoteRPCResponse) IsError() bool {
 	return v.Code != 0
 }
 
-func (v VoteRPCResponse) ToVote() (*types.Vote, error) {
+func (v VoteRPCResponse) ToVote() *types.Vote {
 	votesMap := map[string]string{
 		"VOTE_OPTION_YES":          "👌Yes",
 		"VOTE_OPTION_ABSTAIN":      "🤷Abstain",
@@ -43,11 +44,6 @@ func (v VoteRPCResponse) ToVote() (*types.Vote, error) {
 		options = make([]types.VoteOption, len(v.Vote.Options))
 
 		for index, option := range v.Vote.Options {
-			weight, err := strconv.ParseFloat(option.Weight, 64)
-			if err != nil {
-				return nil, err
-			}
-
 			voteOption, found := votesMap[option.Option]
 			if !found {
 				voteOption = option.Option
@@ -55,7 +51,7 @@ func (v VoteRPCResponse) ToVote() (*types.Vote, error) {
 
 			options[index] = types.VoteOption{
 				Option: voteOption,
-				Weight: weight,
+				Weight: option.Weight.MustFloat64(),
 			}
 		}
 	} else {
@@ -76,5 +72,5 @@ func (v VoteRPCResponse) ToVote() (*types.Vote, error) {
 		ProposalID: v.Vote.ProposalID,
 		Voter:      v.Vote.Voter,
 		Options:    options,
-	}, nil
+	}
 }

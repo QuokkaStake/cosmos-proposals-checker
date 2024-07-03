@@ -1,7 +1,8 @@
 config.toml
 config2.toml
 main
-*.json
+*mutes.json
+*state.json
 .idea
 cover.out
 cosmos-proposals-checker

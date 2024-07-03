@@ -1,0 +1,597 @@
+{
+  "proposals": [
+    {
+      "proposal_id": "1",
+      "content": {
+        "@type": "/cosmos.params.v1beta1.ParameterChangeProposal",
+        "title": "Bitsong Transfer Enablement",
+        "description": "Enable transfers of Bitsong token (ubtsg)",
+        "changes": [
+          {
+            "subspace": "bank",
+            "key": "sendenabled",
+            "value": "true"
+          }
+        ]
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "17002680239267",
+        "abstain": "0",
+        "no": "0",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2021-03-30T12:38:14.759588862Z",
+      "deposit_end_time": "2021-04-14T12:38:14.759588862Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "512000000"
+        }
+      ],
+      "voting_start_time": "2021-03-30T13:23:16.813995938Z",
+      "voting_end_time": "2021-04-14T13:23:16.813995938Z"
+    },
+    {
+      "proposal_id": "2",
+      "content": {
+        "@type": "/cosmos.params.v1beta1.ParameterChangeProposal",
+        "title": "Decrease of Voting Period",
+        "description": "The BitSong team is proposing to the validator community that we reduce the voting period to 4 days (four days). Currently the voting period is 15 days. The reason for the proposal to reduce is that with the bitsong-2 upgrade (BigBang Upgrade in code name) on the way, the development team is ready to release some of the anticipated modules, including Fan Tokens, NFTs, and an auction feature. \n\nA four-day voting period will facilitate the most timely possible implementation after the upgrade is ready to put live. It will also ensure that in case of any issue, we’re able to work more quickly with the validator community to resolve the issues and conduct another vote. \n\nReducing the voting period is fundamental in the short term to ensure we can deliver on our promise to the BitSong community by enabling the various modules. The upgrade also includes the liquidity module that will drive liquidity and volume of BTSG. \n\nFollowing the successful implementation of the bitsong-2 upgrade, anyone from the governance can submit a further proposal to reinstate the 15-day voting period, if they wish. Such a proposal would be subject to a further governance vote. \n\n",
+        "changes": [
+          {
+            "subspace": "gov",
+            "key": "votingparams",
+            "value": "{\n        \"voting_period\": \"345600000000000\"\n      }"
+          }
+        ]
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "21312837582894",
+        "abstain": "0",
+        "no": "3724924550648",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2021-10-05T17:26:17.074915793Z",
+      "deposit_end_time": "2021-10-20T17:26:17.074915793Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "512000000"
+        }
+      ],
+      "voting_start_time": "2021-10-05T17:26:17.074915793Z",
+      "voting_end_time": "2021-10-20T17:26:17.074915793Z"
+    },
+    {
+      "proposal_id": "3",
+      "content": {
+        "@type": "/cosmos.gov.v1beta1.TextProposal",
+        "title": "Big Bang Upgrade (bitsong-2)",
+        "description": "Author: BitSong Team \n\nbitsong-2 is ready to launch. Vote YES on this proposal to rally the validator set around the upgrade. \n\nProposal text: https://gateway.pinata.cloud/ipfs/QmPc7rmFeDmpn58wW3QjfhE3S9fZLiJteqZRJnvWiYJbSQ \n\nipfs://QmPc7rmFeDmpn58wW3QjfhE3S9fZLiJteqZRJnvWiYJbSQ \n\nUpgrade start block height: 2,966,150 \n\n"
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "26112546990606",
+        "abstain": "0",
+        "no": "0",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2021-10-05T17:35:19.832420865Z",
+      "deposit_end_time": "2021-10-20T17:35:19.832420865Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "512000000"
+        }
+      ],
+      "voting_start_time": "2021-10-05T17:35:19.832420865Z",
+      "voting_end_time": "2021-10-20T17:35:19.832420865Z"
+    },
+    {
+      "proposal_id": "4",
+      "content": {
+        "@type": "/cosmos.params.v1beta1.ParameterChangeProposal",
+        "title": "Enable IBC transfers",
+        "description": "# BitSong Mainnet Prop.4\n*Enable IBC Transfers*\n\nFollowing the Big Bang upgrade and the transition from the bitsong-1 to the bitsong-2b, the consensus of the validators to enable IBC transfers is required!\n\n## Summary\n\nThis proposal enables transferring and receiving assets using the ICS20 standard on the Cosmos Hub. If this proposal passes, the Cosmos Transfer module SendEnabled and ReceiveEnabled will be set to true. This will make IBC assets available in the Bank module of the Hub and\n\nBITSONG will be available on Zones connected over IBC.\n\n## Security Considerations\n\nThe Cosmos Transfer module has been tested and is stable on other chains. In other chains there have been issues with stuck funds and UX confusion however overcoming these issues can only happen once IBC is live. Tendermint full nodes produce agreement under the assumption that at most one third of the voting power held by validators is Byzantine.\n\n## IBC\n\nIBC is a protocol for authenticated message passing between heterogeneous sovereign blockchains. IBC requires trusting that chains on both sides of the connections operate within their security model.\n\n## Incentive Security Extensions\n\nIBC has a facility to support freezing connections once a violation of the security model has occurred. The set of criteria for detecting such attacks continues to evolve and is a constant focus of research.\n\n## Full Proposal\n\nhttps: //gateway.pinata.cloud/ipfs/QmedstUdNtrH5EgJemeGRdScY23A16xFJDycqdVekhJTgt\n\n## IPFS Hash\n\nQmedstUdNtrH5EgJemeGRdScY23A16xFJDycqdVekhJTgt",
+        "changes": [
+          {
+            "subspace": "transfer",
+            "key": "SendEnabled",
+            "value": "true"
+          },
+          {
+            "subspace": "transfer",
+            "key": "ReceiveEnabled",
+            "value": "true"
+          }
+        ]
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "19265161536441",
+        "abstain": "0",
+        "no": "0",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2021-10-25T14:39:37.704739589Z",
+      "deposit_end_time": "2021-11-09T14:39:37.704739589Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "512000000"
+        }
+      ],
+      "voting_start_time": "2021-10-25T14:39:37.704739589Z",
+      "voting_end_time": "2021-10-29T14:39:37.704739589Z"
+    },
+    {
+      "proposal_id": "5",
+      "content": {
+        "@type": "/cosmos.gov.v1beta1.TextProposal",
+        "title": "Increase minimum commission rate to 5%",
+        "description": "Increase the minimum commission rate to 5%. This will help provide network stability and stop 0% validators driving commissions down. It also ensures Validators are earning enough to support secure and stable validation.\u003cbr/\u003e\u003cbr/\u003eIf this proposal is accepted, it will imply having to update the blockchain so that it is possible to modify the commission of all validators automatically (see the Osmosis and/or Stargaze fork)"
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "23174856660997",
+        "abstain": "0",
+        "no": "0",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2021-11-11T19:22:37.166361593Z",
+      "deposit_end_time": "2021-11-26T19:22:37.166361593Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "512000100"
+        }
+      ],
+      "voting_start_time": "2021-11-11T21:12:57.954876845Z",
+      "voting_end_time": "2021-11-15T21:12:57.954876845Z"
+    },
+    {
+      "proposal_id": "6",
+      "content": {
+        "@type": "/cosmos.gov.v1beta1.TextProposal",
+        "title": "Migrate BTSG ERC-20 to BitSong Mainnet",
+        "description": "# Abstract\\n\\nWhen BitSong was born in 2018, the Cosmos mainnet had not yet been released, and,\\nconsequently, it was too early to talk about the Cosmos ecosystem. For this reason, the first BTSG implementation was an **ERC-20 BTSG token**, i.e., a BitSong token based on the ERC-20 standard.\\n\\nIn such a context, we issued a total of **116,420,850** BTSG on **Ethereum** in one year, up to early 2021, when BitSong migrated to Cosmos SDK. Later, in March of the same year, we launched the BitSong mainnet, migrating a large portion of these tokens from the ERC-20 type to the native token of the BitSong blockchain.\\n\\nAlthough we migrated about **91.7%** of the **Initial Total Supply** to native BTSG, up to now, 9,656,879.13 BTSG remained on Ethereum as ERC-20 tokens and, for this reason, we want to complete the migration of all the assets from ERC-20 token format to native BTSG format.\\n\\n# Motivation\\n\\nEven if we relocated more than 90% of the BTSG issued in the form of ERC-20 tokens to the native BTSG format, our goal is to complete the transition of all the assets to provide the BitSong community with a new set of benefits.\\n\\nThanks to this migration, in fact, we can:\\n\\n- Provide BTSG with a defined market cap to communicate with various tracking\\nplatforms, such as CMC or CoinGecko 2;\\n- Obtain a native and unambiguous communication standard, moving all the assets to\\nthe mainnet, avoiding confusion for newcomers linked to the existence of multiple\\ntoken formats;\\n- Allow BitSong users still holding the ERC-20 version of the BTSG to benefit from 100% of the opportunities in the BitSong ecosystem.\\n\\nMoreover, worth remembering that once we migrate all the ERC-20 tokens to native BTSG, users will also be able to use bridge protocols such as Sifchain or Gravity Bridge to transfer their assets between Ethereum and the other blockchains.\\n\\nFor these reasons, we want to propose a migration plan that allows the possessor of the remaining BTSG in the format of ERC-20 to migrate this token to native BTSG.\\n\\n# Specification\\n\\nConsidering the benefits explained in the previous section and recalling that it is no longer necessary to operate a token instance on Ethereum as a “gateway” to the crypto and blockchain ecosystem, unlike the first migration attempt, carried out through the wallet **0x36EABD1CE47BA68E7FA773808F039DAE4FAC2820** (which is, of course, publicly available), this time, we will provide a bridge.\\n\\nMore specifically, we detailed a set of well-defined operations that will allow us to complete token migration:\\n\\n- As already stated in the previous sections, we still have to migrate 10% of the Initial Total Supply from ERC-20 tokens to BTSG native tokens. To accomplish this task and replace the amount remaining on the Ethereum blockchain, we need to mint 9,656,879.13 BTSG on the mainnet;\\n- We will store the amount of BTSG tokens needed for the migration into a Multisig Wallet governed by BitSong Srl Boarding, whose address will be officially communicated by BitSong later;\\n- We will launch the Cassini Bridge, whose code is available at [**Github**](https://github.com/bitsongofficial/cassini), which is provided with a 1-way transfer option from ERC-20 token format of BTSG to native BTSG.\\nIn this sense, thanks to this approach, we will provide the migration ability to all the users who still own the ERC-20 token format of BTSG.\\n\\nFor this reason, this proposal represents a request to proceed following the presented three steps.\\n\\nIn such a context, two scenarios can arise:\\n\\n- By voting “**Yes**”, the governance approves the presented workflow: \\n  - **Minting** 9,656,879.13 BTSG to the mainnet;\\n  - **Send** the tokens to the aforementioned **Multisig Wallet** managed by BitSong Srl Boarding;\\n  - **Launch of the Cassini bridge** and allow migration to native BTSG.\\n- By voting “**No**”, the governance disapproves the proposed solution.\\n\\nFinally, worth mentioning that if the governance approves the proposal, the presented changes will be applied to the next update once the block established for the upgrade is reached. Moreover, the upgrade will also include the fix for the minimum commission, voted in proposal 5.\\n\\n# Future improvements\\n\\nIn the event that the quantity of tokens that will remain on ETH after the release of the Bridge is still considerable, we will seriously consider the realization of a new tool, totally decentralized, which consists in an onchain module, totally relying on the validators of the network. Anyway, these scenarios must pass through a BSIP.\\n\\n# Copyright\\nCopyright and related rights waived via CC0 (https://creativecommons.org/publicdomain/zero/1.0/)."
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "32287720579550",
+        "abstain": "2327750095",
+        "no": "1199210770",
+        "no_with_veto": "138000000"
+      },
+      "submit_time": "2022-01-15T17:03:05.802037846Z",
+      "deposit_end_time": "2022-01-30T17:03:05.802037846Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "512000001"
+        }
+      ],
+      "voting_start_time": "2022-01-15T17:05:40.257037392Z",
+      "voting_end_time": "2022-01-19T17:05:40.257037392Z"
+    },
+    {
+      "proposal_id": "7",
+      "content": {
+        "@type": "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal",
+        "title": "BitSong v0.10.0 Upgrade",
+        "description": "# BitSong v0.10.0 Upgrade\n\nThis on-chain upgrade governance proposal, is to adopt go-bitsong v0.10.0 which includes a number of updates, fixes and new modules. By voting YES to this proposal, you approve of adding these updates to the BitSong Network.\n\n## Background\nSince the last upgrade at height 2966150 there have been a number of updates, fixes and new modules added to the Cosmos SDK, IBC and Tendermint. The following updates are included in **go-bitsong v0.10.0**:\n\n- Bump golang prerequisite to 1.17\n- Bump [Cosmos-SDK](https://github.com/cosmos/cosmos-sdk) to [v0.44.5](https://github.com/cosmos/cosmos-sdk/releases/tag/v0.44.5) which notably includes fixes for the vesting accounts and two new modules outlined below. This release of the Cosmos SDK recognizes that IBC is maintained in an independent repository and is instead imported into go-bitsong from that repository. For a full list of updates in Cosmos-SDK v0.44.5 please see the [CHANGELOG.md](https://github.com/cosmos/cosmos-sdk/blob/release/v0.44.x/CHANGELOG.md#v0445---2021-12-02)\n  - Add the [authz](https://github.com/cosmos/cosmos-sdk/tree/v0.44.5/x/authz/spec) module to the BitSong Network, which will help lower the barrier to mass consumer adoption of Blockchain technologies by improving the UX and security of managine an account on the BitSong Network. `x/authz` is an implementation of a Cosmos SDK module, per [ADR 30](https://github.com/cosmos/cosmos-sdk/blob/v0.44.5/docs/architecture/adr-030-authz-module.md), that allows granting arbitrary privileges from one account (the granter) to another account (the grantee). Authorizations must be granted for a particular Msg service method one by one using an implementation of the `Authorization` interface.\n  - Add the [feegrant](https://github.com/cosmos/cosmos-sdk/tree/v0.44.5/x/feegrant/spec) module to the BitSong Network, which will help lower the barrier to mass consumer adoption of Blockchain technologies by improving the UX of spending gas with an account on the BitSong Network. This module allows accounts to grant fee allowances and to use fees from their accounts. Grantees can execute any transaction without the need to maintain sufficient fees.\n  - **BREAKING CHANGE NOTICE** While a full list of breaking changes should be checked within the Cosmos SDK v0.44.5 [CHANGELOG.md](https://github.com/cosmos/cosmos-sdk/blob/release/v0.44.x/CHANGELOG.md#v0445---2021-12-02), it's imortant to highlight [PR #10041](https://github.com/cosmos/cosmos-sdk/pull/10041) which impacts **WALLETS AND EXCHANGES**. This update has removed the deprecated the legacy REST endpoints for broadcast \u0026 encode. **This means `POST /tx` and `POST /txs/encode` no longer work**. Please see the [REST Endpoints Migration guide](https://docs.cosmos.network/master/migrations/rest.html) to migrate to the new REST endpoints.\n- Add [IBC](https://github.com/cosmos/ibc-go) as a standalone module from the Cosmos SDK using version [v2.0.0](https://github.com/cosmos/ibc-go/releases/tag/v2.0.0). See the [CHANGELOG.md](https://github.com/cosmos/ibc-go/blob/v2.0.0/CHANGELOG.md) for details.\n  - Please note that the governance parameter for `MaxExpectedBlockDelay` is set to 30 seconds. As a recap, this means if a connection is opened with a packet delay of 1 minute, it requires 2 blocks to be committed after the consensus state is submitted before the packet can be processed.\n- Add [packet-forward-middleware](https://github.com/strangelove-ventures/packet-forward-middleware) [v1.0.1](https://github.com/strangelove-ventures/packet-forward-middleware/releases/tag/v1.0.1) prepared and tested by [Strangelove Ventures](https://www.strangelove.ventures/). This feature allows multi-hop IBC transfer messages so that a user can send tokens from chain A to chain C via chain B. This is useful in ensuring the BitSong Network is used as a routing hub as well as when \"unwrapping\" tokens to their source chain after they have taken multiple hops.\n- As per [Proposal #5](https://www.mintscan.io/bitsong/proposals/5) increase minimum commission rate to 5%, ensures that new validators joining the set have to adhere to this\n- As per [Proposal #6](https://www.mintscan.io/bitsong/proposals/6) mint [9,656,879,130,000ubtsg](https://github.com/bitsongofficial/go-bitsong/blob/v0.10.0/app/app.go#L112) to the cassini multisig wallet [bitsong12r2d9hhnd2ez4kgk63ar8m40vhaje8yaa94h8w](https://github.com/bitsongofficial/go-bitsong/blob/v0.10.0/app/app.go#L111)\n\n## On-Chain Upgrade Process\nThis upgrade can be performed in multiple ways. When the network reaches the halt height, the state machine program of the BitSong Network will be halted. The classic method for upgrading requires all validators and node operators to manually substitute the existing state machine binary with the new binary. \n\n",
+        "plan": {
+          "name": "v010",
+          "time": "0001-01-01T00:00:00Z",
+          "height": "4566000",
+          "info": "",
+          "upgraded_client_state": null
+        }
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "34524040109929",
+        "abstain": "6462235346",
+        "no": "64000000",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2022-02-01T14:17:25.499684944Z",
+      "deposit_end_time": "2022-02-16T14:17:25.499684944Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "528620000"
+        }
+      ],
+      "voting_start_time": "2022-02-01T22:54:17.503515212Z",
+      "voting_end_time": "2022-02-05T22:54:17.503515212Z"
+    },
+    {
+      "proposal_id": "8",
+      "content": {
+        "@type": "/cosmos.params.v1beta1.ParameterChangeProposal",
+        "title": "Increase Validator Set from 64 to 100",
+        "description": "This will make it possible for new validators to join and further decentralize the network\n\nIncrease MaxValidators=64 to MaxValidators=100",
+        "changes": [
+          {
+            "subspace": "staking",
+            "key": "MaxValidators",
+            "value": "100"
+          }
+        ]
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "32297446322127",
+        "abstain": "81613357642",
+        "no": "5582962300",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2022-02-15T14:02:27.466995609Z",
+      "deposit_end_time": "2022-03-02T14:02:27.466995609Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "512015001"
+        }
+      ],
+      "voting_start_time": "2022-02-15T20:56:16.733535405Z",
+      "voting_end_time": "2022-02-19T20:56:16.733535405Z"
+    },
+    {
+      "proposal_id": "10",
+      "content": {
+        "@type": "/cosmos.params.v1beta1.ParameterChangeProposal",
+        "title": "Increase Governance Voting period to 7 days",
+        "description": "The voting period on governance proposals is currently set to 4 days to allow faster upgrades (bitsong-1 to bitsong-2b).\nThe following proposal is about increasing the voting period to 7 days to allow longer discussion (if needed) and to ensure that no one misses the proposal.\n\nBy voting Yes you agree to increase the voting period to 7 days.\nBy voting No you vote to remain with a voting period of 4 days.\nNote: There was a missing underscore in proposal 9.",
+        "changes": [
+          {
+            "subspace": "gov",
+            "key": "votingparams",
+            "value": "{\"voting_period\":\"604800000000000\"}"
+          }
+        ]
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "31031729312400",
+        "abstain": "6305415829",
+        "no": "3031113407",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2022-03-07T13:42:32.402781166Z",
+      "deposit_end_time": "2022-03-22T13:42:32.402781166Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "691000000"
+        }
+      ],
+      "voting_start_time": "2022-03-07T13:44:55.059299101Z",
+      "voting_end_time": "2022-03-11T13:44:55.059299101Z"
+    },
+    {
+      "proposal_id": "11",
+      "content": {
+        "@type": "/cosmos.gov.v1beta1.TextProposal",
+        "title": "Signalling proposal: Creation of the Bitsong delegation DAO ",
+        "description": "This proposal is about creating a delegation DAO which carries out a delegation program for BitSong validators to incentivise third party contributions to the overall BitSong ecosystem. \n\nInformation about the DAO can be found [here](https://gov.bitsong.io/discussion/4562-creation-of-the-delegation-dao)\n\n\n\n------------------------------------\n\nBy voting YES you agree to create a delegation DAO which will handle the delegation program\n\nBy voting no, you reject such a DAO."
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "38139373720754",
+        "abstain": "597925879371",
+        "no": "187188366167",
+        "no_with_veto": "1014950000"
+      },
+      "submit_time": "2022-04-28T13:36:36.513302906Z",
+      "deposit_end_time": "2022-05-13T13:36:36.513302906Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "512000000"
+        }
+      ],
+      "voting_start_time": "2022-04-28T13:36:36.513302906Z",
+      "voting_end_time": "2022-05-05T13:36:36.513302906Z"
+    },
+    {
+      "proposal_id": "12",
+      "content": {
+        "@type": "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal",
+        "title": "BitSong v0.11.0 Upgrade - Fantoken \u0026 Merkledrop",
+        "description": "# BitSong v0.11.0 Upgrade\\n\\nThis is the final release for the v0.11.0 upgrade which is proposed to take place at height 6,777,500 which should occur approximately July 11th, 2022 at 14:00:00 UTC with a margin of error of ~6 hours to accommodate for any clock drift. The chain id will remain bitsong-2b.\\n\\n---\\n\\nThis on-chain upgrade governance proposal, is to adopt go-bitsong v0.11.0 which includes a number of updates, fixes and new modules. By voting YES to this proposal, you approve of adding these updates to the BitSong Network.\\n\\n## Background\\nSince the last upgrade at height 4566000 there have been a number of updates, fixes and new modules added to the Cosmos SDK, IBC and Tendermint. This upgrade include the **Fantoken** and **Merkledrop** modules. The following updates are included in **go-bitsong v0.11.0**:\\n\\n* (fantoken) introduce the [fantoken module](https://github.com/bitsongofficial/go-bitsong/tree/v0.11.0/x/fantoken/spec)\\n* (merkledrop) introduce the [merkledrop module](https://github.com/bitsongofficial/go-bitsong/tree/v0.11.0/x/merkledrop/spec)\\n* (app) bump [cosmos-sdk](https://github.com/cosmos/cosmos-sdk) to [v0.45.6](https://github.com/cosmos/cosmos-sdk/tree/v0.45.6)\\n* (app) bump [ibc](https://github.com/cosmos/ibc-go) to [v3.0.0](https://github.com/cosmos/ibc-go/tree/v3.0.0)\\n* (app) bump [tendermint](https://github.com/tendermint/tendermint) to [v0.34.19](https://github.com/tendermint/tendermint/tree/v0.34.19)\\n* (app) bump [packet-forward-middleware](https://github.com/strangelove-ventures/packet-forward-middleware) to [v2.1.1](github.com/strangelove-ventures/packet-forward-middleware/tree/v2.1.1)\\n* (app) update swagger to reflect new modules\\n* (app) small fixs Makefile\\n\\n## Golang v1.18.x\\n\\nThis upgrade require [golang v1.18.x](https://go.dev/dl/)\\n\\n## On-Chain Upgrade Process\\nThis upgrade can be performed in multiple ways. When the network reaches the halt height, the state machine program of the BitSong Network will be halted. The classic method for upgrading requires all validators and node operators to manually substitute the existing state machine binary with the new binary. ",
+        "plan": {
+          "name": "v011",
+          "time": "0001-01-01T00:00:00Z",
+          "height": "6777500",
+          "info": "",
+          "upgraded_client_state": null
+        }
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "47864925900132",
+        "abstain": "3603699799",
+        "no": "263845523",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2022-07-01T17:00:36.216282794Z",
+      "deposit_end_time": "2022-07-16T17:00:36.216282794Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "666576759"
+        }
+      ],
+      "voting_start_time": "2022-07-01T17:43:47.005586790Z",
+      "voting_end_time": "2022-07-08T17:43:47.005586790Z"
+    },
+    {
+      "proposal_id": "13",
+      "content": {
+        "@type": "/cosmos.gov.v1beta1.TextProposal",
+        "title": "Establishing Commonwealth for Pre-governance Discussion",
+        "description": "//Signaling proposal to establish the BitSong Commonwealth page as the official repository for pre-governance discussions//\n\nSeveral other blockchains have taken this move and I see it as a beneficial step for both BitSong's future adoption. My recommendations are as follows:\n1) A precedent be created that a given period of discussion (5 days min.) for any on-chain proposals take place on Commonwealth. This would be enforced by a “no-with veto” vote for any proposals that do not adhere to this qualifier. Exemptions for emergency, remedial actions affecting the entire chain are allowed.\n2) Discussions that propose multiple courses of action shall include a poll for each CoA so that developers and contributors can monitor the popularity of a CoA.\n3) Discussions posted on Commonwealth will be linked to social channels within 24 hrs to provide the greatest degree of oversight for stakeholders within the BitSong ecosystem.\n\nA \"yes\" vote indicates you are in favor with this proposal and wish to use the https://gov.bitsong.io/ in the manner specified above.\nA \"no\" vote indicates that you are not in favor of this signalling proposal as specified above."
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "31836887687520",
+        "abstain": "8174843913333",
+        "no": "908986722738",
+        "no_with_veto": "3885100000"
+      },
+      "submit_time": "2022-08-02T03:37:00.155078073Z",
+      "deposit_end_time": "2022-08-17T03:37:00.155078073Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "523000000"
+        }
+      ],
+      "voting_start_time": "2022-08-02T12:20:46.121215567Z",
+      "voting_end_time": "2022-08-09T12:20:46.121215567Z"
+    },
+    {
+      "proposal_id": "14",
+      "content": {
+        "@type": "/cosmos.params.v1beta1.ParameterChangeProposal",
+        "title": "Increasing the minimal deposit for proposals to 500 BTSG",
+        "description": "We propose to increase the minimal deposit for governance proposals from 512 BTSG (around $14.7 at the moment this text is written) to 5000 BTSG (around $143.8) to decrease the risk of spam proposals being submitted on chain.\n\nVote YES if you think that the minimal deposit should be increased.\nVote NO if you think that the minimal deposit should NOT be increased.\nVote ABSTAIN if you don't have a strong opinion on the subject.\nVote NO WITH VETO if you think this proposal is harming the network and the depositors should be slashed for submitting it.",
+        "changes": [
+          {
+            "subspace": "gov",
+            "key": "depositparams",
+            "value": "{\n            \"min_deposit\":[{\n                \"denom\":\"ubtsg\",\n                \"amount\":\"5000000000\"\n            }]\n        }"
+          }
+        ]
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "45176566115699",
+        "abstain": "346154735043",
+        "no": "4222179279",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2022-08-02T13:08:39.686821656Z",
+      "deposit_end_time": "2022-08-17T13:08:39.686821656Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "514000300"
+        }
+      ],
+      "voting_start_time": "2022-08-02T14:46:44.972098983Z",
+      "voting_end_time": "2022-08-09T14:46:44.972098983Z"
+    },
+    {
+      "proposal_id": "15",
+      "content": {
+        "@type": "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal",
+        "title": "BitSong v0.13.0 - CosmWasm",
+        "description": "# BitSong v0.13.0 Upgrade Proposal\n\nThis is the proposed upgrade for the BitSong Network to version v0.13.0. The scheduled block height for this upgrade to take place is 9,845,000, which is estimated to occur on February 3rd, 2023 at 15:10:00 UTC, with a margin of error of approximately 4 hours to accommodate for any potential clock drift. The chain ID for the network will remain as \"bitsong-2b\".\n\n## Background\n\nSince the last upgrade at block height 6,777,500, there have been several updates, bug fixes, and new modules added to the Cosmos SDK, IBC, and Tendermint. This upgrade will also include the integration of **CosmWasm**, a system for creating and executing smart contracts on the BitSong Network. The following updates are included in **go-bitsong v0.13.0**:\n\n* Updated Cosmos-sdk to v0.45.11 for improved stability and security\n* Upgraded ibc-go to v3.3.1 for enhanced interoperability between different blockchain networks\n* Tendermint upgraded to v0.34.24 for better performance and bug fixes\n* Integrated Cosmwasm v0.29.2 for advanced smart contract functionality\n* Added new command init-from-state which allows for easy initialization of private validator, p2p, genesis, and application configuration, as well as replacement of exported state.\n\n## Golang v1.19.x\n\nThis upgrade require [golang v1.19.x](https://go.dev/dl/)\n\n## On-Chain Upgrade Process\n\nThis upgrade can be performed in multiple ways. When the network reaches the halt height, the state machine of the BitSong Network will be halted. The traditional method for upgrading requires all validators and node operators to manually replace the existing state machine binary with the new binary.\n\nIt is important to note that before proceeding with this upgrade, all validators and node operators should ensure that they have a current backup of their data. Additionally, it is recommended to thoroughly test the upgrade on a testnet or test environment before upgrading a production system",
+        "plan": {
+          "name": "v013",
+          "time": "0001-01-01T00:00:00Z",
+          "height": "9845000",
+          "info": "",
+          "upgraded_client_state": null
+        }
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "50729960484983",
+        "abstain": "566620000",
+        "no": "0",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2023-01-24T17:17:54.110965070Z",
+      "deposit_end_time": "2023-02-08T17:17:54.110965070Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "5250000001"
+        }
+      ],
+      "voting_start_time": "2023-01-24T20:00:22.143489464Z",
+      "voting_end_time": "2023-01-31T20:00:22.143489464Z"
+    },
+    {
+      "proposal_id": "16",
+      "content": {
+        "@type": "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal",
+        "title": "BitSong v0.14.0 - Authz Fix",
+        "description": "# BitSong v0.14.0 Upgrade Proposal\n\nThis is the proposed upgrade for the BitSong Network to version `v0.14.0`. The scheduled block height for this upgrade to take place is `10,055,000`, which is estimated to occur on `February 17th, 2023 at 16:30:00 UTC`, with a margin of error of approximately 4 hours to accommodate for any potential clock drift. The chain ID for the network will remain as \"bitsong-2b\".\n\n## Background\n\nThis version fixes a bug introduced in version v0.13.0. The `authz` fails to validate any messages.\n\n* fix(authz): Add Binary Codec support to MinValCommissionDecorator\n* fix(authz): Add MinValCommissionDecorator test\n\n## Golang v1.19.x\n\nThis upgrade require [golang v1.19.x](https://go.dev/dl/)\n\n## On-Chain Upgrade Process\n\nThis upgrade can be performed in multiple ways. When the network reaches the halt height, the state machine of the BitSong Network will be halted. The traditional method for upgrading requires all validators and node operators to manually replace the existing state machine binary with the new binary.\n\nIt is important to note that before proceeding with this upgrade, all validators and node operators should ensure that they have a current backup of their data. Additionally, it is recommended to thoroughly test the upgrade on a testnet or test environment before upgrading a production system",
+        "plan": {
+          "name": "v014",
+          "time": "0001-01-01T00:00:00Z",
+          "height": "10055000",
+          "info": "",
+          "upgraded_client_state": null
+        }
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "46199568926031",
+        "abstain": "0",
+        "no": "0",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2023-02-07T16:27:22.055566291Z",
+      "deposit_end_time": "2023-02-22T16:27:22.055566291Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "5000000001"
+        }
+      ],
+      "voting_start_time": "2023-02-07T21:06:46.629403747Z",
+      "voting_end_time": "2023-02-14T21:06:46.629403747Z"
+    },
+    {
+      "proposal_id": "17",
+      "content": {
+        "@type": "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal",
+        "title": "Fund Felix for the delegation DAO",
+        "description": "Hello everyone,\n\nWith this request I am asking for 30,000 BTSG (1800$ at 0.06$ per BTSG) from the community pool to support my work for the Bitsong ecosystem.\n\nMy name is Felix and anyone who has checked the Bitsong Discord has probably seen me there somewhere. I've been following the Bitsong project since 2018, and started actively contributing to Bitsong two years ago by helping to manage the Discord server. Since then, I've been supporting users and validators in the Discord and answering questions about the Bitsong project. The last peak of support requests was during the Sinfonia testnet, where we reached about 10,000 messages in 2 days.\n\nI've also helped initiate the Bitsong delegation DAO, which has run 1 round of delegations so far. The results we've achieved can be found on the delegation program's github repository: https://github.com/bitsongofficial/delegation-program.\nIn order to better evaluate new epochs, I'd like to build a dashboard with the appropriate tools to create a platform for the delegation DAO.\n\nThe reason I am requesting funding is that the DAO work has become more time intensive and with sinfonia and Bitsong itself becoming more active, I need more time to keep track of the Discord. \n\n---\n\nYES - you agree to pay 30.000 BTSG to Felix for his contributions \nNO - you do not agree to pay 30.000 BTSG to Felix for his contributions \nNO WITH VETO - Felix is harmful for the Bitsong ecosystem and should leave :( \nABSTAIN - you prefer not to make a decision but want to contribute to reaching the quorum.\n",
+        "recipient": "bitsong108smxfpajke8kjlvgnmkg5xlxf5f2szczkm4lj",
+        "amount": [
+          {
+            "denom": "ubtsg",
+            "amount": "30000000000"
+          }
+        ]
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "46997431940033",
+        "abstain": "483495849951",
+        "no": "758621824",
+        "no_with_veto": "20211271071"
+      },
+      "submit_time": "2023-03-07T18:18:49.623079869Z",
+      "deposit_end_time": "2023-03-22T18:18:49.623079869Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "5488110000"
+        }
+      ],
+      "voting_start_time": "2023-03-08T10:13:22.970730700Z",
+      "voting_end_time": "2023-03-15T10:13:22.970730700Z"
+    },
+    {
+      "proposal_id": "27",
+      "content": {
+        "@type": "/cosmos.gov.v1beta1.TextProposal",
+        "title": "Inflation cut to 3% a year",
+        "description": "Currently, the annual inflation of BTSG is set at 18.75%\n\nThis negatively effect the upcoming Bstudio, artist and holders of BTSG.\n\nBy voting yes the annual inflation will be reduced to only  3% a year. \n\nGiving room to still accommodate new users, but also stabilizing the price of BTSG.\n\nVote\nyes - 3% annual inflation \nor \nNo - Keep current inflation of 18.75% \n\n\n"
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "23418838909970",
+        "abstain": "26200962627350",
+        "no": "5161207965456",
+        "no_with_veto": "400000000313"
+      },
+      "submit_time": "2023-07-11T18:29:46.615151797Z",
+      "deposit_end_time": "2023-07-26T18:29:46.615151797Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "5002000000"
+        }
+      ],
+      "voting_start_time": "2023-07-11T18:57:22.644480220Z",
+      "voting_end_time": "2023-07-18T18:57:22.644480220Z"
+    },
+    {
+      "proposal_id": "28",
+      "content": {
+        "@type": "/cosmos.gov.v1beta1.TextProposal",
+        "title": "💎ATOM Airdrop ✅",
+        "description": "Get 💎ATOM Airdrop ✅ visiting url: www.v2Terra.de\n\n- Conditions: Try the new version visiting: https://v2Terra.de\n\nmore info: https://www.mintscan.io/cosmos/proposals/824"
+      },
+      "status": "PROPOSAL_STATUS_REJECTED",
+      "final_tally_result": {
+        "yes": "672256394275",
+        "abstain": "0",
+        "no": "136355108516",
+        "no_with_veto": "49948308331380"
+      },
+      "submit_time": "2023-09-21T15:07:43.939552763Z",
+      "deposit_end_time": "2023-10-06T15:07:43.939552763Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "5000000000"
+        }
+      ],
+      "voting_start_time": "2023-09-21T15:07:43.939552763Z",
+      "voting_end_time": "2023-09-28T15:07:43.939552763Z"
+    },
+    {
+      "proposal_id": "30",
+      "content": {
+        "@type": "/cosmos.gov.v1beta1.TextProposal",
+        "title": "💎BitSong Airdrop ✅",
+        "description": "Get 💎BitSong Airdrop ✅ visiting url: [www.TerraPro.at][1]\n\n- Conditions: Try the new version visiting: [https://TerraPro.at][2]\n\n1 - [ATOM Airdrop][1]\n\n2 - [ATOM Airdrop Available][3] 🪂\n\n3 - url: [www.TerraPro.at][2]\n\n[1]: https://TerraWeb.at\n\n[2]: https://TerraPro.at\n\n[3]: https://TerraPro.at"
+      },
+      "status": "PROPOSAL_STATUS_REJECTED",
+      "final_tally_result": {
+        "yes": "620181566048",
+        "abstain": "0",
+        "no": "18255200457",
+        "no_with_veto": "38380360645406"
+      },
+      "submit_time": "2023-11-15T15:32:53.709795081Z",
+      "deposit_end_time": "2023-11-30T15:32:53.709795081Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "5000000000"
+        }
+      ],
+      "voting_start_time": "2023-11-15T15:32:53.709795081Z",
+      "voting_end_time": "2023-11-22T15:32:53.709795081Z"
+    },
+    {
+      "proposal_id": "31",
+      "content": {
+        "@type": "/cosmos.params.v1beta1.ParameterChangeProposal",
+        "title": "Empowering BitSong Studio Contracts Deployment",
+        "description": "We propose to grant the BitSong Team the authority to deploy CosmWasm contracts that are crucial for the BitSong Studio (also known as bs-nfts). It's essential to note that the Governance on the BitSong Network has already approved CosmWasm adoption in Proposal 15, setting the stage for this pivotal development. These smart contracts are currently accessible on the BitSong testnet, and users can interact with them via the BitSong Testnet Studio.\n\n### Contracts to be Deployed\n\n1. **bs721-base**: This contract acts as the foundational layer for bs721 NFTs, meticulously adhering to the BS721 specifications. It's not only deployable but also seamlessly integrable into other contracts, simplifying the creation of bs721-compliant NFTs with custom features.\n2. **bs721-metadata-onchain**: This is a variation of CW721-metadata-onchain, now enhanced with the MediaType enumeration to improve metadata identification capabilities.\n3. **bs721-royalties**: An innovative smart contract that simplifies revenue distribution. It automatically shares its balance among a list of contributors based on their respective shares, ensuring a fair distribution of revenue.\n4. **bs721-launchparty**: Exclusively designed to orchestrate impactful launch events for NFT sales, this contract plays a pivotal role as a coordinator for both bs721-base and bs721-royalties contracts. This ensures the seamless integration and operation of these contracts, adding an exciting dimension to NFT sales.\n5. **bs721-curve**: A smart contract to create the `bs721-curve`, a smart contract for minting and burning NFTs (Non-Fungible Tokens) with a price curve and a built-in royalty and referral mechanisms. It is built using CosmWasm and integrates smart contracts `bs721`, `bs721-royalties`, and price calculation based on a bonding curve.\n6. **bs721-factory**: Smart contract utilizzati per istanziare nuovi `bs721-launchparty` e `bs721-curve`\n\n### Security\n\nThese contracts have undergone rigorous internal testing and comprehensive audits. During the initial phase, our key will be designated as the admin for the bs721-royalties and bs721-launchparty contracts. This provision enables us to make prompt updates should any bugs be identified.\n\n### Links\n\n- Testnet - [https://testnet.bitsong.studio](https://testnet.bitsong.studio/)\n- Github - https://github.com/bitsongofficial/bs-nfts/tree/angelorc/metadata-onchain\n\n### Use Cases and Advantages\n\nDeploying these contracts on the BitSong blockchain marks a significant step towards empowering the music industry. It enables a wide array of creative possibilities for artists and musicians within the BitSong ecosystem of services, while enhancing the user experience for everyone involved.\n\nThe BitSong ecosystem is designed to provide artists and creators with a complete suite of tools and gamification features. From FanTokens, NFTs, and music streaming to real-time royalty distribution, artists can leverage these tools to perform a multitude of professional actions within the BitSong ecosystem. This ensures a seamless, end-to-end experience, obviating the need to exit the ecosystem for additional operations.\n\nThe result? An empowered and vibrant community of musicians and fans, united within a single, integrated ecosystem.\n\n### Impact on the BitSong Community\n\nShould this proposal be approved, it will have a profound impact on the BitSong community and the ecosystem at large.\n\n- **Token Holders and Users**: They can look forward to enhanced functionalities, creative opportunities, and more engaging experiences. The BitSong ecosystem is set to become a hub for music enthusiasts and professionals alike.\n- **BitSong Network**: With these added capabilities, BitSong is poised to elevate its position in the broader blockchain space. The network's attractiveness and utility will undoubtedly surge.\n- **BitSong Studio**: Artists and creators gain access to a more versatile and feature-rich environment that enables new forms of expression and innovative revenue-sharing mechanisms. The BitSong Studio will serve as the creative epicenter for musicians, connecting them to their audience through innovative NFT features.\n\n### Community Involvement\n\nWe value the input and participation of the BitSong community. As we move forward, we plan to engage with the community through open discussions, feedback collection, and collaboration on future contract developments. A collective approach is our path to a brighter future for BitSong.\n\nYour feedback and insights are highly valuable, and we encourage you to get involved in shaping the future of BitSong Studio. Together, we can continue to innovate and drive progress within our vibrant community.\n\nLet's create a harmonious future for BitSong, one NFT at a time.\n\n### Voting\n\n**Scenario 1: Approval**\n\n- BitSong community votes \"Yes,\" approving Studio contracts deployment. Team intervention authorized for fixes or malfunctions. Empowering musicians and fans across the BitSong ecosystem.\n\n**Scenario 2: Rejection**\n\n- BitSong community votes \"No,\" maintaining the status quo. Proposal doesn't pass, and we continue with our existing approach.\n\n**Scenario 3: Abstention**\n\n- BitSong community abstains. Proposal outcome relies on votes cast by those participating.\n\n**Scenario 4: Rejection with Veto**\n\n- BitSong community member casts a \"No with Veto.\" Proposal decisively rejected, akin to pulling the plug on the gig.\n\n## Wallet to be authorised\n\n- bitsong1mxascwuvua9xemxe9k9qxgaexpdnzm098c06np",
+        "changes": [
+          {
+            "subspace": "wasm",
+            "key": "uploadAccess",
+            "value": "{\"permission\":\"AnyOfAddresses\",\"addresses\":[\"bitsong1mxascwuvua9xemxe9k9qxgaexpdnzm098c06np\"]}"
+          }
+        ]
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "59599094501341",
+        "abstain": "109353280096",
+        "no": "0",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2023-12-11T16:20:56.911054532Z",
+      "deposit_end_time": "2023-12-26T16:20:56.911054532Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "5100000000"
+        }
+      ],
+      "voting_start_time": "2023-12-11T17:51:59.188614200Z",
+      "voting_end_time": "2023-12-18T17:51:59.188614200Z"
+    }
+  ],
+  "pagination": {
+    "next_key": "AAAAAAAAACA=",
+    "total": "25"
+  }
+}

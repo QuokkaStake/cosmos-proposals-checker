@@ -1,0 +1,1 @@
+{"voting_params":{"voting_period":"0s"},"deposit_params":{"min_deposit":[{"denom":"uatom","amount":"250000000"}],"max_deposit_period":"1209600s"},"tally_params":{"quorum":"0.000000000000000000","threshold":"0.000000000000000000","veto_threshold":"0.000000000000000000"}}

@@ -35,12 +35,7 @@ func (rpc *RPC) GetVote(
 		}
 	}
 
-	height, err := utils.GetBlockHeightFromHeader(header)
-	if err != nil {
-		return nil, 0, &types.QueryError{
-			QueryError: errors.New("got error when parsing vote height"),
-		}
-	}
+	height, _ := utils.GetBlockHeightFromHeader(header)
 
 	if vote.IsError() {
 		// not voted
@@ -54,13 +49,5 @@ func (rpc *RPC) GetVote(
 		}
 	}
 
-	voteParsed, err := vote.ToVote()
-	if err != nil {
-		return nil, height, &types.QueryError{
-			QueryError: err,
-			NodeErrors: nil,
-		}
-	}
-
-	return voteParsed, height, nil
+	return vote.ToVote(), height, nil
 }

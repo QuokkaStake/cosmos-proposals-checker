@@ -1,0 +1,168 @@
+{
+  "proposals": [
+    {
+      "proposal_id": "32",
+      "content": {
+        "@type": "/cosmos.params.v1beta1.ParameterChangeProposal",
+        "title": "Inflation Reduction",
+        "description": "This proposal is in line with the community's expressed desire for a lower inflation rate in proposal 27 at https://www.mintscan.io/bitsong/proposals/27, acknowledging the need for careful adjustment to minimize any potential disruptions.\n\n### Formal Proposal for BTSG Inflation Reduction\n\n**Current Inflation:** 20%\n\n**Current APR:** 42.64%\n\n### Objective\n\nTo propose a reduction in the annual inflation rate of BTSG from the current 20% to 10% for gradual stabilization and long-term sustainability.\n\n### Rationale\n\nThe current inflation rate of 20% may pose challenges for the BitSong ecosystem, impacting BitSong Studio, artists, and BTSG holders. By voting in favor of this proposal, we aim to initiate a gradual reduction in inflation, fostering positive outcomes for all stakeholders.\n\n### Proposed Changes\n\n1. **Inflation Rate Adjustment:**\n    - Reduce the annual inflation rate from the current 20% to 10%.\n2. **Phased Approach:**\n    - Implement the reduction in steps to ensure a smooth transition.\n    - Initial reduction to 10%, followed by subsequent reductions in the coming years.\n3. **APR Adjustment:**\n    - The current APR of 42.64% will be adjusted proportionately with the inflation reduction to maintain balance.\n\n### Positive Scenarios\n\n1. **Price Stabilization:**\n    - A gradual reduction in inflation can contribute to a more stable BTSG price, benefitting both holders and users.\n2. **Sustainable Growth:**\n    - The proposed reduction allows for continued user onboarding while maintaining a sustainable inflation rate.\n3. **Enhanced Governance Support:**\n    - Aligning with the community's desire for reduced inflation, this proposal demonstrates governance responsiveness to user concerns.\n\n### Voting Options\n\n1. **Yes - 10% Annual Inflation:**\n    - Support the proposed reduction to 10% annual inflation for gradual stabilization.\n2. **No - Keep Current 20% Inflation:**\n    - Oppose the reduction, maintaining the current 20% inflation rate.\n\n### Governance Approval\n\nThis proposal seeks approval from the BitSong Governance, building on the community's prior decision to reduce inflation. The phased approach ensures a balanced transition, fostering sustainability and positive growth.",
+        "changes": [
+          {
+            "subspace": "mint",
+            "key": "InflationMax",
+            "value": "\"0.100000000000000000\""
+          }
+        ]
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "57933289182652",
+        "abstain": "1456658728402",
+        "no": "7547038138",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2023-12-11T16:38:21.851826101Z",
+      "deposit_end_time": "2023-12-26T16:38:21.851826101Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "5000000000"
+        }
+      ],
+      "voting_start_time": "2023-12-11T16:38:21.851826101Z",
+      "voting_end_time": "2023-12-18T16:38:21.851826101Z"
+    },
+    {
+      "proposal_id": "34",
+      "content": {
+        "@type": "/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal",
+        "title": "BitSong v0.15.0",
+        "description": "# BitSong v0.15.0 Upgrade Proposal\n\nThis is the proposed upgrade for the BitSong Network to version `v0.15.0`. The scheduled block height for this upgrade to take place is `15,947,000`, which is estimated to occur on `March 15th, 2023 at 15:30:00 UTC`, with a margin of error of approximately 4 hours to accommodate for any potential clock drift. The chain ID for the network will remain as \"bitsong-2b\".\n\n## Background\n\n* Change Tendermint to CometBFT\n* Bump wasmd to 0.33.0\n* Bump ibc-go to 4.4.2\n* Minor bug fixes\n* Fix fantoken, merkledrop and ante_handler test\n\n## Golang v1.19.x\n\nThis upgrade require [golang v1.19.x](https://go.dev/dl/)\n\n## On-Chain Upgrade Process\n\nThis upgrade can be performed in multiple ways. When the network reaches the halt height, the state machine of the BitSong Network will be halted. The traditional method for upgrading requires all validators and node operators to manually replace the existing state machine binary with the new binary.\n\nIt is important to note that before proceeding with this upgrade, all validators and node operators should ensure that they have a current backup of their data. Additionally, it is recommended to thoroughly test the upgrade on a testnet or test environment before upgrading a production system",
+        "plan": {
+          "name": "v015",
+          "time": "0001-01-01T00:00:00Z",
+          "height": "15947000",
+          "info": "",
+          "upgraded_client_state": null
+        }
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "63270215383165",
+        "abstain": "17500",
+        "no": "0",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2024-03-07T17:03:21.858625335Z",
+      "deposit_end_time": "2024-03-22T17:03:21.858625335Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "5000000001"
+        }
+      ],
+      "voting_start_time": "2024-03-07T18:23:45.840217946Z",
+      "voting_end_time": "2024-03-14T18:23:45.840217946Z"
+    },
+    {
+      "proposal_id": "35",
+      "content": {
+        "@type": "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal",
+        "title": "Funding BTSG/ARCH Pool on Astrovault DEX",
+        "description": "We, the BitSong Team, hereby present a formal proposal to the BitSong Network Governance for the creation of a new liquidity pool on Astrovault DEX, named ARCH/BTSG. This proposal seeks to leverage the strengths of our community and enhance the liquidity and accessibility of BitSong's native token, BTSG, through collaborative efforts.\n\n## Overview\n\nThe purpose of this proposal is to establish a new liquidity pool on Astrovault DEX in collaboration with the Archway Team and Astrovault Team. This pool will pair BTSG with ARCH, the native token of the Archway Foundation, thereby providing users with additional trading options and liquidity. To facilitate this initiative, we are requesting 2 million BTSG from the Community Pool.\n\n### Team that will manage the funds\n* Angelo Recca / Co-Founder and main developer at BitSong\n* Iulian Anghelin / Co-Founder and GM at BitSong\n* Jad - Archway Foundation\n* Ethan Illingworth - Archway Liquidity Council\n* Eric Waisanen | Astrovault representative\n\nThe funds will be allocated into the BitSong Team wallet 1st, and then will be moved to the Archway multisig.\n\n### The wallet to be funded is\nbitsong166d42nyufxrh3jps5wx3egdkmvvg7jl6k33yut\n\n### The multisig wallet to be used for the pool is\narchway16j6sx4kpyn5d2jmpaxlj4k0hhytqm28c93pnvdynmapks29m0l9sdju2py\n\n## Benefits of Creating the ARCH/BTSG Pool\n\n- **Increased Liquidity**: By creating a pool on Astrovault DEX, we aim to significantly increase the liquidity of BTSG, thereby enhancing the trading experience for our community members. Increased liquidity can lead to reduced slippage and improved price stability, ultimately benefiting all participants in the ecosystem.\n- **Perpetual Incentives**: gives the opportunity for BTSG holders to participate in DeFi and earn yield while keeping tokens liquid.\n- **Diversification of Market Presence**: Establishing a presence on Astrovault DEX diversifies our market exposure and reduces reliance on any single exchange. This also increases visibility and accessibility for traders across different platforms.\n- **Collaborative Efforts**: This initiative represents a collaborative effort between BitSong and the Archway Team and Astrovault Team, showcasing our commitment to fostering cooperation within the blockchain ecosystem. By pooling our resources and expertise, we can achieve shared goals and unlock new opportunities for growth and innovation.\n\n## Structure of the Liquidity Pool\nThe liquidity for the ARCH - BTSG pool will be provided in equal parts by the BitSong Team and the Archway Team, totaling 2 million BTSG on our side and the respective collateral, approximately 170,000 ARCH (at april 5th, 2024) on the Archway team side. These funds will be sourced from the Community Pool, and their usage will be subject to approval by the BitSong Network Governance through a voting process.\n\nThe liquidity will be held in a 3/5 multi-signature wallet, ensuring security and decentralization. The wallet will have the following signer structure:\n\n* 1 signer from the Archway Foundation\n* 1 community signer from the Archway Liquidity Council\n* 1 signer from the Astrovault Team\n* 2 signers from the BitSong Team\n\nThis multi-signature setup ensures that no single entity has control over the entire liquidity pool, promoting decentralization and security.\n\n- **Voting YES**: you agree with funding the BitSong Team with 2,000,000 BTSG from the community pool for the aforementioned purpose.\n- **Voting NO**: you disagree with funding the BitSong Team with 2,000,000 BTSG from the community pool.\n- **Voting NOWITHVETO**: you express that you consider this proposal malicious or harmful and would like to see depositors penalized by revocation of the deposit, which contributes towards an automatic ⅓ veto threshold.\n- **ABSTAIN**: you formally decline to vote either for or against the proposal but want to contribute to the quorum.",
+        "recipient": "bitsong166d42nyufxrh3jps5wx3egdkmvvg7jl6k33yut",
+        "amount": [
+          {
+            "denom": "ubtsg",
+            "amount": "2000000000000"
+          }
+        ]
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "47105800580858",
+        "abstain": "3434773427778",
+        "no": "530551433",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2024-05-07T08:34:43.564894796Z",
+      "deposit_end_time": "2024-05-22T08:34:43.564894796Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "5000000001"
+        }
+      ],
+      "voting_start_time": "2024-05-07T08:36:49.001650084Z",
+      "voting_end_time": "2024-05-14T08:36:49.001650084Z"
+    },
+    {
+      "proposal_id": "36",
+      "content": {
+        "@type": "/cosmos.distribution.v1beta1.CommunityPoolSpendProposal",
+        "title": "Fund DAO DAO Deployment",
+        "description": "A DAO DAO deployment on BitSong will enable community-driven media and collaboration, such as DAO record labels, streaming services, artist curation, and more.\n\n## **About DAO DAO**\n\nWith DAO DAO, BitSong projects and communities have immediate access to best-in-class DAO tooling without needing to build their own governance modules, smart contracts, UI, and more. Try it today: [https://daodao.zone](https://daodao.zone/)\n\nOur mission is to build better, more flexible governance systems. Getting governance right is crucial to the success of decentralized communities, protocols, and entire blockchains, and DAO DAO makes it as easy as clicking a few buttons to experiment with and scale governance infrastructure.\n\nToday, over $300M is managed by 5,157 DAO DAO DAOs across 9 chains (and growing). Our smart contracts and UI have been battle tested by 11,838 proposals encompassing 32,795 unique DAO members for over 2 years. Over $1M (and many, many hours) have been put into the necessary research and development, as well as the perfection of each feature, with a solid chunk devoted to numerous security audits.\n\nThe biggest features we aim to bring to BitSong:\n\n- **Token** DAOs, **NFT** DAOs, and **Membership** (multisig-like) DAOs\n- **Beautiful UI** for making proposals, voting, and exploring DAOs\n- **Cross-Chain Accounts** via Polytone\n- **Vesting** and **Retroactive Payment** solutions\n- Sophisticated organizational structures using **SubDAOs** and **Authz**\n\nAnd much more:\n\n- Treasury spends and swaps\n- Staking management\n- Veto and approval flows\n- NFT creation and management\n- On-chain, governance gated key / value store\n- Proposal inbox\n- Customizable DAO widgets\n- DAO Press: publishing tools for a DAO-run blog, official communications, and more\n- Bulk actions import\n- Smart contract management (instantiate, execute, migrate, update admin)\n- DAO-run validators (check out ours here: https://daodao.zone/dao/juno185hgkqs8q8ysnc8cvkgd8j2knnq2m0ah6ae73gntv9ampgwpmrxqc5vwdr)\n- Push and email notifications\n- Native mobile support\n- etc.\n\nOur immediate roadmap include:\n\n- Staking rewards\n- Voting with locked vesting tokens\n- Voting delegations\n- Treasury rebalancing management\n\n## **Polytone Interchain Accounts and Queries**\n\nIn addition to DAO DAO contracts, BitSong will receive [Polytone](https://github.com/DA0-DA0/polytone) to allow for accounts, smart contracts, or DAOs on BitSong to control accounts on other chains, and vice versa.\n\nWe are excited for the new possibilities that will be unlocked for developers and the wider BitSong community. For example, a smart contract (or DAO) on another CosmWasm chain can control an account on BitSong to sell or purchase music. BitSong teams can also use it to manage outposts across the Interchain. Moreover, Polytone includes an easy to use Interchain Queries implementation, allowing for smart contracts on other chains to reliably query information from BitSong.\n\n## Audits\n\n- [DAO DAO v1](https://github.com/oak-security/audit-reports/blob/master/DAO%20DAO/2022-06-22%20Audit%20Report%20-%20DAO%20DAO%20v1.0.pdf)\n- [DAO DAO v2](https://github.com/oak-security/audit-reports/blob/master/DAO%20DAO/2023-02-06%20Audit%20Report%20-%20DAO%20DAO%202%20v1.0.pdf)\n- [Polytone (smart contract interchain accounts)](https://github.com/oak-security/audit-reports/blob/master/Polytone/2023-06-05%20Audit%20Report%20-%20Polytone%20v1.0.pdf)\n- [Vesting and Payroll Factory](https://github.com/oak-security/audit-reports/blob/master/DAO%20DAO/2023-03-22%20Audit%20Report%20-%20DAO%20DAO%20Vesting%20and%20Payroll%20Factory%20v1.0.pdf)\n- [Token Factory and NFT upgrades](https://github.com/oak-security/audit-reports/blob/master/DAO%20DAO/2023-10-16%20Audit%20Report%20-%20DAO%20DAO%20Updates%20v1.0.pdf)\n- [Veto upgrade](https://github.com/oak-security/audit-reports/blob/master/DAO%20DAO/2024-01-10%20Audit%20Report%20-%20DAO%20DAO%20Veto%20v1.0.pdf)\n\n## Codebases\n\n**DAO Contracts:** https://github.com/DA0-DA0/dao-contracts\n\n**DAO DAO UI:** https://github.com/DA0-DA0/dao-dao-ui\n\n**Polytone:** https://github.com/DA0-DA0/polytone\n\n## Custom Support\n\nDAO DAO’s Token DAOs are currently configured to work with the standard token factory module made by Osmosis and used across the Cosmos. BitSong on the other hand uses a custom SDK module: [x/fantoken](https://github.com/bitsongofficial/go-bitsong/tree/main/x/fantoken).\n\nIn order to support this, we will create a new DAO voting module, similar to our existing [dao-voting-token-staked](https://github.com/DA0-DA0/dao-contracts/tree/development/contracts/voting/dao-voting-token-staked) contract, in order to fully support the BitSong ecosystem.\n\nThis includes support for existing BitSong Fan Tokens to run DAOs, and it will be released as soon as available.\n\n## Ask\n\nIn exchange for all this, we ask for 2,000,000 $BTSG vested over 18 months (starting from when this proposal passes) instead of our usual upfront fee—since BitSong is a small ecosystem with limited liquidity. This serves to align our projects long term and alleviate the financial burden of a DAO DAO deployment. We believe DAOs are crucial to the sustainable expansion of the BitSong ecosystem and are happy to provide access to sophisticated tooling in this early stage.\n\nThe entirety of the funds will be transferred to a BitSong team wallet (bitsong166d42nyufxrh3jps5wx3egdkmvvg7jl6k33yut), which is then responsible for initiating the vest.\n\nWe plan to deploy both membership-based (multisig) DAOs and NFT-based DAOs immediately and begin the custom Fan Token work in parallel. We will release support for Fan Token DAOs as soon as the new contracts are ready.\n\nIncluded in this ask is the promise of **future security and feature upgrades**, as well as **ongoing support**. Each new deployment incurs significant ongoing support and maintenance costs. We aim to provide ongoing, high-quality support, which is built into our fees.",
+        "recipient": "bitsong166d42nyufxrh3jps5wx3egdkmvvg7jl6k33yut",
+        "amount": [
+          {
+            "denom": "ubtsg",
+            "amount": "2000000000000"
+          }
+        ]
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "49098705775025",
+        "abstain": "3094589546338",
+        "no": "458090933",
+        "no_with_veto": "0"
+      },
+      "submit_time": "2024-06-13T17:13:36.228768201Z",
+      "deposit_end_time": "2024-06-28T17:13:36.228768201Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "5000000000"
+        }
+      ],
+      "voting_start_time": "2024-06-13T17:59:01.025025044Z",
+      "voting_end_time": "2024-06-20T17:59:01.025025044Z"
+    },
+    {
+      "proposal_id": "37",
+      "content": {
+        "@type": "/cosmos.params.v1beta1.ParameterChangeProposal",
+        "title": "Authorize DAO DAO Deployment",
+        "description": "[Proposal #36](https://daodao.zone/dao/bitsong/proposals/36) is live, requesting funding for a DAO DAO deployment on BitSong.\n\nIn order to bring DAOs to BitSong sooner, this proposal parallelizes the second step of the deployment process, which is to authorize a wallet controlled by the DAO DAO team (bitsong1l3wm85qfp6y2ptw9rk76pk5qn5f9krf3txh7vr) to deploy smart contracts. This proposal adds the address to the existing list of accounts approved to upload smart contracts, which currently contains only one other address.\n\nOnce both proposals pass, we will upload the DAO DAO and Polytone smart contracts, and DAOs will be live on [daodao.zone](https://daodao.zone).",
+        "changes": [
+          {
+            "subspace": "wasm",
+            "key": "uploadAccess",
+            "value": "{\"permission\":\"AnyOfAddresses\",\"addresses\":[\"bitsong1mxascwuvua9xemxe9k9qxgaexpdnzm098c06np\",\"bitsong1l3wm85qfp6y2ptw9rk76pk5qn5f9krf3txh7vr\"]}"
+          }
+        ]
+      },
+      "status": "PROPOSAL_STATUS_PASSED",
+      "final_tally_result": {
+        "yes": "52804244822677",
+        "abstain": "0",
+        "no": "458090933",
+        "no_with_veto": "64288507"
+      },
+      "submit_time": "2024-06-13T18:13:19.793056818Z",
+      "deposit_end_time": "2024-06-28T18:13:19.793056818Z",
+      "total_deposit": [
+        {
+          "denom": "ubtsg",
+          "amount": "5000000000"
+        }
+      ],
+      "voting_start_time": "2024-06-13T18:22:32.532054110Z",
+      "voting_end_time": "2024-06-20T18:22:32.532054110Z"
+    }
+  ],
+  "pagination": {
+    "next_key": null,
+    "total": "25"
+  }
+}

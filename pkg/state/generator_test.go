@@ -8,6 +8,8 @@ import (
 	"main/pkg/types"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -98,7 +100,7 @@ func TestReportGeneratorProcessProposalWithError(t *testing.T) {
 	newVotes, ok := newState.ChainInfos["chain"]
 	assert.True(t, ok)
 	assert.NotNil(t, newVotes)
-	assert.NotNil(t, newVotes.ProposalsError)
+	require.Error(t, newVotes.ProposalsError)
 	assert.Equal(t, int64(15), newVotes.ProposalsHeight)
 
 	proposal, ok := newVotes.ProposalVotes["1"]
@@ -144,7 +146,7 @@ func TestReportGeneratorProcessProposalWithoutError(t *testing.T) {
 	newVotes, ok := newState.ChainInfos["chain"]
 	assert.True(t, ok)
 	assert.NotNil(t, newVotes)
-	assert.Nil(t, newVotes.ProposalsError)
+	require.Error(t, newVotes.ProposalsError)
 	assert.Equal(t, int64(123), newVotes.ProposalsHeight)
 
 	proposal, ok := newVotes.ProposalVotes["1"]
@@ -206,7 +208,7 @@ func TestReportGeneratorProcessVoteWithError(t *testing.T) {
 	newVote, ok := newProposal.Votes["me"]
 	assert.True(t, ok)
 	assert.Equal(t, int64(15), newVote.Height)
-	assert.NotNil(t, newVote.Error)
+	require.Error(t, newVote.Error)
 	assert.Equal(t, "not_me", newVote.Vote.Voter)
 }
 
@@ -264,7 +266,7 @@ func TestReportGeneratorProcessVoteWithDisappearedVote(t *testing.T) {
 	newVote, ok := newProposal.Votes["me"]
 	assert.True(t, ok)
 	assert.Equal(t, int64(456), newVote.Height)
-	assert.Nil(t, newVote.Error)
+	require.Error(t, newVote.Error)
 	assert.Equal(t, "not_me", newVote.Vote.Voter)
 }
 
@@ -322,6 +324,6 @@ func TestReportGeneratorProcessVoteWithOkVote(t *testing.T) {
 	newVote, ok := newProposal.Votes["me"]
 	assert.True(t, ok)
 	assert.Equal(t, int64(456), newVote.Height)
-	assert.Nil(t, newVote.Error)
+	require.Error(t, newVote.Error)
 	assert.Equal(t, "me", newVote.Vote.Voter)
 }
