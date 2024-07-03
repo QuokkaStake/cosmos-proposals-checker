@@ -18,13 +18,5 @@ func (fetcher *Fetcher) GetAllProposals(
 		return nil, height, err
 	}
 
-	proposalsParsed, parseErr := proposals.ToProposals()
-	if parseErr != nil {
-		return nil, height, &types.QueryError{
-			QueryError: err,
-			NodeErrors: nil,
-		}
-	}
-
-	return proposalsParsed, height, nil
+	return proposals.ToProposals(), height, nil
 }
