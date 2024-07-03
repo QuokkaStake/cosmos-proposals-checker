@@ -139,7 +139,7 @@ func TestVoteOk(t *testing.T) {
 		context.Background(),
 	)
 
-	require.Nil(t, err) //nolint:testifylint //disabled
+	require.Nil(t, err)
 	require.Zero(t, height)
 	require.NotNil(t, vote)
 	require.Equal(t, types.VoteOptions{
@@ -174,7 +174,7 @@ func TestVoteOkUnknown(t *testing.T) {
 		context.Background(),
 	)
 
-	require.Nil(t, err) //nolint:testifylint //disabled
+	require.Nil(t, err)
 	require.Zero(t, height)
 	require.NotNil(t, vote)
 	require.Equal(t, types.VoteOptions{
@@ -209,7 +209,7 @@ func TestVoteOkOld(t *testing.T) {
 		context.Background(),
 	)
 
-	require.Nil(t, err) //nolint:testifylint //disabled
+	require.Nil(t, err)
 	require.Zero(t, height)
 	require.NotNil(t, vote)
 	require.Equal(t, types.VoteOptions{
@@ -244,7 +244,7 @@ func TestVoteOkOldUnknown(t *testing.T) {
 		context.Background(),
 	)
 
-	require.Nil(t, err) //nolint:testifylint //disabled
+	require.Nil(t, err)
 	require.Zero(t, height)
 	require.NotNil(t, vote)
 	require.Equal(t, types.VoteOptions{

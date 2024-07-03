@@ -110,7 +110,7 @@ func TestProposalsV1beta1Success(t *testing.T) {
 		context.Background(),
 	)
 
-	require.Nil(t, err) //nolint:testifylint //disabled
+	require.Nil(t, err)
 	require.Zero(t, height)
 	require.Len(t, proposals, 25)
 }
