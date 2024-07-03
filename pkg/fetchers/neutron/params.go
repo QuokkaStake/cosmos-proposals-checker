@@ -14,10 +14,5 @@ func (fetcher *Fetcher) GetChainParams(ctx context.Context) (*types.ChainWithVot
 		return nil, []error{err}
 	}
 
-	paramsParsed, errs := params.ToParams(fetcher.ChainConfig)
-	if len(errs) > 0 {
-		return nil, errs
-	}
-
-	return paramsParsed, nil
+	return params.ToParams(fetcher.ChainConfig), nil
 }

@@ -1,0 +1,1 @@
+{"data":{"threshold":{"threshold_quorum":{"threshold":{"percent":"0.5"},"quorum":{"percent":"0.1"}}},"max_voting_period":{"time":1209600},"min_voting_period":null,"allow_revoting":true,"dao":"neutron1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrstdxvff","close_proposal_on_execution_failure":true}}

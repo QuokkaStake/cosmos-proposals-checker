@@ -58,7 +58,7 @@ func TestTallyTallyError(t *testing.T) {
 		LCDEndpoints:  []string{"https://example.com"},
 		ProposalsType: "v1",
 	}
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	tracer := tracing.InitNoopTracer()
 
 	fetcher := NewRPC(config, logger, tracer)
@@ -113,7 +113,7 @@ func TestTallyAllOk(t *testing.T) {
 		LCDEndpoints:  []string{"https://example.com"},
 		ProposalsType: "v1",
 	}
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	tracer := tracing.InitNoopTracer()
 
 	fetcher := NewRPC(config, logger, tracer)

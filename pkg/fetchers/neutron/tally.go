@@ -14,13 +14,8 @@ func (fetcher *Fetcher) GetTallies(ctx context.Context) (types.ChainTallyInfos, 
 		return types.ChainTallyInfos{}, err
 	}
 
-	tallyInfos, err := proposals.ToTally()
-	if err != nil {
-		return types.ChainTallyInfos{}, err
-	}
-
 	return types.ChainTallyInfos{
 		Chain:      fetcher.ChainConfig,
-		TallyInfos: tallyInfos,
+		TallyInfos: proposals.ToTally(),
 	}, nil
 }

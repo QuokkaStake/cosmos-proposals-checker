@@ -2,7 +2,6 @@ package responses
 
 import (
 	"main/pkg/types"
-	"strconv"
 	"time"
 )
 
@@ -11,10 +10,10 @@ type ParamsResponse struct {
 		Threshold struct {
 			ThresholdQuorum struct {
 				Threshold struct {
-					Percent string `json:"percent"`
+					Percent float64 `json:"percent,string"`
 				} `json:"threshold"`
 				Quorum struct {
-					Percent string `json:"percent"`
+					Percent float64 `json:"percent,string"`
 				} `json:"quorum"`
 			} `json:"threshold_quorum"`
 		} `json:"threshold"`
@@ -25,27 +24,17 @@ type ParamsResponse struct {
 	} `json:"data"`
 }
 
-func (params ParamsResponse) ToParams(chain *types.Chain) (*types.ChainWithVotingParams, []error) {
-	thresholdPercent, err := strconv.ParseFloat(params.Data.Threshold.ThresholdQuorum.Threshold.Percent, 64)
-	if err != nil {
-		return nil, []error{err}
-	}
-
-	quorumPercent, err := strconv.ParseFloat(params.Data.Threshold.ThresholdQuorum.Quorum.Percent, 64)
-	if err != nil {
-		return nil, []error{err}
-	}
-
+func (params ParamsResponse) ToParams(chain *types.Chain) *types.ChainWithVotingParams {
 	return &types.ChainWithVotingParams{
 		Chain: chain,
 		Params: []types.ChainParam{
-			types.PercentParam{Description: "Threshold percent", Value: thresholdPercent},
-			types.PercentParam{Description: "Quorum percent", Value: quorumPercent},
+			types.PercentParam{Description: "Threshold percent", Value: params.Data.Threshold.ThresholdQuorum.Threshold.Percent},
+			types.PercentParam{Description: "Quorum percent", Value: params.Data.Threshold.ThresholdQuorum.Quorum.Percent},
 			types.DurationParam{
 				Description: "Max voting period",
 				Value:       time.Duration(params.Data.MaxVotingPeriod.Time * 1e9),
 			},
 			types.BoolParam{Description: "Allow revoting", Value: params.Data.AllowRevoting},
 		},
-	}, []error{}
+	}
 }

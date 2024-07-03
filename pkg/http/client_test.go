@@ -35,7 +35,7 @@ func TestHttpClientQueryFail(t *testing.T) {
 		"https://example.com",
 		httpmock.NewErrorResponder(errors.New("custom error")),
 	)
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	tracer := tracing.InitNoopTracer()
 	client := NewClient("chain", []string{"https://example.com"}, logger, tracer)
 
@@ -57,7 +57,7 @@ func TestHttpClientPredicateFail(t *testing.T) {
 			constants.HeaderBlockHeight: []string{"1"},
 		}),
 	)
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	tracer := tracing.InitNoopTracer()
 	client := NewClient("chain", []string{"https://example.com"}, logger, tracer)
 
@@ -77,7 +77,7 @@ func TestHttpClientJsonParseFail(t *testing.T) {
 		"https://example.com",
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("invalid-json.json")),
 	)
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	tracer := tracing.InitNoopTracer()
 	client := NewClient("chain", []string{"https://example.com"}, logger, tracer)
 
@@ -97,7 +97,7 @@ func TestHttpClientOk(t *testing.T) {
 		"https://example.com",
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("tally.json")),
 	)
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	tracer := tracing.InitNoopTracer()
 	client := NewClient("chain", []string{"https://example.com"}, logger, tracer)
 
@@ -116,7 +116,7 @@ func TestHttpClientGetMultipleFail(t *testing.T) {
 		"https://example.com/",
 		httpmock.NewErrorResponder(errors.New("custom error")),
 	)
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	tracer := tracing.InitNoopTracer()
 	client := NewClient("chain", []string{"https://example.com"}, logger, tracer)
 
@@ -138,7 +138,7 @@ func TestHttpClientGetMultipleOk(t *testing.T) {
 		"https://example.com/",
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("tally.json")),
 	)
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	tracer := tracing.InitNoopTracer()
 	client := NewClient("chain", []string{"https://example.com"}, logger, tracer)
 

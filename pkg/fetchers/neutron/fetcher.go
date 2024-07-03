@@ -3,7 +3,6 @@ package neutron
 import (
 	"context"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"main/pkg/http"
 	"main/pkg/types"
@@ -59,12 +58,6 @@ func (fetcher *Fetcher) GetSmartContractState(
 		}
 	}
 
-	height, err := utils.GetBlockHeightFromHeader(header)
-	if err != nil {
-		return 0, &types.QueryError{
-			QueryError: errors.New("got error when parsing vote height"),
-		}
-	}
-
+	height, _ := utils.GetBlockHeightFromHeader(header)
 	return height, nil
 }

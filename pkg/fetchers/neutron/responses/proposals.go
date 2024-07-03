@@ -16,7 +16,7 @@ type Proposal struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Expiration  struct {
-		AtTime string `json:"at_time"`
+		AtTime int64 `json:"at_time,string"`
 	} `json:"expiration"`
 	Status     string `json:"status"`
 	TotalPower string `json:"total_power"`
@@ -34,68 +34,40 @@ type ProposalsResponse struct {
 	} `json:"data"`
 }
 
-func (p ProposalsResponse) ToProposals() ([]types.Proposal, error) {
+func (p ProposalsResponse) ToProposals() []types.Proposal {
 	proposals := make([]types.Proposal, len(p.Data.Proposals))
 
 	for index, proposal := range p.Data.Proposals {
-		proposalParsed, err := proposal.ToProposal()
-		if err != nil {
-			return nil, err
-		}
-
-		proposals[index] = proposalParsed
+		proposals[index] = proposal.ToProposal()
 	}
 
-	return proposals, nil
+	return proposals
 }
 
-func (p ProposalWithID) ToProposal() (types.Proposal, error) {
-	expiresAt, err := strconv.ParseInt(p.Proposal.Expiration.AtTime, 10, 64)
-	if err != nil {
-		return types.Proposal{}, err
-	}
-
+func (p ProposalWithID) ToProposal() types.Proposal {
 	return types.Proposal{
 		ID:          strconv.Itoa(p.ID),
 		Title:       p.Proposal.Title,
 		Description: p.Proposal.Description,
-		EndTime:     time.Unix(0, expiresAt),
+		EndTime:     time.Unix(0, p.Proposal.Expiration.AtTime),
 		Status:      ParseProposalStatus(p.Proposal.Status),
-	}, nil
+	}
 }
 
-func (p ProposalsResponse) ToTally() ([]types.TallyInfo, error) {
+func (p ProposalsResponse) ToTally() []types.TallyInfo {
 	tallyInfos := make([]types.TallyInfo, 0)
 
 	for _, proposal := range p.Data.Proposals {
-		proposalParsed, err := proposal.ToProposal()
-		if err != nil {
-			return []types.TallyInfo{}, err
-		}
+		proposalParsed := proposal.ToProposal()
 
 		if !proposalParsed.IsInVoting() {
 			continue
 		}
 
-		yesVotes, err := math.LegacyNewDecFromStr(proposal.Proposal.Votes.Yes)
-		if err != nil {
-			return []types.TallyInfo{}, err
-		}
-
-		noVotes, err := math.LegacyNewDecFromStr(proposal.Proposal.Votes.No)
-		if err != nil {
-			return []types.TallyInfo{}, err
-		}
-
-		abstainVotes, err := math.LegacyNewDecFromStr(proposal.Proposal.Votes.Abstain)
-		if err != nil {
-			return []types.TallyInfo{}, err
-		}
-
-		totalVotes, err := math.LegacyNewDecFromStr(proposal.Proposal.TotalPower)
-		if err != nil {
-			return []types.TallyInfo{}, err
-		}
+		yesVotes := math.LegacyMustNewDecFromStr(proposal.Proposal.Votes.Yes)
+		noVotes := math.LegacyMustNewDecFromStr(proposal.Proposal.Votes.No)
+		abstainVotes := math.LegacyMustNewDecFromStr(proposal.Proposal.Votes.Abstain)
+		totalVotes := math.LegacyMustNewDecFromStr(proposal.Proposal.TotalPower)
 
 		tallyInfos = append(tallyInfos, types.TallyInfo{
 			Proposal: proposalParsed,
@@ -108,5 +80,5 @@ func (p ProposalsResponse) ToTally() ([]types.TallyInfo, error) {
 		})
 	}
 
-	return tallyInfos, nil
+	return tallyInfos
 }
