@@ -95,6 +95,7 @@ func (f *TestFetcher) GetChainParams(ctx context.Context) (*types.ChainWithVotin
 	}
 
 	return &types.ChainWithVotingParams{
-		Chain: &types.Chain{Name: "test"},
+		Chain:  &types.Chain{Name: "test"},
+		Params: []types.ChainParam{types.BoolParam{Value: true, Description: "param"}},
 	}, []error{}
 }

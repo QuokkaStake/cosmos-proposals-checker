@@ -4,7 +4,6 @@ import (
 	"main/pkg"
 	"main/pkg/fs"
 	"main/pkg/logger"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -13,37 +12,22 @@ var (
 	version = "unknown"
 )
 
-type OsFS struct {
-}
-
-func (fs *OsFS) ReadFile(name string) ([]byte, error) {
-	return os.ReadFile(name)
-}
-
-func (fs *OsFS) WriteFile(name string, data []byte, perms os.FileMode) error {
-	return os.WriteFile(name, data, perms)
-}
-
-func (fs *OsFS) Create(path string) (fs.File, error) {
-	return os.Create(path)
-}
-
 func ExecuteMain(configPath string) {
-	filesystem := &OsFS{}
+	filesystem := &fs.OsFS{}
 	app := pkg.NewApp(configPath, filesystem, version)
 	app.Start()
 }
 
 func ExecuteValidateConfig(configPath string) {
-	filesystem := &OsFS{}
+	filesystem := &fs.OsFS{}
 
 	config, err := pkg.GetConfig(filesystem, configPath)
 	if err != nil {
-		logger.GetDefaultLogger().Fatal().Err(err).Msg("Could not load config!")
+		logger.GetDefaultLogger().Panic().Err(err).Msg("Could not load config!")
 	}
 
 	if err := config.Validate(); err != nil {
-		logger.GetDefaultLogger().Fatal().Err(err).Msg("Config is invalid!")
+		logger.GetDefaultLogger().Panic().Err(err).Msg("Config is invalid!")
 	}
 
 	if warnings := config.DisplayWarnings(); len(warnings) > 0 {
@@ -75,18 +59,13 @@ func main() {
 	}
 
 	rootCmd.PersistentFlags().StringVar(&ConfigPath, "config", "", "Config file path")
-	if err := rootCmd.MarkPersistentFlagRequired("config"); err != nil {
-		logger.GetDefaultLogger().Fatal().Err(err).Msg("Could not set flag as required")
-	}
+	_ = rootCmd.MarkPersistentFlagRequired("config")
 
 	validateConfigCmd.PersistentFlags().StringVar(&ConfigPath, "config", "", "Config file path")
-	if err := validateConfigCmd.MarkPersistentFlagRequired("config"); err != nil {
-		logger.GetDefaultLogger().Fatal().Err(err).Msg("Could not set flag as required")
-	}
-
+	_ = validateConfigCmd.MarkPersistentFlagRequired("config")
 	rootCmd.AddCommand(validateConfigCmd)
 
 	if err := rootCmd.Execute(); err != nil {
-		logger.GetDefaultLogger().Fatal().Err(err).Msg("Could not start application")
+		logger.GetDefaultLogger().Panic().Err(err).Msg("Could not start application")
 	}
 }
