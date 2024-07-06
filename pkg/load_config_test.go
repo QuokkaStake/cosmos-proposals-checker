@@ -24,7 +24,7 @@ func TestLoadConfigInvalidToml(t *testing.T) {
 
 	filesystem := &fs.TestFS{}
 
-	config, err := GetConfig(filesystem, "invalid-config.toml")
+	config, err := GetConfig(filesystem, "invalid.toml")
 
 	assert.Nil(t, config)
 	require.Error(t, err)
@@ -35,7 +35,7 @@ func TestLoadConfigValidToml(t *testing.T) {
 
 	filesystem := &fs.TestFS{}
 
-	config, err := GetConfig(filesystem, "valid-config.toml")
+	config, err := GetConfig(filesystem, "config-valid.toml")
 
 	require.NoError(t, err)
 	assert.NotNil(t, config)

@@ -34,11 +34,11 @@ type App struct {
 func NewApp(configPath string, filesystem fs.FS, version string) *App {
 	config, err := GetConfig(filesystem, configPath)
 	if err != nil {
-		logger.GetDefaultLogger().Fatal().Err(err).Msg("Could not load config")
+		logger.GetDefaultLogger().Panic().Err(err).Msg("Could not load config")
 	}
 
 	if err = config.Validate(); err != nil {
-		logger.GetDefaultLogger().Fatal().Err(err).Msg("Provided config is invalid!")
+		logger.GetDefaultLogger().Panic().Err(err).Msg("Provided config is invalid!")
 	}
 
 	if warnings := config.DisplayWarnings(); len(warnings) > 0 {
@@ -106,7 +106,7 @@ func (a *App) Start() {
 	if _, err := c.AddFunc(a.Config.Interval, func() {
 		a.Report()
 	}); err != nil {
-		a.Logger.Fatal().Err(err).Msg("Error processing cron pattern")
+		a.Logger.Panic().Err(err).Msg("Error processing cron pattern")
 	}
 	c.Start()
 	a.Logger.Info().Str("interval", a.Config.Interval).Msg("Scheduled proposals reporting")

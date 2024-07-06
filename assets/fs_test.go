@@ -23,6 +23,6 @@ func TestGetPanicOrFailPanic(t *testing.T) {
 func TestGetPanicOrFailOk(t *testing.T) {
 	t.Parallel()
 
-	bytes := GetBytesOrPanic("valid-config.toml")
+	bytes := GetBytesOrPanic("config-valid.toml")
 	assert.NotNil(t, bytes)
 }
