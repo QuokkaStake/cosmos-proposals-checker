@@ -29,6 +29,7 @@ type App struct {
 	ReportGenerator  *report.Generator
 	StateGenerator   *state.Generator
 	ReportDispatcher *report.Dispatcher
+	StopChannel      chan bool
 }
 
 func NewApp(configPath string, filesystem fs.FS, version string) *App {
@@ -93,6 +94,7 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 		ReportGenerator:  reportGenerator,
 		StateGenerator:   stateGenerator,
 		ReportDispatcher: reportDispatcher,
+		StopChannel:      make(chan bool),
 	}
 }
 
@@ -103,15 +105,19 @@ func (a *App) Start() {
 	}
 
 	c := cron.New()
-	if _, err := c.AddFunc(a.Config.Interval, func() {
-		a.Report()
-	}); err != nil {
+	if _, err := c.AddFunc(a.Config.Interval, a.Report); err != nil {
 		a.Logger.Panic().Err(err).Msg("Error processing cron pattern")
 	}
 	c.Start()
 	a.Logger.Info().Str("interval", a.Config.Interval).Msg("Scheduled proposals reporting")
 
-	select {}
+	<-a.StopChannel
+	a.Logger.Info().Msg("Shutting down...")
+	c.Stop()
+}
+
+func (a *App) Stop() {
+	a.StopChannel <- true
 }
 
 func (a *App) Report() {
