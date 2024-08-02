@@ -42,7 +42,7 @@ func TestGetLinksPresent(t *testing.T) {
 
 	assert.Len(t, links, 2, "Expected 2 links")
 	assert.Equal(t, "Keplr", links[0].Name, "Expected Keplr link")
-	assert.Equal(t, "https://wallet.keplr.app/chains/chain/proposals=test", links[0].Href, "Wrong Keplr link")
+	assert.Equal(t, "https://wallet.keplr.app/chains/chain/proposals/test", links[0].Href, "Wrong Keplr link")
 	assert.Equal(t, "Explorer", links[1].Name, "Expected Explorer link")
 	assert.Equal(t, "example.com/proposal/test", links[1].Href, "Wrong explorer link")
 }
