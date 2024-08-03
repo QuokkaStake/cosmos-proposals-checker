@@ -78,7 +78,7 @@ func (c *Chain) GetExplorerProposalsLinks(proposalID string) []Link {
 	if c.KeplrName != "" {
 		links = append(links, Link{
 			Name: "Keplr",
-			Href: fmt.Sprintf("https://wallet.keplr.app/#/%s/governance?detailId=%s", c.KeplrName, proposalID),
+			Href: fmt.Sprintf("https://wallet.keplr.app/chains/%s/proposals/%s", c.KeplrName, proposalID),
 		})
 	}
 
