@@ -90,9 +90,18 @@ func (client *Client) GetFull(
 	childCtx, span := client.Tracer.Start(ctx, "HTTP request")
 	defer span.End()
 
+	var transport http.RoundTripper
+
+	transportRaw, ok := http.DefaultTransport.(*http.Transport)
+	if ok {
+		transport = transportRaw.Clone()
+	} else {
+		transport = http.DefaultTransport
+	}
+
 	httpClient := &http.Client{
 		Timeout:   10 * time.Second,
-		Transport: otelhttp.NewTransport(http.DefaultTransport),
+		Transport: otelhttp.NewTransport(transport),
 	}
 
 	start := time.Now()
