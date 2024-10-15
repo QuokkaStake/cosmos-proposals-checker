@@ -8,6 +8,7 @@ import (
 )
 
 type Config struct {
+	DatabaseConfig  DatabaseConfig  `toml:"database"`
 	PagerDutyConfig PagerDutyConfig `toml:"pagerduty"`
 	TelegramConfig  TelegramConfig  `toml:"telegram"`
 	DiscordConfig   DiscordConfig   `toml:"discord"`
@@ -37,6 +38,10 @@ type DiscordConfig struct {
 }
 
 func (c *Config) Validate() error {
+	if err := c.DatabaseConfig.Validate(); err != nil {
+		return fmt.Errorf("invalid database config: %s", err)
+	}
+
 	if len(c.Chains) == 0 {
 		return fmt.Errorf("no chains provided")
 	}

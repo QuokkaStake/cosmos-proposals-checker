@@ -3,6 +3,7 @@ package pkg
 import (
 	"context"
 	"main/pkg/data"
+	databasePkg "main/pkg/database"
 	"main/pkg/fs"
 	"main/pkg/logger"
 	mutes "main/pkg/mutes"
@@ -29,6 +30,7 @@ type App struct {
 	ReportGenerator  *report.Generator
 	StateGenerator   *state.Generator
 	ReportDispatcher *report.Dispatcher
+	Database         *databasePkg.Database
 	StopChannel      chan bool
 }
 
@@ -50,6 +52,8 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 
 	tracer := tracing.InitTracer(config.TracingConfig, version)
 	log := logger.GetLogger(config.LogConfig)
+
+	database := databasePkg.NewDatabase(log, config.DatabaseConfig)
 
 	stateManager := state.NewStateManager(config.StatePath, filesystem, log)
 	mutesManager := mutes.NewMutesManager(config.MutesPath, filesystem, log)
@@ -94,11 +98,15 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 		ReportGenerator:  reportGenerator,
 		StateGenerator:   stateGenerator,
 		ReportDispatcher: reportDispatcher,
+		Database:         database,
 		StopChannel:      make(chan bool),
 	}
 }
 
 func (a *App) Start() {
+	a.Database.Init()
+	a.Database.Migrate()
+
 	a.StateManager.Load()
 	if err := a.ReportDispatcher.Init(); err != nil {
 		a.Logger.Panic().Err(err).Msg("Error initializing reporters")
