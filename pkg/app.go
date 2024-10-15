@@ -127,4 +127,5 @@ func (a *App) Report() {
 	newState := a.StateGenerator.GetState(a.StateManager.State, ctx)
 	generatedReport := a.ReportGenerator.GenerateReport(a.StateManager.State, newState, ctx)
 	a.ReportDispatcher.SendReport(generatedReport, ctx)
+	a.StateManager.CommitState(newState)
 }

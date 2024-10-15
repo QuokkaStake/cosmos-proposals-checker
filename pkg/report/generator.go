@@ -169,7 +169,5 @@ func (g *Generator) GenerateReport(oldState, newState state.State, ctx context.C
 		}
 	}
 
-	g.StateManager.CommitState(newState)
-
 	return reporters.Report{Entries: entries}
 }
