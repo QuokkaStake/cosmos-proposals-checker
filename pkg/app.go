@@ -28,6 +28,7 @@ type App struct {
 	Config           *types.Config
 	StateManager     *state.Manager
 	ReportGenerator  *report.Generator
+	ReportGenerator2 *report.NewGenerator
 	StateGenerator   *state.Generator
 	ReportDispatcher *report.Dispatcher
 	Database         *databasePkg.Database
@@ -60,6 +61,8 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 	reportGenerator := report.NewReportGenerator(stateManager, log, config.Chains, tracer)
 	stateGenerator := state.NewStateGenerator(log, tracer, config.Chains)
 	dataManager := data.NewManager(log, config.Chains, tracer)
+
+	generator2 := report.NewReportNewGenerator(log, config.Chains, database, tracer)
 
 	timeZone, _ := time.LoadLocation(config.Timezone)
 
@@ -96,6 +99,7 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 		Config:           config,
 		StateManager:     stateManager,
 		ReportGenerator:  reportGenerator,
+		ReportGenerator2: generator2,
 		StateGenerator:   stateGenerator,
 		ReportDispatcher: reportDispatcher,
 		Database:         database,
@@ -132,8 +136,10 @@ func (a *App) Report() {
 	ctx, span := a.Tracer.Start(context.Background(), "report")
 	defer span.End()
 
-	newState := a.StateGenerator.GetState(a.StateManager.State, ctx)
-	generatedReport := a.ReportGenerator.GenerateReport(a.StateManager.State, newState, ctx)
+	// newState := a.StateGenerator.GetState(a.StateManager.State, ctx)
+	// generatedReport := a.ReportGenerator.GenerateReport(a.StateManager.State, newState, ctx)
+	//a.StateManager.CommitState(newState)
+
+	generatedReport := a.ReportGenerator2.GenerateReport(ctx)
 	a.ReportDispatcher.SendReport(generatedReport, ctx)
-	a.StateManager.CommitState(newState)
 }

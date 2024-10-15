@@ -90,3 +90,51 @@ func (d *Database) Rollback() {
 		}
 	}
 }
+
+func (d *Database) UpsertProposal(
+	chain *types.Chain,
+	proposal types.Proposal,
+) error {
+	_, err := d.client.Exec(
+		"INSERT INTO proposals (chain, id, title, description, status, end_time) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO UPDATE SET title = $3, description = $4, status = $5, end_time = $6",
+		chain.Name,
+		proposal.ID,
+		proposal.Title,
+		proposal.Description,
+		proposal.Status,
+		proposal.EndTime,
+	)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Could not upsert proposal")
+		return err
+	}
+
+	return nil
+}
+
+func (d *Database) GetProposal(chain *types.Chain, proposalID string) (*types.Proposal, error) {
+	proposal := &types.Proposal{}
+	row := d.client.QueryRow(
+		"SELECT id, title, description, status, end_time FROM proposals WHERE chain = $1 AND id = $2 LIMIT 1",
+		chain.Name,
+		proposalID,
+	)
+
+	err := row.Scan(
+		&proposal.ID,
+		&proposal.Title,
+		&proposal.Description,
+		&proposal.Status,
+		&proposal.EndTime,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil //nolint:nilnil
+		}
+
+		d.logger.Error().Err(err).Msg("Error getting proposal")
+		return nil, err
+	}
+
+	return proposal, nil
+}
