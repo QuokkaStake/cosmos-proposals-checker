@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	migrationsPkg "main/migrations"
@@ -137,4 +138,90 @@ func (d *Database) GetProposal(chain *types.Chain, proposalID string) (*types.Pr
 	}
 
 	return proposal, nil
+}
+
+func (d *Database) GetVote(
+	chain *types.Chain,
+	proposal types.Proposal,
+	wallet *types.Wallet,
+) (*types.Vote, error) {
+	rows, err := d.client.Query(
+		"SELECT vote_option, vote_weight FROM votes WHERE chain = $1 AND proposal_id = $2 AND wallet = $3",
+		chain.Name,
+		proposal.ID,
+		wallet.Address,
+	)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Error getting vote") //nolint:nilnil
+		return nil, err
+	}
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err()
+	}()
+
+	vote := &types.Vote{
+		ProposalID: proposal.ID,
+		Voter:      wallet.Address,
+		Options:    make(types.VoteOptions, 0),
+	}
+
+	for rows.Next() {
+		voteOption := types.VoteOption{}
+
+		scanErr := rows.Scan(&voteOption.Option, &voteOption.Weight)
+		if scanErr != nil {
+			d.logger.Error().Err(scanErr).Msg("Error getting vote")
+			return nil, scanErr
+		}
+
+		vote.Options = append(vote.Options, voteOption)
+	}
+
+	return vote, nil
+}
+
+func (d *Database) UpsertVote(
+	chain *types.Chain,
+	proposal types.Proposal,
+	wallet *types.Wallet,
+	vote *types.Vote,
+	ctx context.Context,
+) error {
+	tx, err := d.client.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+
+	if _, deleteErr := tx.Exec(
+		"DELETE FROM votes WHERE chain = $1 AND proposal_id = $2 AND wallet = $3",
+		chain.Name,
+		proposal.ID,
+		wallet.Address,
+	); deleteErr != nil {
+		d.logger.Error().Err(deleteErr).Msg("Error deleting votes")
+		return err
+	}
+
+	for _, option := range vote.Options {
+		if _, insertErr := tx.Exec(
+			"INSERT INTO votes (chain, proposal_id, wallet, vote_option, vote_weight) VALUES ($1, $2, $3, $4, $5)",
+			chain.Name,
+			proposal.ID,
+			wallet.Address,
+			option.Option,
+			option.Weight,
+		); insertErr != nil {
+			d.logger.Error().Err(insertErr).Msg("Error inserting votes")
+			return err
+		}
+	}
+
+	if insertErr := tx.Commit(); insertErr != nil {
+		d.logger.Error().Err(insertErr).Msg("Error committing votes")
+	}
+
+	return nil
 }

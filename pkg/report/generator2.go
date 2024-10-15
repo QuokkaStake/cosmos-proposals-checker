@@ -124,11 +124,6 @@ func (g *NewGenerator) ProcessProposal(
 	span.SetAttributes(attribute.String("proposal_id", proposal.ID))
 	defer span.End()
 
-	g.Logger.Trace().
-		Str("chain", chain.Name).
-		Str("proposal", proposal.ID).
-		Msg("Processing proposal...")
-
 	previousProposal, err := g.Database.GetProposal(chain, proposal.ID)
 	if err != nil {
 		g.Logger.Error().Err(err).Msg("Failed to fetch proposal from DB")
@@ -139,6 +134,11 @@ func (g *NewGenerator) ProcessProposal(
 	entries := []entry.ReportEntry{}
 
 	if previousProposal != nil && previousProposal.IsInVoting() && !proposal.IsInVoting() {
+		g.Logger.Trace().
+			Str("chain", chain.Name).
+			Str("proposal", proposal.ID).
+			Msg("Voting on a proposal has finished")
+
 		entries = append(entries, events.FinishedVotingEvent{
 			Chain:    chain,
 			Proposal: proposal,
@@ -148,6 +148,7 @@ func (g *NewGenerator) ProcessProposal(
 	if previousProposal == nil || !previousProposal.Equals(proposal) {
 		if updateErr := g.Database.UpsertProposal(chain, proposal); updateErr != nil {
 			g.Logger.Error().Err(updateErr).Msg("Failed to update proposal in DB")
+			span.RecordError(err)
 		}
 	}
 
@@ -158,6 +159,11 @@ func (g *NewGenerator) ProcessProposal(
 			Msg("Proposal is not in voting period - not fetching votes.")
 		return entries
 	}
+
+	g.Logger.Trace().
+		Str("chain", chain.Name).
+		Str("proposal", proposal.ID).
+		Msg("Processing proposal...")
 
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
@@ -187,11 +193,40 @@ func (g *NewGenerator) ProcessWallet(
 	wallet *types.Wallet,
 	ctx context.Context,
 ) []entry.ReportEntry {
-	_, span := g.Tracer.Start(ctx, "Processing wallet")
+	childCtx, span := g.Tracer.Start(ctx, "Processing wallet")
 	span.SetAttributes(attribute.String("chain", chain.Name))
 	span.SetAttributes(attribute.String("proposal_id", proposal.ID))
 	span.SetAttributes(attribute.String("wallet", wallet.Address))
 	defer span.End()
+
+	fetcher := g.Fetchers[chain.Name]
+
+	vote, _, err := fetcher.GetVote(proposal.ID, wallet.Address, 0, childCtx)
+	if err != nil {
+		g.Logger.Error().Err(err).Msg("Failed to fetch vote from chain")
+		span.RecordError(err)
+		return []entry.ReportEntry{
+			events.VoteQueryError{
+				Chain:    chain,
+				Proposal: proposal,
+				Error:    err,
+			},
+		}
+	}
+
+	previousVote, dbErr := g.Database.GetVote(chain, proposal, wallet)
+	if dbErr != nil {
+		g.Logger.Error().Err(err).Msg("Failed to fetch vote from DB")
+		span.RecordError(err)
+		return []entry.ReportEntry{}
+	}
+
+	if previousVote == nil || !previousVote.VotesEquals(vote) {
+		if updateErr := g.Database.UpsertVote(chain, proposal, wallet, vote, childCtx); updateErr != nil {
+			g.Logger.Error().Err(updateErr).Msg("Failed to update vote in DB")
+			span.RecordError(err)
+		}
+	}
 
 	return []entry.ReportEntry{}
 }
