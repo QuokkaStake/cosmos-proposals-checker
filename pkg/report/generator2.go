@@ -199,6 +199,12 @@ func (g *NewGenerator) ProcessWallet(
 	span.SetAttributes(attribute.String("wallet", wallet.Address))
 	defer span.End()
 
+	g.Logger.Trace().
+		Str("chain", chain.Name).
+		Str("proposal", proposal.ID).
+		Str("address", wallet.Address).
+		Msg("Processing wallet...")
+
 	fetcher := g.Fetchers[chain.Name]
 
 	vote, _, err := fetcher.GetVote(proposal.ID, wallet.Address, 0, childCtx)
@@ -214,6 +220,21 @@ func (g *NewGenerator) ProcessWallet(
 		}
 	}
 
+	if vote == nil {
+		g.Logger.Trace().
+			Str("chain", chain.Name).
+			Str("proposal", proposal.ID).
+			Str("address", wallet.Address).
+			Msg("Wallet has not voted - sending an alert.")
+		return []entry.ReportEntry{
+			events.NotVotedEvent{
+				Chain:    chain,
+				Proposal: proposal,
+				Wallet:   wallet,
+			},
+		}
+	}
+
 	previousVote, dbErr := g.Database.GetVote(chain, proposal, wallet)
 	if dbErr != nil {
 		g.Logger.Error().Err(err).Msg("Failed to fetch vote from DB")
@@ -225,6 +246,41 @@ func (g *NewGenerator) ProcessWallet(
 		if updateErr := g.Database.UpsertVote(chain, proposal, wallet, vote, childCtx); updateErr != nil {
 			g.Logger.Error().Err(updateErr).Msg("Failed to update vote in DB")
 			span.RecordError(err)
+		}
+	}
+
+	if previousVote == nil {
+		g.Logger.Trace().
+			Str("chain", chain.Name).
+			Str("proposal", proposal.ID).
+			Str("address", wallet.Address).
+			Msg("Wallet has voted - sending an alert.")
+
+		return []entry.ReportEntry{
+			events.VotedEvent{
+				Chain:    chain,
+				Proposal: proposal,
+				Wallet:   wallet,
+				Vote:     vote,
+			},
+		}
+	}
+
+	if !vote.VotesEquals(previousVote) {
+		g.Logger.Trace().
+			Str("chain", chain.Name).
+			Str("proposal", proposal.ID).
+			Str("address", wallet.Address).
+			Msg("Wallet has changed its vote - sending an alert.")
+
+		return []entry.ReportEntry{
+			events.RevotedEvent{
+				Chain:    chain,
+				Proposal: proposal,
+				Wallet:   wallet,
+				Vote:     vote,
+				OldVote:  previousVote,
+			},
 		}
 	}
 

@@ -178,6 +178,10 @@ func (d *Database) GetVote(
 		vote.Options = append(vote.Options, voteOption)
 	}
 
+	if len(vote.Options) == 0 {
+		return nil, nil // nolint:nilnil
+	}
+
 	return vote, nil
 }
 
