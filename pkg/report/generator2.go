@@ -18,7 +18,7 @@ import (
 type NewGenerator struct {
 	Chains   types.Chains
 	Logger   zerolog.Logger
-	Database *databasePkg.Database
+	Database databasePkg.Database
 	Fetchers map[string]fetchersPkg.Fetcher
 	Tracer   trace.Tracer
 }
@@ -26,7 +26,7 @@ type NewGenerator struct {
 func NewReportNewGenerator(
 	logger *zerolog.Logger,
 	chains types.Chains,
-	database *databasePkg.Database,
+	database databasePkg.Database,
 	tracer trace.Tracer,
 ) *NewGenerator {
 	fetchers := make(map[string]fetchersPkg.Fetcher, len(chains))

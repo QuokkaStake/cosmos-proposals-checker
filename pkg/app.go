@@ -31,7 +31,7 @@ type App struct {
 	ReportGenerator2 *report.NewGenerator
 	StateGenerator   *state.Generator
 	ReportDispatcher *report.Dispatcher
-	Database         *databasePkg.Database
+	Database         databasePkg.Database
 	StopChannel      chan bool
 }
 
@@ -54,7 +54,7 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 	tracer := tracing.InitTracer(config.TracingConfig, version)
 	log := logger.GetLogger(config.LogConfig)
 
-	database := databasePkg.NewDatabase(log, config.DatabaseConfig)
+	database := databasePkg.NewSqliteDatabase(log, config.DatabaseConfig)
 
 	stateManager := state.NewStateManager(config.StatePath, filesystem, log)
 	mutesManager := mutes.NewMutesManager(config.MutesPath, filesystem, log)
@@ -138,7 +138,7 @@ func (a *App) Report() {
 
 	// newState := a.StateGenerator.GetState(a.StateManager.State, ctx)
 	// generatedReport := a.ReportGenerator.GenerateReport(a.StateManager.State, newState, ctx)
-	//a.StateManager.CommitState(newState)
+	// a.StateManager.CommitState(newState)
 
 	generatedReport := a.ReportGenerator2.GenerateReport(ctx)
 	a.ReportDispatcher.SendReport(generatedReport, ctx)
