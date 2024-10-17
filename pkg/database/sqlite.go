@@ -244,7 +244,7 @@ func (d *SqliteDatabase) GetLastBlockHeight(
 
 	if err := row.Scan(&lastBlockHeight); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return 0, nil 
+			return 0, nil
 		}
 
 		d.logger.Error().Err(err).Msg("Error getting last block height")

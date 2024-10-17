@@ -1,5 +1,8 @@
 interval = "@hourly"
 
+[database]
+path = "database.sqlite"
+
 [[chains]]
 name = "bitsong"
 pretty-name = "Bitsong"

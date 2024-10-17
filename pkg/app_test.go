@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	databasePkg "main/pkg/database"
 	"main/pkg/fs"
 	reportersPkg "main/pkg/reporters"
 	"sync"
@@ -117,6 +118,8 @@ func TestAppReport(t *testing.T) {
 
 	filesystem := &fs.TestFS{}
 	app := NewApp("config-valid.toml", filesystem, "1.2.3")
+	app.Database = &databasePkg.StubDatabase{}
+	app.ReportGenerator2.Database = &databasePkg.StubDatabase{}
 	app.Report()
 
 	assert.True(t, true)

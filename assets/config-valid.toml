@@ -2,6 +2,9 @@ state-path = "cosmos-proposals-checker-state.json"
 mutes-path = "cosmos-proposals-checker-mutes.json"
 interval = "@hourly"
 
+[database]
+path = "database_test.sqlite"
+
 [[chains]]
 name = "bitsong"
 pretty-name = "Bitsong"
