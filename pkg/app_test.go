@@ -119,7 +119,7 @@ func TestAppReport(t *testing.T) {
 	filesystem := &fs.TestFS{}
 	app := NewApp("config-valid.toml", filesystem, "1.2.3")
 	app.Database = &databasePkg.StubDatabase{}
-	app.ReportGenerator2.Database = &databasePkg.StubDatabase{}
+	app.ReportGenerator.Database = &databasePkg.StubDatabase{}
 	app.Report()
 
 	assert.True(t, true)

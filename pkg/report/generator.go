@@ -2,172 +2,313 @@ package report
 
 import (
 	"context"
+	"fmt"
+	databasePkg "main/pkg/database"
 	"main/pkg/events"
-	"main/pkg/fetchers/cosmos"
+	fetchersPkg "main/pkg/fetchers"
 	"main/pkg/report/entry"
 	"main/pkg/reporters"
-	"main/pkg/state"
 	"main/pkg/types"
-
-	"go.opentelemetry.io/otel/trace"
+	"sync"
 
 	"github.com/rs/zerolog"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type Generator struct {
-	StateManager *state.Manager
-	Chains       types.Chains
-	RPC          *cosmos.RPC
-	Logger       zerolog.Logger
-	Tracer       trace.Tracer
+	Chains   types.Chains
+	Logger   zerolog.Logger
+	Database databasePkg.Database
+	Fetchers map[string]fetchersPkg.Fetcher
+	Tracer   trace.Tracer
 }
 
-func NewReportGenerator(
-	manager *state.Manager,
+func NewReportNewGenerator(
 	logger *zerolog.Logger,
 	chains types.Chains,
+	database databasePkg.Database,
 	tracer trace.Tracer,
 ) *Generator {
+	fetchers := make(map[string]fetchersPkg.Fetcher, len(chains))
+
+	for _, chain := range chains {
+		fetchers[chain.Name] = fetchersPkg.GetFetcher(chain, logger, tracer)
+	}
+
 	return &Generator{
-		StateManager: manager,
-		Chains:       chains,
-		Logger:       logger.With().Str("component", "report_generator").Logger(),
-		Tracer:       tracer,
+		Chains:   chains,
+		Logger:   logger.With().Str("component", "report_generator").Logger(),
+		Tracer:   tracer,
+		Fetchers: fetchers,
+		Database: database,
 	}
 }
 
-func (g *Generator) GenerateReport(oldState, newState state.State, ctx context.Context) reporters.Report {
+func (g *Generator) GenerateReport(ctx context.Context) reporters.Report {
 	_, span := g.Tracer.Start(ctx, "Generating report")
 	defer span.End()
 
 	entries := []entry.ReportEntry{}
 
-	for chainName, chainInfo := range newState.ChainInfos {
-		if chainInfo.HasProposalsError() {
-			g.Logger.Debug().
-				Str("chain", chainName).
-				Msg("Error querying for proposals - sending an alert")
-			entries = append(entries, events.ProposalsQueryErrorEvent{
-				Chain: g.Chains.FindByName(chainName),
-				Error: chainInfo.ProposalsError,
-			})
-			continue
-		}
+	var wg sync.WaitGroup
+	var mutex sync.Mutex
 
-		for proposalID, proposalVotes := range chainInfo.ProposalVotes {
-			oldProposal, oldProposalFound := oldState.GetProposal(chainName, proposalID)
-			newProposal := proposalVotes.Proposal
+	wg.Add(len(g.Chains))
 
-			if oldProposalFound {
-				// There can be the following cases:
-				// 1) old proposal not found - this is a new proposal, no custom logic needed.
-				// 2) old proposal is found, it's not in voting and the current one is not in voting
-				// (like deposit -> deposit) - we don't need to report it at all.
-				// 3) old proposal is found, it's not in voting but the current one is in voting
-				// (like deposit -> deposit) - no custom logic needed.
-				// 4) old proposal is found, it's in voting and the current one is in voting
-				// (like voting -> voting) - no custom logic needed.
-				// 5) old proposal is found, it's in voting and the current one is not in voting
-				// (like voting -> passed) -> send a new event that the voting has finished.
+	for _, chain := range g.Chains {
+		go func(chain *types.Chain) {
+			defer wg.Done()
 
-				// case 1, 3 and 4 is handled outside of this if case
-				if oldProposal.IsInVoting() && !newProposal.IsInVoting() { // case 5
-					g.Logger.Debug().
-						Str("chain", chainName).
-						Str("proposal", proposalID).
-						Msg("Previously proposal was in voting, but it's not now - sending an alert")
+			chainEntries := g.ProcessChain(chain, ctx)
 
-					entries = append(entries, events.FinishedVotingEvent{
-						Chain:    g.Chains.FindByName(chainName),
-						Proposal: newProposal,
-					})
-					continue
-				} else if !oldProposal.IsInVoting() && !newProposal.IsInVoting() { // case 2
-					g.Logger.Trace().
-						Str("chain", chainName).
-						Str("proposal", proposalID).
-						Msg("Previously proposal was and is not in voting period - ignoring.")
-					continue
-				}
-			}
+			mutex.Lock()
+			entries = append(entries, chainEntries...)
+			mutex.Unlock()
+		}(chain)
+	}
 
-			for wallet := range proposalVotes.Votes {
-				g.Logger.Trace().
-					Str("name", chainName).
-					Str("proposal", proposalID).
-					Str("wallet", wallet).
-					Msg("Generating report for a wallet vote")
+	wg.Wait()
 
-				oldVote, _ := oldState.GetVote(chainName, proposalID, wallet)
-				newVote, _ := newState.GetVote(chainName, proposalID, wallet)
+	return reporters.Report{Entries: entries}
+}
 
-				// Error querying for vote - need to notify via Telegram.
-				if newVote.IsError() {
-					g.Logger.Debug().
-						Str("chain", chainName).
-						Str("proposal", proposalID).
-						Str("wallet", wallet).
-						Msg("Error querying for vote - sending an alert")
-					entries = append(entries, events.VoteQueryError{
-						Chain:    g.Chains.FindByName(chainName),
-						Proposal: newProposal,
-						Error:    newVote.Error,
-					})
+func (g *Generator) ProcessChain(chain *types.Chain, ctx context.Context) []entry.ReportEntry {
+	childCtx, span := g.Tracer.Start(ctx, "Processing chain")
+	span.SetAttributes(attribute.String("chain", chain.Name))
+	defer span.End()
 
-					continue
-				}
+	fetcher := g.Fetchers[chain.Name]
 
-				// Hasn't voted for this proposal - need to notify.
-				if !newVote.HasVoted() {
-					g.Logger.Debug().
-						Str("chain", chainName).
-						Str("proposal", proposalID).
-						Str("wallet", wallet).
-						Msg("Wallet hasn't voted now - sending an alert")
-					entries = append(entries, events.NotVotedEvent{
-						Chain:    g.Chains.FindByName(chainName),
-						Wallet:   newVote.Wallet,
-						Proposal: newProposal,
-					})
-					continue
-				}
+	g.Logger.Trace().Str("chain", chain.Name).Msg("Processing chain...")
 
-				// Hasn't voted before but voted now - need to close alert/notify about new vote.
-				if newVote.HasVoted() && !oldVote.HasVoted() {
-					g.Logger.Debug().
-						Str("chain", chainName).
-						Str("proposal", newProposal.ID).
-						Str("wallet", wallet).
-						Msg("Wallet hasn't voted before but voted now - closing an alert")
+	prevHeight, prevHeightErr := g.Database.GetLastBlockHeight(chain, "proposals")
+	if prevHeightErr != nil {
+		g.Logger.Error().Err(prevHeightErr).Msg("Failed to fetch last block height")
+		span.RecordError(prevHeightErr)
+		return []entry.ReportEntry{}
+	}
 
-					entries = append(entries, events.VotedEvent{
-						Chain:    g.Chains.FindByName(chainName),
-						Wallet:   newVote.Wallet,
-						Proposal: newProposal,
-						Vote:     newVote.Vote,
-					})
-					continue
-				}
-
-				// Changed its vote - only notify via Telegram.
-				if newVote.HasVoted() && oldVote.HasVoted() && !newVote.Vote.VotesEquals(oldVote.Vote) {
-					g.Logger.Debug().
-						Str("chain", chainName).
-						Str("proposal", newProposal.ID).
-						Str("wallet", wallet).
-						Msg("Wallet changed its vote - sending an alert")
-
-					entries = append(entries, events.RevotedEvent{
-						Chain:    g.Chains.FindByName(chainName),
-						Wallet:   newVote.Wallet,
-						Proposal: newProposal,
-						Vote:     newVote.Vote,
-						OldVote:  oldVote.Vote,
-					})
-				}
-			}
+	proposals, newHeight, err := fetcher.GetAllProposals(prevHeight, childCtx)
+	if err != nil {
+		g.Logger.Error().Str("chain", chain.Name).Err(err).Msg("Error fetching proposals")
+		span.RecordError(err)
+		return []entry.ReportEntry{
+			events.ProposalsQueryErrorEvent{Chain: chain, Error: err},
 		}
 	}
 
-	return reporters.Report{Entries: entries}
+	if insertErr := g.Database.UpsertLastBlockHeight(chain, "proposals", newHeight); insertErr != nil {
+		g.Logger.Error().Err(prevHeightErr).Msg("Failed to insert last block height")
+		span.RecordError(prevHeightErr)
+	}
+
+	var wg sync.WaitGroup
+	var mutex sync.Mutex
+
+	entries := make([]entry.ReportEntry, 0)
+
+	wg.Add(len(proposals))
+
+	for _, proposal := range proposals {
+		go func(proposal types.Proposal) {
+			defer wg.Done()
+
+			proposalEntries := g.ProcessProposal(chain, proposal, childCtx)
+
+			mutex.Lock()
+			entries = append(entries, proposalEntries...)
+			mutex.Unlock()
+		}(proposal)
+	}
+
+	wg.Wait()
+
+	return entries
+}
+
+func (g *Generator) ProcessProposal(
+	chain *types.Chain,
+	proposal types.Proposal,
+	ctx context.Context,
+) []entry.ReportEntry {
+	childCtx, span := g.Tracer.Start(ctx, "Processing proposal")
+	span.SetAttributes(attribute.String("chain", chain.Name))
+	span.SetAttributes(attribute.String("proposal_id", proposal.ID))
+	defer span.End()
+
+	previousProposal, err := g.Database.GetProposal(chain, proposal.ID)
+	if err != nil {
+		g.Logger.Error().Err(err).Msg("Failed to fetch proposal from DB")
+		span.RecordError(err)
+		return []entry.ReportEntry{}
+	}
+
+	entries := []entry.ReportEntry{}
+
+	if previousProposal != nil && previousProposal.IsInVoting() && !proposal.IsInVoting() {
+		g.Logger.Trace().
+			Str("chain", chain.Name).
+			Str("proposal", proposal.ID).
+			Msg("Voting on a proposal has finished")
+
+		entries = append(entries, events.FinishedVotingEvent{
+			Chain:    chain,
+			Proposal: proposal,
+		})
+	}
+
+	if previousProposal == nil || !previousProposal.Equals(proposal) {
+		if updateErr := g.Database.UpsertProposal(chain, proposal); updateErr != nil {
+			g.Logger.Error().Err(updateErr).Msg("Failed to update proposal in DB")
+			span.RecordError(err)
+		}
+	}
+
+	if !proposal.IsInVoting() {
+		// g.Logger.Trace().
+		//	Str("chain", chain.Name).
+		//	Str("proposal", proposal.ID).
+		//	Msg("Proposal is not in voting period - not fetching votes.")
+		return entries
+	}
+
+	g.Logger.Trace().
+		Str("chain", chain.Name).
+		Str("proposal", proposal.ID).
+		Msg("Processing proposal...")
+
+	var wg sync.WaitGroup
+	var mutex sync.Mutex
+
+	wg.Add(len(chain.Wallets))
+
+	for _, wallet := range chain.Wallets {
+		go func(wallet *types.Wallet) {
+			defer wg.Done()
+
+			walletEntries := g.ProcessWallet(chain, proposal, wallet, childCtx)
+
+			mutex.Lock()
+			entries = append(entries, walletEntries...)
+			mutex.Unlock()
+		}(wallet)
+	}
+
+	wg.Wait()
+
+	return entries
+}
+
+func (g *Generator) ProcessWallet(
+	chain *types.Chain,
+	proposal types.Proposal,
+	wallet *types.Wallet,
+	ctx context.Context,
+) []entry.ReportEntry {
+	childCtx, span := g.Tracer.Start(ctx, "Processing wallet")
+	span.SetAttributes(attribute.String("chain", chain.Name))
+	span.SetAttributes(attribute.String("proposal_id", proposal.ID))
+	span.SetAttributes(attribute.String("wallet", wallet.Address))
+	defer span.End()
+
+	g.Logger.Trace().
+		Str("chain", chain.Name).
+		Str("proposal", proposal.ID).
+		Str("address", wallet.Address).
+		Msg("Processing wallet...")
+
+	fetcher := g.Fetchers[chain.Name]
+	storeKey := fmt.Sprintf("proposal_%s_vote_%s", proposal.ID, wallet.Address)
+
+	prevHeight, prevHeightErr := g.Database.GetLastBlockHeight(chain, storeKey)
+	if prevHeightErr != nil {
+		g.Logger.Error().Err(prevHeightErr).Msg("Failed to fetch last block height")
+		span.RecordError(prevHeightErr)
+		return []entry.ReportEntry{}
+	}
+
+	vote, newHeight, err := fetcher.GetVote(proposal.ID, wallet.Address, prevHeight, childCtx)
+	if err != nil {
+		g.Logger.Error().Err(err).Msg("Failed to fetch vote from chain")
+		span.RecordError(err)
+		return []entry.ReportEntry{
+			events.VoteQueryError{
+				Chain:    chain,
+				Proposal: proposal,
+				Error:    err,
+			},
+		}
+	}
+
+	if insertErr := g.Database.UpsertLastBlockHeight(chain, storeKey, newHeight); insertErr != nil {
+		g.Logger.Error().Err(prevHeightErr).Msg("Failed to insert last block height")
+		span.RecordError(prevHeightErr)
+	}
+
+	if vote == nil {
+		g.Logger.Trace().
+			Str("chain", chain.Name).
+			Str("proposal", proposal.ID).
+			Str("address", wallet.Address).
+			Msg("Wallet has not voted - sending an alert.")
+		return []entry.ReportEntry{
+			events.NotVotedEvent{
+				Chain:    chain,
+				Proposal: proposal,
+				Wallet:   wallet,
+			},
+		}
+	}
+
+	previousVote, dbErr := g.Database.GetVote(chain, proposal, wallet)
+	if dbErr != nil {
+		g.Logger.Error().Err(err).Msg("Failed to fetch vote from DB")
+		span.RecordError(err)
+		return []entry.ReportEntry{}
+	}
+
+	if previousVote == nil || !previousVote.VotesEquals(vote) {
+		if updateErr := g.Database.UpsertVote(chain, proposal, wallet, vote, childCtx); updateErr != nil {
+			g.Logger.Error().Err(updateErr).Msg("Failed to update vote in DB")
+			span.RecordError(err)
+		}
+	}
+
+	if previousVote == nil {
+		g.Logger.Trace().
+			Str("chain", chain.Name).
+			Str("proposal", proposal.ID).
+			Str("address", wallet.Address).
+			Msg("Wallet has voted - sending an alert.")
+
+		return []entry.ReportEntry{
+			events.VotedEvent{
+				Chain:    chain,
+				Proposal: proposal,
+				Wallet:   wallet,
+				Vote:     vote,
+			},
+		}
+	}
+
+	if !vote.VotesEquals(previousVote) {
+		g.Logger.Trace().
+			Str("chain", chain.Name).
+			Str("proposal", proposal.ID).
+			Str("address", wallet.Address).
+			Msg("Wallet has changed its vote - sending an alert.")
+
+		return []entry.ReportEntry{
+			events.RevotedEvent{
+				Chain:    chain,
+				Proposal: proposal,
+				Wallet:   wallet,
+				Vote:     vote,
+				OldVote:  previousVote,
+			},
+		}
+	}
+
+	return []entry.ReportEntry{}
 }
