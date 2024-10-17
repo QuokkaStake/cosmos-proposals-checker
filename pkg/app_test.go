@@ -99,6 +99,8 @@ func TestAppStartOk(t *testing.T) {
 	filesystem := &fs.TestFS{}
 	app := NewApp("config-valid.toml", filesystem, "1.2.3")
 	app.ReportDispatcher.Reporters = []reportersPkg.Reporter{&reportersPkg.TestReporter{}}
+	app.Database = &databasePkg.StubDatabase{}
+	app.ReportGenerator.Database = &databasePkg.StubDatabase{}
 
 	var wg sync.WaitGroup
 	wg.Add(1)
