@@ -26,4 +26,13 @@ type Database interface {
 		vote *types.Vote,
 		ctx context.Context,
 	) error
+	GetLastBlockHeight(
+		chain *types.Chain,
+		storableKey string,
+	) (int64, error)
+	UpsertLastBlockHeight(
+		chain *types.Chain,
+		storableKey string,
+		height int64,
+	) error
 }

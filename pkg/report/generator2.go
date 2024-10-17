@@ -2,6 +2,7 @@ package report
 
 import (
 	"context"
+	"fmt"
 	databasePkg "main/pkg/database"
 	"main/pkg/events"
 	fetchersPkg "main/pkg/fetchers"
@@ -81,13 +82,25 @@ func (g *NewGenerator) ProcessChain(chain *types.Chain, ctx context.Context) []e
 
 	g.Logger.Trace().Str("chain", chain.Name).Msg("Processing chain...")
 
-	proposals, _, err := fetcher.GetAllProposals(0, childCtx)
+	prevHeight, prevHeightErr := g.Database.GetLastBlockHeight(chain, "proposals")
+	if prevHeightErr != nil {
+		g.Logger.Error().Err(prevHeightErr).Msg("Failed to fetch last block height")
+		span.RecordError(prevHeightErr)
+		return []entry.ReportEntry{}
+	}
+
+	proposals, newHeight, err := fetcher.GetAllProposals(prevHeight, childCtx)
 	if err != nil {
 		g.Logger.Error().Str("chain", chain.Name).Err(err).Msg("Error fetching proposals")
 		span.RecordError(err)
 		return []entry.ReportEntry{
 			events.ProposalsQueryErrorEvent{Chain: chain, Error: err},
 		}
+	}
+
+	if insertErr := g.Database.UpsertLastBlockHeight(chain, "proposals", newHeight); insertErr != nil {
+		g.Logger.Error().Err(prevHeightErr).Msg("Failed to insert last block height")
+		span.RecordError(prevHeightErr)
 	}
 
 	var wg sync.WaitGroup
@@ -206,8 +219,16 @@ func (g *NewGenerator) ProcessWallet(
 		Msg("Processing wallet...")
 
 	fetcher := g.Fetchers[chain.Name]
+	storeKey := fmt.Sprintf("proposal_%s_vote_%s", proposal.ID, wallet.Address)
 
-	vote, _, err := fetcher.GetVote(proposal.ID, wallet.Address, 0, childCtx)
+	prevHeight, prevHeightErr := g.Database.GetLastBlockHeight(chain, storeKey)
+	if prevHeightErr != nil {
+		g.Logger.Error().Err(prevHeightErr).Msg("Failed to fetch last block height")
+		span.RecordError(prevHeightErr)
+		return []entry.ReportEntry{}
+	}
+
+	vote, newHeight, err := fetcher.GetVote(proposal.ID, wallet.Address, prevHeight, childCtx)
 	if err != nil {
 		g.Logger.Error().Err(err).Msg("Failed to fetch vote from chain")
 		span.RecordError(err)
@@ -218,6 +239,11 @@ func (g *NewGenerator) ProcessWallet(
 				Error:    err,
 			},
 		}
+	}
+
+	if insertErr := g.Database.UpsertLastBlockHeight(chain, storeKey, newHeight); insertErr != nil {
+		g.Logger.Error().Err(prevHeightErr).Msg("Failed to insert last block height")
+		span.RecordError(prevHeightErr)
 	}
 
 	if vote == nil {

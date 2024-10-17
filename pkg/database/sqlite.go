@@ -229,3 +229,46 @@ func (d *SqliteDatabase) UpsertVote(
 
 	return nil
 }
+
+func (d *SqliteDatabase) GetLastBlockHeight(
+	chain *types.Chain,
+	storableKey string,
+) (int64, error) {
+	row := d.client.QueryRow(
+		"SELECT height FROM query_last_block WHERE chain = $1 AND query = $2 LIMIT 1",
+		chain.Name,
+		storableKey,
+	)
+
+	var lastBlockHeight int64 = 0
+
+	if err := row.Scan(&lastBlockHeight); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, nil 
+		}
+
+		d.logger.Error().Err(err).Msg("Error getting last block height")
+		return 0, err
+	}
+
+	return lastBlockHeight, nil
+}
+
+func (d *SqliteDatabase) UpsertLastBlockHeight(
+	chain *types.Chain,
+	storableKey string,
+	height int64,
+) error {
+	_, err := d.client.Exec(
+		"INSERT INTO query_last_block (chain, query, height) VALUES ($1, $2, $3) ON CONFLICT DO UPDATE SET height = $3",
+		chain.Name,
+		storableKey,
+		height,
+	)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Could not upsert last block height")
+		return err
+	}
+
+	return nil
+}
