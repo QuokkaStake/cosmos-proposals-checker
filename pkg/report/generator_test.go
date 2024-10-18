@@ -3,6 +3,7 @@ package report
 import (
 	"context"
 	databasePkg "main/pkg/database"
+	"main/pkg/events"
 	fetchersPkg "main/pkg/fetchers"
 	loggerPkg "main/pkg/logger"
 	"main/pkg/tracing"
@@ -44,5 +45,9 @@ func TestGeneratorProposalError(t *testing.T) {
 	}
 
 	report := generator.GenerateReport(context.Background())
-	require.NotEmpty(t, report.Entries)
+	require.Len(t, report.Entries, 1)
+
+	firstEntry, ok := report.Entries[0].(events.ProposalsQueryErrorEvent)
+	require.True(t, ok)
+	require.NotNil(t, firstEntry)
 }

@@ -88,6 +88,8 @@ func TestAppStartInvalidCronPattern(t *testing.T) {
 
 	app := NewApp("config-valid.toml", filesystem, "1.2.3")
 	app.Config.Interval = "invalid"
+	app.Database = &databasePkg.StubDatabase{}
+	app.ReportGenerator.Database = &databasePkg.StubDatabase{}
 
 	app.Start()
 	require.NotNil(t, app)
