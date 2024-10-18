@@ -2,8 +2,8 @@ package report
 
 import (
 	"context"
+	databasePkg "main/pkg/database"
 	"main/pkg/events"
-	"main/pkg/fs"
 	"main/pkg/logger"
 	mutes "main/pkg/mutes"
 	"main/pkg/report/entry"
@@ -19,7 +19,8 @@ import (
 func TestReportDispatcherInitFail(t *testing.T) {
 	t.Parallel()
 
-	mutesManager := mutes.NewMutesManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
+	db := &databasePkg.StubDatabase{}
+	mutesManager := mutes.NewMutesManager(logger.GetNopLogger(), db)
 	dispatcher := NewDispatcher(logger.GetNopLogger(), mutesManager, []reportersPkg.Reporter{
 		&reportersPkg.TestReporter{WithInitFail: true},
 	}, tracing.InitNoopTracer())
@@ -31,7 +32,8 @@ func TestReportDispatcherInitFail(t *testing.T) {
 func TestReportDispatcherInitOk(t *testing.T) {
 	t.Parallel()
 
-	mutesManager := mutes.NewMutesManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
+	db := &databasePkg.StubDatabase{}
+	mutesManager := mutes.NewMutesManager(logger.GetNopLogger(), db)
 	dispatcher := NewDispatcher(logger.GetNopLogger(), mutesManager, []reportersPkg.Reporter{
 		&reportersPkg.TestReporter{},
 	}, tracing.InitNoopTracer())
@@ -43,7 +45,8 @@ func TestReportDispatcherInitOk(t *testing.T) {
 func TestReportDispatcherSendEmptyReport(t *testing.T) {
 	t.Parallel()
 
-	mutesManager := mutes.NewMutesManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
+	db := &databasePkg.StubDatabase{}
+	mutesManager := mutes.NewMutesManager(logger.GetNopLogger(), db)
 	dispatcher := NewDispatcher(logger.GetNopLogger(), mutesManager, []reportersPkg.Reporter{
 		&reportersPkg.TestReporter{},
 	}, tracing.InitNoopTracer())
@@ -57,7 +60,8 @@ func TestReportDispatcherSendEmptyReport(t *testing.T) {
 func TestReportDispatcherSendReportDisabledReporter(t *testing.T) {
 	t.Parallel()
 
-	mutesManager := mutes.NewMutesManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
+	db := &databasePkg.StubDatabase{}
+	mutesManager := mutes.NewMutesManager(logger.GetNopLogger(), db)
 	dispatcher := NewDispatcher(logger.GetNopLogger(), mutesManager, []reportersPkg.Reporter{
 		&reportersPkg.TestReporter{WithDisabled: true},
 	}, tracing.InitNoopTracer())
@@ -73,7 +77,8 @@ func TestReportDispatcherSendReportDisabledReporter(t *testing.T) {
 func TestReportDispatcherSendReportMuted(t *testing.T) {
 	t.Parallel()
 
-	mutesManager := mutes.NewMutesManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
+	db := &databasePkg.StubDatabase{}
+	mutesManager := mutes.NewMutesManager(logger.GetNopLogger(), db)
 	dispatcher := NewDispatcher(logger.GetNopLogger(), mutesManager, []reportersPkg.Reporter{
 		&reportersPkg.TestReporter{},
 	}, tracing.InitNoopTracer())
@@ -81,7 +86,7 @@ func TestReportDispatcherSendReportMuted(t *testing.T) {
 	err := dispatcher.Init()
 	require.NoError(t, err)
 
-	mutesManager.AddMute(&mutes.Mute{Expires: time.Now().Add(time.Minute)})
+	mutesManager.AddMute(&types.Mute{Expires: time.Now().Add(time.Minute)})
 
 	dispatcher.SendReport(reportersPkg.Report{Entries: []entry.ReportEntry{
 		events.NotVotedEvent{
@@ -94,7 +99,8 @@ func TestReportDispatcherSendReportMuted(t *testing.T) {
 func TestReportDispatcherSendReportErrorSending(t *testing.T) {
 	t.Parallel()
 
-	mutesManager := mutes.NewMutesManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
+	db := &databasePkg.StubDatabase{}
+	mutesManager := mutes.NewMutesManager(logger.GetNopLogger(), db)
 	dispatcher := NewDispatcher(logger.GetNopLogger(), mutesManager, []reportersPkg.Reporter{
 		&reportersPkg.TestReporter{WithErrorSending: true},
 	}, tracing.InitNoopTracer())
@@ -110,7 +116,8 @@ func TestReportDispatcherSendReportErrorSending(t *testing.T) {
 func TestReportDispatcherSendReportOk(t *testing.T) {
 	t.Parallel()
 
-	mutesManager := mutes.NewMutesManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
+	db := &databasePkg.StubDatabase{}
+	mutesManager := mutes.NewMutesManager(logger.GetNopLogger(), db)
 	dispatcher := NewDispatcher(logger.GetNopLogger(), mutesManager, []reportersPkg.Reporter{
 		&reportersPkg.TestReporter{},
 	}, tracing.InitNoopTracer())

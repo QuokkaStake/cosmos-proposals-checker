@@ -35,4 +35,6 @@ type Database interface {
 		storableKey string,
 		height int64,
 	) error
+	UpsertMute(mute *types.Mute) error
+	GetAllMutes() ([]*types.Mute, error)
 }

@@ -1,114 +1,27 @@
 package mutesmanager
 
 import (
+	databasePkg "main/pkg/database"
 	"main/pkg/events"
-	"main/pkg/fs"
 	"main/pkg/logger"
 	"main/pkg/types"
 	"testing"
 	"time"
 
+	"github.com/guregu/null/v5"
+
 	"github.com/stretchr/testify/assert"
 )
-
-func TestMuteManagerLoadWithoutPath(t *testing.T) {
-	t.Parallel()
-
-	log := logger.GetNopLogger()
-	filesystem := &fs.TestFS{}
-
-	manager := NewMutesManager("", filesystem, log)
-	manager.Load()
-
-	assert.Empty(t, manager.Mutes.Mutes)
-}
-
-func TestMuteManagerLoadNotExistingPath(t *testing.T) {
-	t.Parallel()
-
-	log := logger.GetNopLogger()
-	filesystem := &fs.TestFS{}
-
-	manager := NewMutesManager("not-existing.json", filesystem, log)
-	manager.Load()
-
-	assert.Empty(t, manager.Mutes.Mutes)
-}
-
-func TestMuteManagerLoadInvalidJson(t *testing.T) {
-	t.Parallel()
-
-	log := logger.GetNopLogger()
-	filesystem := &fs.TestFS{}
-
-	manager := NewMutesManager("invalid-json.json", filesystem, log)
-	manager.Load()
-
-	assert.Empty(t, manager.Mutes.Mutes)
-}
-
-func TestMuteManagerLoadValidJson(t *testing.T) {
-	t.Parallel()
-
-	log := logger.GetNopLogger()
-	filesystem := &fs.TestFS{}
-
-	manager := NewMutesManager("valid-mutes.json", filesystem, log)
-	manager.Load()
-
-	assert.NotEmpty(t, manager.Mutes.Mutes)
-}
-
-func TestMuteManagerSaveWithoutPath(t *testing.T) {
-	t.Parallel()
-
-	log := logger.GetNopLogger()
-	filesystem := &fs.TestFS{}
-
-	manager := NewMutesManager("", filesystem, log)
-	manager.Load()
-	manager.Save()
-
-	assert.Empty(t, manager.Mutes.Mutes)
-}
-
-func TestMuteManagerSaveWithError(t *testing.T) {
-	t.Parallel()
-
-	log := logger.GetNopLogger()
-	filesystem := &fs.TestFS{WithWriteError: true}
-
-	manager := NewMutesManager("out.json", filesystem, log)
-	manager.Load()
-	manager.Save()
-
-	assert.Empty(t, manager.Mutes.Mutes)
-}
-
-func TestMuteManagerSaveWithoutError(t *testing.T) {
-	t.Parallel()
-
-	log := logger.GetNopLogger()
-	filesystem := &fs.TestFS{}
-
-	manager := NewMutesManager("out.json", filesystem, log)
-	manager.Load()
-	manager.Save()
-
-	assert.Empty(t, manager.Mutes.Mutes)
-}
 
 func TestMuteManagerAddAndDeleteMuteIsMuted(t *testing.T) {
 	t.Parallel()
 
 	log := logger.GetNopLogger()
-	filesystem := &fs.TestFS{}
+	db := &databasePkg.StubDatabase{}
+	manager := NewMutesManager(log, db)
 
-	manager := NewMutesManager("out.json", filesystem, log)
-	manager.Load()
-
-	manager.AddMute(&Mute{
-		Chain:   "chain",
+	manager.AddMute(&types.Mute{
+		Chain:   null.StringFrom("chain"),
 		Expires: time.Now().Add(time.Hour),
 	})
 
@@ -121,8 +34,8 @@ func TestMuteManagerAddAndDeleteMuteIsMuted(t *testing.T) {
 		Proposal: types.Proposal{ID: "proposal"},
 	}))
 
-	deleted := manager.DeleteMute(&Mute{
-		Chain: "chain",
+	deleted := manager.DeleteMute(&types.Mute{
+		Chain: null.StringFrom("chain"),
 	})
 	assert.True(t, deleted)
 
@@ -140,13 +53,11 @@ func TestMuteManagerIsMutedNoPath(t *testing.T) {
 	t.Parallel()
 
 	log := logger.GetNopLogger()
-	filesystem := &fs.TestFS{}
+	db := &databasePkg.StubDatabase{}
+	manager := NewMutesManager(log, db)
 
-	manager := NewMutesManager("", filesystem, log)
-	manager.Load()
-
-	manager.AddMute(&Mute{
-		Chain:   "chain",
+	manager.AddMute(&types.Mute{
+		Chain:   null.StringFrom("chain"),
 		Expires: time.Now().Add(time.Hour),
 	})
 
@@ -160,10 +71,8 @@ func TestMuteManagerIsNotAlert(t *testing.T) {
 	t.Parallel()
 
 	log := logger.GetNopLogger()
-	filesystem := &fs.TestFS{}
-
-	manager := NewMutesManager("", filesystem, log)
-	manager.Load()
+	db := &databasePkg.StubDatabase{}
+	manager := NewMutesManager(log, db)
 
 	assert.False(t, manager.IsEntryMuted(events.ProposalsQueryErrorEvent{
 		Chain: &types.Chain{Name: "chain"},

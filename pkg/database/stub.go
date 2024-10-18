@@ -148,3 +148,11 @@ func (d *StubDatabase) UpsertLastBlockHeight(
 	d.LastBlockHeight[chain.Name][storableKey] = height
 	return nil
 }
+
+func (d *StubDatabase) UpsertMute(mute *types.Mute) error {
+	return nil
+}
+
+func (d *StubDatabase) GetAllMutes() ([]*types.Mute, error) {
+	return []*types.Mute{}, nil
+}

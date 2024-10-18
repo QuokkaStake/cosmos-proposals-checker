@@ -272,3 +272,23 @@ func (d *SqliteDatabase) UpsertLastBlockHeight(
 
 	return nil
 }
+
+func (d *SqliteDatabase) UpsertMute(mute *types.Mute) error {
+	_, err := d.client.Exec(
+		"INSERT INTO mutes (chain, proposal_id, expires, comment) VALUES ($1, $2, $3, $4) ON CONFLICT DO UPDATE SET expires = $3, comment = $4",
+		mute.Chain,
+		mute.ProposalID,
+		mute.Expires,
+		mute.Comment,
+	)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Could not upsert mute")
+		return err
+	}
+
+	return nil
+}
+
+func (d *SqliteDatabase) GetAllMutes() ([]*types.Mute, error) {
+	return []*types.Mute{}, nil
+}

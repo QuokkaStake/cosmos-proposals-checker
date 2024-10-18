@@ -1,62 +1,22 @@
 package mutesmanager
 
 import (
-	"encoding/json"
-	"main/pkg/fs"
+	databasePkg "main/pkg/database"
 	"main/pkg/report/entry"
-	"main/pkg/utils"
+	"main/pkg/types"
 
 	"github.com/rs/zerolog"
 )
 
 type Manager struct {
-	Filesystem fs.FS
-	MutesPath  string
-	Logger     zerolog.Logger
-	Mutes      Mutes
+	Database databasePkg.Database
+	Logger   zerolog.Logger
 }
 
-func NewMutesManager(mutesPath string, filesystem fs.FS, logger *zerolog.Logger) *Manager {
+func NewMutesManager(logger *zerolog.Logger, database databasePkg.Database) *Manager {
 	return &Manager{
-		Filesystem: filesystem,
-		MutesPath:  mutesPath,
-		Logger:     logger.With().Str("component", "mutes_manager").Logger(),
-		Mutes:      Mutes{},
-	}
-}
-
-func (m *Manager) Load() {
-	if m.MutesPath == "" {
-		m.Logger.Debug().Msg("Mutes path not configured, not loading.")
-		return
-	}
-
-	content, err := m.Filesystem.ReadFile(m.MutesPath)
-	if err != nil {
-		m.Logger.Warn().Err(err).Msg("Could not load mutes")
-		return
-	}
-
-	var mutes Mutes
-	if err = json.Unmarshal(content, &mutes); err != nil {
-		m.Logger.Warn().Err(err).Msg("Could not unmarshall mutes")
-		m.Mutes = Mutes{}
-	}
-
-	m.Mutes = mutes
-}
-
-func (m *Manager) Save() {
-	if m.MutesPath == "" {
-		m.Logger.Debug().Msg("Mutes path not configured, not saving.")
-		return
-	}
-
-	content := utils.MustMarshal(m.Mutes)
-
-	if err := m.Filesystem.WriteFile(m.MutesPath, content, 0o600); err != nil {
-		m.Logger.Warn().Err(err).Msg("Could not save mutes")
-		return
+		Database: database,
+		Logger:   logger.With().Str("component", "mutes_manager").Logger(),
 	}
 }
 
@@ -66,22 +26,23 @@ func (m *Manager) IsEntryMuted(reportEntry entry.ReportEntry) bool {
 		return false
 	}
 
-	if m.MutesPath == "" {
-		return false
-	}
-
-	chain := entryConverted.GetChain()
-	proposal := entryConverted.GetProposal()
-	return m.Mutes.IsMuted(chain.Name, proposal.ID)
+	_ = entryConverted.GetChain()
+	_ = entryConverted.GetProposal()
+	return false
+	// return m.Mutes.IsMuted(chain.Name, proposal.ID)
 }
 
-func (m *Manager) AddMute(mute *Mute) {
-	m.Mutes.AddMute(mute)
-	m.Save()
+func (m *Manager) GetAllMutes() ([]*types.Mute, error) {
+	return m.Database.GetAllMutes()
 }
 
-func (m *Manager) DeleteMute(mute *Mute) bool {
-	found := m.Mutes.DeleteMute(mute)
-	m.Save()
-	return found
+func (m *Manager) AddMute(mute *types.Mute) {
+	_ = m.Database.UpsertMute(mute)
+}
+
+func (m *Manager) DeleteMute(mute *types.Mute) bool {
+	return false
+	// found := m.Mutes.DeleteMute(mute)
+	// m.Save()
+	//return found
 }

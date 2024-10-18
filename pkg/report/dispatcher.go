@@ -32,8 +32,6 @@ func NewDispatcher(
 }
 
 func (d *Dispatcher) Init() error {
-	d.MutesManager.Load()
-
 	for _, reporter := range d.Reporters {
 		if err := reporter.Init(); err != nil {
 			d.Logger.Error().Err(err).

@@ -54,7 +54,7 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 
 	database := databasePkg.NewSqliteDatabase(log, config.DatabaseConfig)
 
-	mutesManager := mutes.NewMutesManager(config.MutesPath, filesystem, log)
+	mutesManager := mutes.NewMutesManager(log, database)
 	stateGenerator := state.NewStateGenerator(log, tracer, config.Chains)
 	dataManager := data.NewManager(log, config.Chains, tracer)
 

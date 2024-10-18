@@ -1,9 +1,10 @@
 package discord
 
 import (
-	"github.com/guregu/null/v5"
-	mutes "main/pkg/mutes"
+	"main/pkg/types"
 	"time"
+
+	"github.com/guregu/null/v5"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -42,11 +43,10 @@ func (reporter *Reporter) GetDeleteMuteCommand() *Command {
 				if opt.Name == "proposal" {
 					proposalRaw, _ := opt.Value.(string)
 					proposal = null.StringFrom(proposalRaw)
-
 				}
 			}
 
-			mute := &mutes.Mute{
+			mute := &types.Mute{
 				Chain:      chain,
 				ProposalID: proposal,
 				Expires:    time.Now(),
