@@ -14,7 +14,6 @@ type Config struct {
 	DiscordConfig   DiscordConfig   `toml:"discord"`
 	LogConfig       LogConfig       `toml:"log"`
 	TracingConfig   TracingConfig   `toml:"tracing"`
-	StatePath       string          `toml:"state-path"`
 	MutesPath       string          `toml:"mutes-path"`
 	Chains          Chains          `toml:"chains"`
 	Timezone        string          `toml:"timezone"`
@@ -70,13 +69,6 @@ func (c *Config) DisplayWarnings() []Warning {
 		warnings = append(warnings, Warning{
 			Labels:  map[string]string{},
 			Message: "mutes-path is not set, cannot persist proposals mutes on disk.",
-		})
-	}
-
-	if c.StatePath == "" {
-		warnings = append(warnings, Warning{
-			Labels:  map[string]string{},
-			Message: "state-path is not set, cannot persist proposals state on disk.",
 		})
 	}
 

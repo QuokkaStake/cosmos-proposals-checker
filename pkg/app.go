@@ -26,7 +26,6 @@ type App struct {
 	Tracer           trace.Tracer
 	Logger           *zerolog.Logger
 	Config           *types.Config
-	StateManager     *state.Manager
 	ReportGenerator  *report.Generator
 	StateGenerator   *state.Generator
 	ReportDispatcher *report.Dispatcher
@@ -55,12 +54,11 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 
 	database := databasePkg.NewSqliteDatabase(log, config.DatabaseConfig)
 
-	stateManager := state.NewStateManager(config.StatePath, filesystem, log)
 	mutesManager := mutes.NewMutesManager(config.MutesPath, filesystem, log)
 	stateGenerator := state.NewStateGenerator(log, tracer, config.Chains)
 	dataManager := data.NewManager(log, config.Chains, tracer)
 
-	generator2 := report.NewReportNewGenerator(log, config.Chains, database, tracer)
+	generator := report.NewReportNewGenerator(log, config.Chains, database, tracer)
 
 	timeZone, _ := time.LoadLocation(config.Timezone)
 
@@ -80,7 +78,6 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 			config,
 			version,
 			log,
-			stateManager,
 			mutesManager,
 			dataManager,
 			stateGenerator,
@@ -95,8 +92,7 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 		Tracer:           tracer,
 		Logger:           log,
 		Config:           config,
-		StateManager:     stateManager,
-		ReportGenerator:  generator2,
+		ReportGenerator:  generator,
 		StateGenerator:   stateGenerator,
 		ReportDispatcher: reportDispatcher,
 		Database:         database,
@@ -108,7 +104,6 @@ func (a *App) Start() {
 	a.Database.Init()
 	a.Database.Migrate()
 
-	a.StateManager.Load()
 	if err := a.ReportDispatcher.Init(); err != nil {
 		a.Logger.Panic().Err(err).Msg("Error initializing reporters")
 	}
