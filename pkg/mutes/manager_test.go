@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/guregu/null/v5"
 
 	"github.com/stretchr/testify/assert"
@@ -20,10 +22,11 @@ func TestMuteManagerAddAndDeleteMuteIsMuted(t *testing.T) {
 	db := &databasePkg.StubDatabase{}
 	manager := NewMutesManager(log, db)
 
-	manager.AddMute(&types.Mute{
+	err := manager.AddMute(&types.Mute{
 		Chain:   null.StringFrom("chain"),
 		Expires: time.Now().Add(time.Hour),
 	})
+	require.NoError(t, err)
 
 	assert.True(t, manager.IsEntryMuted(events.VotedEvent{
 		Chain:    &types.Chain{Name: "chain"},
@@ -34,10 +37,11 @@ func TestMuteManagerAddAndDeleteMuteIsMuted(t *testing.T) {
 		Proposal: types.Proposal{ID: "proposal"},
 	}))
 
-	deleted := manager.DeleteMute(&types.Mute{
+	deleted, err := manager.DeleteMute(&types.Mute{
 		Chain: null.StringFrom("chain"),
 	})
 	assert.True(t, deleted)
+	require.NoError(t, err)
 
 	assert.False(t, manager.IsEntryMuted(events.VotedEvent{
 		Chain:    &types.Chain{Name: "chain"},
@@ -56,10 +60,11 @@ func TestMuteManagerIsMutedNoPath(t *testing.T) {
 	db := &databasePkg.StubDatabase{}
 	manager := NewMutesManager(log, db)
 
-	manager.AddMute(&types.Mute{
+	err := manager.AddMute(&types.Mute{
 		Chain:   null.StringFrom("chain"),
 		Expires: time.Now().Add(time.Hour),
 	})
+	require.NoError(t, err)
 
 	assert.False(t, manager.IsEntryMuted(events.VotedEvent{
 		Chain:    &types.Chain{Name: "chain"},

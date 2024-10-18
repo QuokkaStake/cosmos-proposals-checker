@@ -86,7 +86,8 @@ func TestReportDispatcherSendReportMuted(t *testing.T) {
 	err := dispatcher.Init()
 	require.NoError(t, err)
 
-	mutesManager.AddMute(&types.Mute{Expires: time.Now().Add(time.Minute)})
+	addErr := mutesManager.AddMute(&types.Mute{Expires: time.Now().Add(time.Minute)})
+	require.NoError(t, addErr)
 
 	dispatcher.SendReport(reportersPkg.Report{Entries: []entry.ReportEntry{
 		events.NotVotedEvent{

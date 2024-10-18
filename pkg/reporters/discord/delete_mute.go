@@ -53,8 +53,11 @@ func (reporter *Reporter) GetDeleteMuteCommand() *Command {
 				Comment:    "",
 			}
 
-			if found := reporter.MutesManager.DeleteMute(mute); !found {
+			if found, insertErr := reporter.MutesManager.DeleteMute(mute); !found {
 				reporter.BotRespond(s, i, "Could not find the mute to delete!")
+				return
+			} else if insertErr != nil {
+				reporter.BotRespond(s, i, "Error deleting mute!")
 				return
 			}
 

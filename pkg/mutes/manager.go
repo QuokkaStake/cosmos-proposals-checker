@@ -37,11 +37,10 @@ func (m *Manager) GetAllMutes() ([]*types.Mute, error) {
 	return m.Database.GetAllMutes()
 }
 
-func (m *Manager) AddMute(mute *types.Mute) {
-	_ = m.Database.UpsertMute(mute)
+func (m *Manager) AddMute(mute *types.Mute) error {
+	return m.Database.UpsertMute(mute)
 }
 
-func (m *Manager) DeleteMute(mute *types.Mute) bool {
-	found, _ := m.Database.DeleteMute(mute)
-	return found
+func (m *Manager) DeleteMute(mute *types.Mute) (bool, error) {
+	return m.Database.DeleteMute(mute)
 }

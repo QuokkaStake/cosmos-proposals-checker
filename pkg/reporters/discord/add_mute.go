@@ -72,7 +72,11 @@ func (reporter *Reporter) GetAddMuteCommand() *Command {
 				),
 			}
 
-			reporter.MutesManager.AddMute(mute)
+			if insertErr := reporter.MutesManager.AddMute(mute); insertErr != nil {
+				reporter.Logger.Error().Err(err).Msg("Error adding mute")
+				reporter.BotRespond(s, i, "Error adding mute!")
+				return
+			}
 
 			template, err := reporter.TemplatesManager.Render("mute_added", mute)
 			if err != nil {
