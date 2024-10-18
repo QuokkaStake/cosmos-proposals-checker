@@ -86,7 +86,9 @@ func (g *Generator) ProcessChain(chain *types.Chain, ctx context.Context) []entr
 	if prevHeightErr != nil {
 		g.Logger.Error().Err(prevHeightErr).Msg("Failed to fetch last block height")
 		span.RecordError(prevHeightErr)
-		return []entry.ReportEntry{}
+		return []entry.ReportEntry{
+			events.GenericErrorEvent{Chain: chain, Error: prevHeightErr},
+		}
 	}
 
 	proposals, newHeight, err := fetcher.GetAllProposals(prevHeight, childCtx)
@@ -141,7 +143,9 @@ func (g *Generator) ProcessProposal(
 	if err != nil {
 		g.Logger.Error().Err(err).Msg("Failed to fetch proposal from DB")
 		span.RecordError(err)
-		return []entry.ReportEntry{}
+		return []entry.ReportEntry{
+			events.GenericErrorEvent{Chain: chain, Error: err},
+		}
 	}
 
 	entries := []entry.ReportEntry{}
@@ -166,10 +170,10 @@ func (g *Generator) ProcessProposal(
 	}
 
 	if !proposal.IsInVoting() {
-		// g.Logger.Trace().
-		//	Str("chain", chain.Name).
-		//	Str("proposal", proposal.ID).
-		//	Msg("Proposal is not in voting period - not fetching votes.")
+		g.Logger.Trace().
+			Str("chain", chain.Name).
+			Str("proposal", proposal.ID).
+			Msg("Proposal is not in voting period - not fetching votes.")
 		return entries
 	}
 
@@ -225,7 +229,9 @@ func (g *Generator) ProcessWallet(
 	if prevHeightErr != nil {
 		g.Logger.Error().Err(prevHeightErr).Msg("Failed to fetch last block height")
 		span.RecordError(prevHeightErr)
-		return []entry.ReportEntry{}
+		return []entry.ReportEntry{
+			events.GenericErrorEvent{Chain: chain, Error: prevHeightErr},
+		}
 	}
 
 	vote, newHeight, err := fetcher.GetVote(proposal.ID, wallet.Address, prevHeight, childCtx)
@@ -265,7 +271,9 @@ func (g *Generator) ProcessWallet(
 	if dbErr != nil {
 		g.Logger.Error().Err(err).Msg("Failed to fetch vote from DB")
 		span.RecordError(err)
-		return []entry.ReportEntry{}
+		return []entry.ReportEntry{
+			events.GenericErrorEvent{Chain: chain, Error: err},
+		}
 	}
 
 	if previousVote == nil || !previousVote.VotesEquals(vote) {
