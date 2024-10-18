@@ -292,3 +292,35 @@ func (d *SqliteDatabase) UpsertMute(mute *types.Mute) error {
 func (d *SqliteDatabase) GetAllMutes() ([]*types.Mute, error) {
 	return []*types.Mute{}, nil
 }
+
+func (d *SqliteDatabase) DeleteMute(mute *types.Mute) (bool, error) {
+	query := "DELETE FROM mutes WHERE"
+	args := []any{}
+
+	if mute.Chain.IsZero() && mute.ProposalID.IsZero() {
+		query += " chain IS NULL AND proposal_id IS NULL"
+	} else if mute.Chain.IsZero() {
+		query += " chain IS NULL AND proposal_id = $1"
+		args = append(args, mute.ProposalID.String)
+	} else if mute.ProposalID.IsZero() {
+		query += " chain = $1 AND proposal_id IS NULL"
+		args = append(args, mute.Chain.String)
+	} else {
+		query += " chain = $1 AND proposal_id = $2"
+		args = append(args, mute.Chain.String, mute.ProposalID.String)
+	}
+
+	result, err := d.client.Exec(query, args...)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Could not delete mute")
+		return false, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Could not get affected rows on deleting mute")
+		return false, err
+	}
+
+	return rowsAffected > 0, nil
+}

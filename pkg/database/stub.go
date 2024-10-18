@@ -156,3 +156,7 @@ func (d *StubDatabase) UpsertMute(mute *types.Mute) error {
 func (d *StubDatabase) GetAllMutes() ([]*types.Mute, error) {
 	return []*types.Mute{}, nil
 }
+
+func (d *StubDatabase) DeleteMute(mute *types.Mute) (bool, error) {
+	return true, nil
+}

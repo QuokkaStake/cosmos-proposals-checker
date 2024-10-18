@@ -28,6 +28,7 @@ func (m *Manager) IsEntryMuted(reportEntry entry.ReportEntry) bool {
 
 	_ = entryConverted.GetChain()
 	_ = entryConverted.GetProposal()
+
 	return false
 	// return m.Mutes.IsMuted(chain.Name, proposal.ID)
 }
@@ -41,8 +42,6 @@ func (m *Manager) AddMute(mute *types.Mute) {
 }
 
 func (m *Manager) DeleteMute(mute *types.Mute) bool {
-	return false
-	// found := m.Mutes.DeleteMute(mute)
-	// m.Save()
-	//return found
+	found, _ := m.Database.DeleteMute(mute)
+	return found
 }
