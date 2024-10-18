@@ -2,6 +2,7 @@ package discord
 
 import (
 	"fmt"
+	"github.com/guregu/null/v5"
 	mutes "main/pkg/mutes"
 	"time"
 
@@ -38,17 +39,20 @@ func (reporter *Reporter) GetAddMuteCommand() *Command {
 			options := i.ApplicationCommandData().Options
 
 			durationString, _ := options[0].Value.(string)
-			var chain string
-			var proposal string
+			chain := null.NewString("", false)
+			proposal := null.NewString("", false)
 
 			_, opts := options[0], options[1:]
 
 			for _, opt := range opts {
 				if opt.Name == "chain" {
-					chain, _ = opt.Value.(string)
+					chainRaw, _ := opt.Value.(string)
+					chain = null.StringFrom(chainRaw)
 				}
 				if opt.Name == "proposal" {
-					proposal, _ = opt.Value.(string)
+					proposalRaw, _ := opt.Value.(string)
+					proposal = null.StringFrom(proposalRaw)
+
 				}
 			}
 

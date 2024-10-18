@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"github.com/guregu/null/v5"
 	mutes "main/pkg/mutes"
 	"time"
 
@@ -30,15 +31,18 @@ func (reporter *Reporter) GetDeleteMuteCommand() *Command {
 		Handler: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			options := i.ApplicationCommandData().Options
 
-			var chain string
-			var proposal string
+			chain := null.NewString("", false)
+			proposal := null.NewString("", false)
 
 			for _, opt := range options {
 				if opt.Name == "chain" {
-					chain, _ = opt.Value.(string)
+					chainRaw, _ := opt.Value.(string)
+					chain = null.StringFrom(chainRaw)
 				}
 				if opt.Name == "proposal" {
-					proposal, _ = opt.Value.(string)
+					proposalRaw, _ := opt.Value.(string)
+					proposal = null.StringFrom(proposalRaw)
+
 				}
 			}
 

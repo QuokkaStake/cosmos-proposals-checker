@@ -1,14 +1,15 @@
 package mutesmanager
 
 import (
+	"github.com/guregu/null/v5"
 	"time"
 
 	"main/pkg/utils"
 )
 
 type Mute struct {
-	Chain      string
-	ProposalID string
+	Chain      null.String
+	ProposalID null.String
 	Expires    time.Time
 	Comment    string
 }
@@ -24,12 +25,12 @@ func (m *Mute) IsExpired() bool {
 func (m *Mute) Matches(chain string, proposalID string) bool {
 	match := true
 
-	if m.Chain != "" {
-		match = match && chain == m.Chain
+	if !m.Chain.IsZero() {
+		match = match && chain == m.Chain.String
 	}
 
-	if m.ProposalID != "" {
-		match = match && proposalID == m.ProposalID
+	if !m.ProposalID.IsZero() {
+		match = match && proposalID == m.ProposalID.String
 	}
 
 	return match

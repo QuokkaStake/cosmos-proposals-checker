@@ -3,6 +3,7 @@ package telegram
 import (
 	"context"
 	"fmt"
+	"github.com/guregu/null/v5"
 	"main/pkg/data"
 	mutes "main/pkg/mutes"
 	"main/pkg/report/entry"
@@ -170,8 +171,8 @@ func ParseMuteOptions(query string, c tele.Context) (*mutes.Mute, string) {
 	}
 
 	mute := &mutes.Mute{
-		Chain:      "",
-		ProposalID: "",
+		Chain:      null.NewString("", false),
+		ProposalID: null.NewString("", false),
 		Expires:    time.Now().Add(duration),
 		Comment: fmt.Sprintf(
 			"Muted using cosmos-proposals-checker for %s by %s",
@@ -192,9 +193,9 @@ func ParseMuteOptions(query string, c tele.Context) (*mutes.Mute, string) {
 
 		switch argSplit[0] {
 		case "chain":
-			mute.Chain = argSplit[1]
+			mute.Chain = null.StringFrom(argSplit[1])
 		case "proposal":
-			mute.ProposalID = argSplit[1]
+			mute.ProposalID = null.StringFrom(argSplit[1])
 		}
 	}
 
@@ -205,8 +206,8 @@ func ParseMuteDeleteOptions(query string, c tele.Context) (*mutes.Mute, string) 
 	// we only construct mute with chain/proposal to compare, no need to take care
 	// about the expiration/comment
 	mute := &mutes.Mute{
-		Chain:      "",
-		ProposalID: "",
+		Chain:      null.NewString("", false),
+		ProposalID: null.NewString("", false),
 		Expires:    time.Now(),
 		Comment:    "",
 	}
@@ -223,9 +224,9 @@ func ParseMuteDeleteOptions(query string, c tele.Context) (*mutes.Mute, string) 
 
 		switch argSplit[0] {
 		case "chain":
-			mute.Chain = argSplit[1]
+			mute.Chain = null.StringFrom(argSplit[1])
 		case "proposal":
-			mute.ProposalID = argSplit[1]
+			mute.ProposalID = null.StringFrom(argSplit[1])
 		}
 	}
 
