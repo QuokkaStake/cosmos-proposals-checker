@@ -26,7 +26,7 @@ func TestProposalsQueryErrorEvent(t *testing.T) {
 func TestGenericErrorEvent(t *testing.T) {
 	t.Parallel()
 
-	event := GenericError{}
+	event := GenericErrorEvent{}
 	assert.Equal(t, "generic_error", event.Name())
 	assert.False(t, event.IsAlert())
 }

@@ -6,10 +6,16 @@ import (
 )
 
 type StubDatabase struct {
+	LastHeightQueryErrors map[string]map[string]error
+	LastHeightWriteError  error
+	GetProposalError      error
+	UpsertProposalError   error
+	GetVoteError          error
+	UpsertVoteError       error
+
 	Proposals       map[string]map[string]*types.Proposal
 	Votes           map[string]map[string]map[string]*types.Vote
 	LastBlockHeight map[string]map[string]int64
-	Error           error
 }
 
 func (d *StubDatabase) Init() {
@@ -28,8 +34,12 @@ func (d *StubDatabase) UpsertProposal(
 	chain *types.Chain,
 	proposal types.Proposal,
 ) error {
-	if d.Error != nil {
-		return d.Error
+	if d.UpsertProposalError != nil {
+		return d.UpsertProposalError
+	}
+
+	if d.Proposals == nil {
+		d.Proposals = make(map[string]map[string]*types.Proposal)
 	}
 
 	if _, ok := d.Proposals[chain.Name]; !ok {
@@ -41,8 +51,8 @@ func (d *StubDatabase) UpsertProposal(
 }
 
 func (d *StubDatabase) GetProposal(chain *types.Chain, proposalID string) (*types.Proposal, error) {
-	if d.Error != nil {
-		return nil, d.Error
+	if d.GetProposalError != nil {
+		return nil, d.GetProposalError
 	}
 
 	chainProposals, ok := d.Proposals[chain.Name]
@@ -58,8 +68,8 @@ func (d *StubDatabase) GetVote(
 	proposal types.Proposal,
 	wallet *types.Wallet,
 ) (*types.Vote, error) {
-	if d.Error != nil {
-		return nil, d.Error
+	if d.GetVoteError != nil {
+		return nil, d.GetVoteError
 	}
 
 	chainVotes, ok := d.Votes[chain.Name]
@@ -82,8 +92,8 @@ func (d *StubDatabase) UpsertVote(
 	vote *types.Vote,
 	ctx context.Context,
 ) error {
-	if d.Error != nil {
-		return d.Error
+	if d.UpsertVoteError != nil {
+		return d.UpsertVoteError
 	}
 
 	if _, ok := d.Votes[chain.Name]; !ok {
@@ -102,8 +112,12 @@ func (d *StubDatabase) GetLastBlockHeight(
 	chain *types.Chain,
 	storableKey string,
 ) (int64, error) {
-	if d.Error != nil {
-		return 0, d.Error
+	if d.LastHeightQueryErrors != nil {
+		if chainErrors, chainErrorsFound := d.LastHeightQueryErrors[chain.Name]; chainErrorsFound {
+			if err, errFound := chainErrors[storableKey]; errFound {
+				return 0, err
+			}
+		}
 	}
 
 	chainHeights, ok := d.LastBlockHeight[chain.Name]
@@ -119,8 +133,12 @@ func (d *StubDatabase) UpsertLastBlockHeight(
 	storableKey string,
 	height int64,
 ) error {
-	if d.Error != nil {
-		return d.Error
+	if d.LastHeightWriteError != nil {
+		return d.LastHeightWriteError
+	}
+
+	if d.LastBlockHeight == nil {
+		d.LastBlockHeight = make(map[string]map[string]int64)
 	}
 
 	if _, ok := d.LastBlockHeight[chain.Name]; !ok {

@@ -7,6 +7,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/jarcoal/httpmock"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -117,8 +119,10 @@ func TestAppStartOk(t *testing.T) {
 	assert.True(t, true)
 }
 
+//nolint:paralleltest // disabled due to httpmock usage
 func TestAppReport(t *testing.T) {
-	t.Parallel()
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
 
 	filesystem := &fs.TestFS{}
 	app := NewApp("config-valid.toml", filesystem, "1.2.3")

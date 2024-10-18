@@ -234,15 +234,15 @@ func (g *Generator) ProcessWallet(
 		}
 	}
 
-	vote, newHeight, err := fetcher.GetVote(proposal.ID, wallet.Address, prevHeight, childCtx)
-	if err != nil {
-		g.Logger.Error().Err(err).Msg("Failed to fetch vote from chain")
-		span.RecordError(err)
+	vote, newHeight, fetchVoteErr := fetcher.GetVote(proposal.ID, wallet.Address, prevHeight, childCtx)
+	if fetchVoteErr != nil {
+		g.Logger.Error().Err(fetchVoteErr).Msg("Failed to fetch vote from chain")
+		span.RecordError(fetchVoteErr)
 		return []entry.ReportEntry{
 			events.VoteQueryError{
 				Chain:    chain,
 				Proposal: proposal,
-				Error:    err,
+				Error:    fetchVoteErr,
 			},
 		}
 	}
@@ -269,17 +269,17 @@ func (g *Generator) ProcessWallet(
 
 	previousVote, dbErr := g.Database.GetVote(chain, proposal, wallet)
 	if dbErr != nil {
-		g.Logger.Error().Err(err).Msg("Failed to fetch vote from DB")
-		span.RecordError(err)
+		g.Logger.Error().Err(dbErr).Msg("Failed to fetch vote from DB")
+		span.RecordError(dbErr)
 		return []entry.ReportEntry{
-			events.GenericErrorEvent{Chain: chain, Error: err},
+			events.GenericErrorEvent{Chain: chain, Error: dbErr},
 		}
 	}
 
 	if previousVote == nil || !previousVote.VotesEquals(vote) {
 		if updateErr := g.Database.UpsertVote(chain, proposal, wallet, vote, childCtx); updateErr != nil {
 			g.Logger.Error().Err(updateErr).Msg("Failed to update vote in DB")
-			span.RecordError(err)
+			span.RecordError(updateErr)
 		}
 	}
 
