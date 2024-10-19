@@ -348,3 +348,25 @@ func (d *SqliteDatabase) DeleteMute(mute *types.Mute) (bool, error) {
 
 	return rowsAffected > 0, nil
 }
+
+func (d *SqliteDatabase) IsMuted(chain, proposalID string) (bool, error) {
+	row := d.client.QueryRow(
+		"SELECT COUNT(*) FROM mutes WHERE ((chain IS NULL AND proposal_id IS NULL) OR (chain = $1 AND proposal_id IS NULL) OR (chain IS NULL AND proposal_id = $2) OR (chain = $1 AND proposal_id = $2)) AND expires >= datetime('now')",
+		chain,
+		proposalID,
+	)
+
+	if err := row.Err(); err != nil {
+		d.logger.Error().Err(err).Msg("Could not check if entry was muted")
+		return false, err
+	}
+
+	count := 0
+
+	if err := row.Scan(&count); err != nil {
+		d.logger.Error().Err(err).Msg("Could not scan to check entry was muted")
+		return false, err
+	}
+
+	return count > 0, nil
+}

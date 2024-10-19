@@ -160,3 +160,7 @@ func (d *StubDatabase) GetAllMutes() ([]*types.Mute, error) {
 func (d *StubDatabase) DeleteMute(mute *types.Mute) (bool, error) {
 	return true, nil
 }
+
+func (d *StubDatabase) IsMuted(chain, proposalID string) (bool, error) {
+	return false, nil
+}

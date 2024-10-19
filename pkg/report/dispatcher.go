@@ -71,7 +71,11 @@ func (d *Dispatcher) SendReport(report reportersPkg.Report, ctx context.Context)
 			Msg("Sending report...")
 
 		for _, reportEntry := range report.Entries {
-			if d.MutesManager.IsEntryMuted(reportEntry) {
+			if isMuted, muteErr := d.MutesManager.IsEntryMuted(reportEntry); muteErr != nil {
+				d.Logger.Warn().
+					Err(muteErr).
+					Msg("Error checking whether the proposal was muted.")
+			} else if isMuted {
 				d.Logger.Debug().
 					Str("entry", reportEntry.Name()).
 					Msg("Notifications are muted, not sending.")

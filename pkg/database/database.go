@@ -24,4 +24,5 @@ type Database interface {
 	UpsertMute(mute *types.Mute) error
 	DeleteMute(mute *types.Mute) (bool, error)
 	GetAllMutes() ([]*types.Mute, error)
+	IsMuted(chain, proposalID string) (bool, error)
 }

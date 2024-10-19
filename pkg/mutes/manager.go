@@ -20,17 +20,16 @@ func NewMutesManager(logger *zerolog.Logger, database databasePkg.Database) *Man
 	}
 }
 
-func (m *Manager) IsEntryMuted(reportEntry entry.ReportEntry) bool {
+func (m *Manager) IsEntryMuted(reportEntry entry.ReportEntry) (bool, error) {
 	entryConverted, ok := reportEntry.(entry.ReportEntryNotError)
 	if !ok {
-		return false
+		return false, nil
 	}
 
-	_ = entryConverted.GetChain()
-	_ = entryConverted.GetProposal()
+	chain := entryConverted.GetChain()
+	proposal := entryConverted.GetProposal()
 
-	return false
-	// return m.Mutes.IsMuted(chain.Name, proposal.ID)
+	return m.Database.IsMuted(chain.Name, proposal.ID)
 }
 
 func (m *Manager) GetAllMutes() ([]*types.Mute, error) {
