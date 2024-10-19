@@ -290,7 +290,31 @@ func (d *SqliteDatabase) UpsertMute(mute *types.Mute) error {
 }
 
 func (d *SqliteDatabase) GetAllMutes() ([]*types.Mute, error) {
-	return []*types.Mute{}, nil
+	mutes := make([]*types.Mute, 0)
+
+	rows, err := d.client.Query("SELECT chain, proposal_id, expires, comment FROM mutes")
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Error getting all mutes")
+		return mutes, err
+	}
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err()
+	}()
+
+	for rows.Next() {
+		mute := &types.Mute{}
+
+		err = rows.Scan(&mute.Chain, &mute.ProposalID, &mute.Expires, &mute.Comment)
+		if err != nil {
+			d.logger.Error().Err(err).Msg("Error getting mute")
+			return mutes, err
+		}
+
+		mutes = append(mutes, mute)
+	}
+
+	return mutes, nil
 }
 
 func (d *SqliteDatabase) DeleteMute(mute *types.Mute) (bool, error) {
