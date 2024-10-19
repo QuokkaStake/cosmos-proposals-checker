@@ -16,6 +16,7 @@ type StubDatabase struct {
 	Proposals       map[string]map[string]*types.Proposal
 	Votes           map[string]map[string]map[string]*types.Vote
 	LastBlockHeight map[string]map[string]int64
+	Mutes           []*types.Mute
 }
 
 func (d *StubDatabase) Init() {
@@ -150,17 +151,56 @@ func (d *StubDatabase) UpsertLastBlockHeight(
 }
 
 func (d *StubDatabase) UpsertMute(mute *types.Mute) error {
+	if d.Mutes == nil {
+		d.Mutes = []*types.Mute{}
+	}
+
+	for _, otherMute := range d.Mutes {
+		if otherMute.LabelsEqual(mute) {
+			otherMute.Expires = mute.Expires
+			otherMute.Comment = mute.Comment
+			return nil
+		}
+	}
+
+	d.Mutes = append(d.Mutes, mute)
+
 	return nil
 }
 
 func (d *StubDatabase) GetAllMutes() ([]*types.Mute, error) {
-	return []*types.Mute{}, nil
+	if d.Mutes == nil {
+		return []*types.Mute{}, nil
+	}
+
+	return d.Mutes, nil
 }
 
 func (d *StubDatabase) DeleteMute(mute *types.Mute) (bool, error) {
-	return true, nil
+	if d.Mutes == nil {
+		return false, nil
+	}
+
+	for index, otherMute := range d.Mutes {
+		if otherMute.LabelsEqual(mute) {
+			d.Mutes = append(d.Mutes[:index], d.Mutes[index+1:]...)
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func (d *StubDatabase) IsMuted(chain, proposalID string) (bool, error) {
+	if d.Mutes == nil {
+		return false, nil
+	}
+
+	for _, mute := range d.Mutes {
+		if mute.Matches(chain, proposalID) {
+			return true, nil
+		}
+	}
+
 	return false, nil
 }
