@@ -1,0 +1,8 @@
+{{- if .Chain }}
+❌ There was an error when processing proposals on {{ .Chain.GetName }}:
+{{- else }}
+❌ There was an error when processing proposals:
+{{- end }}
+<strong>Error text: </strong>>{{ .Error }}
+
+Sent by <a href='https://github.com/QuokkaStake/cosmos-proposals-checker'>cosmos-proposals-checker.</a>

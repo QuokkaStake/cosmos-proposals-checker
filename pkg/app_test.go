@@ -1,10 +1,13 @@
 package pkg
 
 import (
+	databasePkg "main/pkg/database"
 	"main/pkg/fs"
 	reportersPkg "main/pkg/reporters"
 	"sync"
 	"testing"
+
+	"github.com/jarcoal/httpmock"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -87,6 +90,8 @@ func TestAppStartInvalidCronPattern(t *testing.T) {
 
 	app := NewApp("config-valid.toml", filesystem, "1.2.3")
 	app.Config.Interval = "invalid"
+	app.Database = &databasePkg.StubDatabase{}
+	app.ReportGenerator.Database = &databasePkg.StubDatabase{}
 
 	app.Start()
 	require.NotNil(t, app)
@@ -98,6 +103,8 @@ func TestAppStartOk(t *testing.T) {
 	filesystem := &fs.TestFS{}
 	app := NewApp("config-valid.toml", filesystem, "1.2.3")
 	app.ReportDispatcher.Reporters = []reportersPkg.Reporter{&reportersPkg.TestReporter{}}
+	app.Database = &databasePkg.StubDatabase{}
+	app.ReportGenerator.Database = &databasePkg.StubDatabase{}
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -112,11 +119,15 @@ func TestAppStartOk(t *testing.T) {
 	assert.True(t, true)
 }
 
+//nolint:paralleltest // disabled due to httpmock usage
 func TestAppReport(t *testing.T) {
-	t.Parallel()
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
 
 	filesystem := &fs.TestFS{}
 	app := NewApp("config-valid.toml", filesystem, "1.2.3")
+	app.Database = &databasePkg.StubDatabase{}
+	app.ReportGenerator.Database = &databasePkg.StubDatabase{}
 	app.Report()
 
 	assert.True(t, true)

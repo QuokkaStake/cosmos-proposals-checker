@@ -29,7 +29,6 @@ type Reporter struct {
 	StateGenerator   *statePkg.Generator
 	Logger           zerolog.Logger
 	Config           *types.Config
-	Manager          *statePkg.Manager
 	MutesManager     *mutes.Manager
 	DataManager      *data.Manager
 	TemplatesManager templatesPkg.Manager
@@ -42,7 +41,6 @@ func NewReporter(
 	config *types.Config,
 	version string,
 	logger *zerolog.Logger,
-	manager *statePkg.Manager,
 	mutesManager *mutes.Manager,
 	dataManager *data.Manager,
 	stateGenerator *statePkg.Generator,
@@ -55,7 +53,6 @@ func NewReporter(
 		Channel:          config.DiscordConfig.Channel,
 		Config:           config,
 		Logger:           logger.With().Str("component", "discord_reporter").Logger(),
-		Manager:          manager,
 		MutesManager:     mutesManager,
 		DataManager:      dataManager,
 		StateGenerator:   stateGenerator,

@@ -8,13 +8,12 @@ import (
 )
 
 type Config struct {
+	DatabaseConfig  DatabaseConfig  `toml:"database"`
 	PagerDutyConfig PagerDutyConfig `toml:"pagerduty"`
 	TelegramConfig  TelegramConfig  `toml:"telegram"`
 	DiscordConfig   DiscordConfig   `toml:"discord"`
 	LogConfig       LogConfig       `toml:"log"`
 	TracingConfig   TracingConfig   `toml:"tracing"`
-	StatePath       string          `toml:"state-path"`
-	MutesPath       string          `toml:"mutes-path"`
 	Chains          Chains          `toml:"chains"`
 	Timezone        string          `toml:"timezone"`
 	Interval        string          `default:"* * * * *" toml:"interval"`
@@ -37,6 +36,10 @@ type DiscordConfig struct {
 }
 
 func (c *Config) Validate() error {
+	if err := c.DatabaseConfig.Validate(); err != nil {
+		return fmt.Errorf("invalid database config: %s", err)
+	}
+
 	if len(c.Chains) == 0 {
 		return fmt.Errorf("no chains provided")
 	}
@@ -59,20 +62,6 @@ func (c *Config) DisplayWarnings() []Warning {
 
 	for _, chain := range c.Chains {
 		warnings = append(warnings, chain.DisplayWarnings()...)
-	}
-
-	if c.MutesPath == "" {
-		warnings = append(warnings, Warning{
-			Labels:  map[string]string{},
-			Message: "mutes-path is not set, cannot persist proposals mutes on disk.",
-		})
-	}
-
-	if c.StatePath == "" {
-		warnings = append(warnings, Warning{
-			Labels:  map[string]string{},
-			Message: "state-path is not set, cannot persist proposals state on disk.",
-		})
 	}
 
 	return warnings

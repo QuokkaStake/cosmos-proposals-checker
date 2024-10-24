@@ -3,7 +3,6 @@ package templates
 import (
 	templatePkg "html/template"
 	loggerPkg "main/pkg/logger"
-	mutes "main/pkg/mutes"
 	"main/pkg/types"
 	"testing"
 	"time"
@@ -75,7 +74,7 @@ func TestDiscordRenderTemplateRenderSuccess(t *testing.T) {
 	timezone, _ := time.LoadLocation("Europe/Moscow")
 	manager := NewDiscordTemplatesManager(logger, timezone)
 
-	template, err := manager.Render("mutes", []mutes.Mute{})
+	template, err := manager.Render("mutes", []types.Mute{})
 	require.NoError(t, err)
 	assert.NotEmpty(t, template)
 }

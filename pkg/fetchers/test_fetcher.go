@@ -50,7 +50,7 @@ func (f *TestFetcher) GetVote(
 ) (*types.Vote, int64, *types.QueryError) {
 	if f.WithVoteError {
 		return nil, 456, &types.QueryError{
-			QueryError: errors.New("error"),
+			QueryError: errors.New("vote query error"),
 		}
 	}
 

@@ -1,7 +1,7 @@
 package discord
 
 import (
-	mutes "main/pkg/mutes"
+	"main/pkg/types"
 	"main/pkg/utils"
 
 	"github.com/bwmarrin/discordgo"
@@ -14,7 +14,13 @@ func (reporter *Reporter) GetMutesCommand() *Command {
 			Description: "List all active mutes.",
 		},
 		Handler: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			filteredMutes := utils.Filter(reporter.MutesManager.Mutes.Mutes, func(m *mutes.Mute) bool {
+			mutes, err := reporter.MutesManager.GetAllMutes()
+			if err != nil {
+				reporter.Logger.Error().Err(err).Msg("Error getting all mutes")
+				return
+			}
+
+			filteredMutes := utils.Filter(mutes, func(m *types.Mute) bool {
 				return !m.IsExpired()
 			})
 

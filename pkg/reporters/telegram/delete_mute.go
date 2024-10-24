@@ -15,8 +15,10 @@ func (reporter *Reporter) HandleDeleteMute(c tele.Context) error {
 		return c.Reply("Error deleting mute: " + err)
 	}
 
-	if found := reporter.MutesManager.DeleteMute(mute); !found {
+	if found, deleteErr := reporter.MutesManager.DeleteMute(mute); !found {
 		return c.Reply("Could not find the mute to delete!")
+	} else if deleteErr != nil {
+		return c.Reply("Error deleting mute!")
 	}
 
 	templateRendered, renderErr := reporter.TemplatesManager.Render("mute_deleted", mute)

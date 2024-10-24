@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/guregu/null/v5"
+
 	"go.opentelemetry.io/otel/trace"
 
 	"main/pkg/types"
@@ -156,7 +158,7 @@ func (reporter *Reporter) BotReply(c tele.Context, msg string) error {
 	return nil
 }
 
-func ParseMuteOptions(query string, c tele.Context) (*mutes.Mute, string) {
+func ParseMuteOptions(query string, c tele.Context) (*types.Mute, string) {
 	args := strings.Split(query, " ")
 	if len(args) < 2 {
 		return nil, "Usage: /proposals_mute <duration> [params]"
@@ -169,9 +171,9 @@ func ParseMuteOptions(query string, c tele.Context) (*mutes.Mute, string) {
 		return nil, fmt.Sprintf("Invalid duration provided: %s", durationString)
 	}
 
-	mute := &mutes.Mute{
-		Chain:      "",
-		ProposalID: "",
+	mute := &types.Mute{
+		Chain:      null.NewString("", false),
+		ProposalID: null.NewString("", false),
 		Expires:    time.Now().Add(duration),
 		Comment: fmt.Sprintf(
 			"Muted using cosmos-proposals-checker for %s by %s",
@@ -192,21 +194,21 @@ func ParseMuteOptions(query string, c tele.Context) (*mutes.Mute, string) {
 
 		switch argSplit[0] {
 		case "chain":
-			mute.Chain = argSplit[1]
+			mute.Chain = null.StringFrom(argSplit[1])
 		case "proposal":
-			mute.ProposalID = argSplit[1]
+			mute.ProposalID = null.StringFrom(argSplit[1])
 		}
 	}
 
 	return mute, ""
 }
 
-func ParseMuteDeleteOptions(query string, c tele.Context) (*mutes.Mute, string) {
+func ParseMuteDeleteOptions(query string, c tele.Context) (*types.Mute, string) {
 	// we only construct mute with chain/proposal to compare, no need to take care
 	// about the expiration/comment
-	mute := &mutes.Mute{
-		Chain:      "",
-		ProposalID: "",
+	mute := &types.Mute{
+		Chain:      null.NewString("", false),
+		ProposalID: null.NewString("", false),
 		Expires:    time.Now(),
 		Comment:    "",
 	}
@@ -223,9 +225,9 @@ func ParseMuteDeleteOptions(query string, c tele.Context) (*mutes.Mute, string) 
 
 		switch argSplit[0] {
 		case "chain":
-			mute.Chain = argSplit[1]
+			mute.Chain = null.StringFrom(argSplit[1])
 		case "proposal":
-			mute.ProposalID = argSplit[1]
+			mute.ProposalID = null.StringFrom(argSplit[1])
 		}
 	}
 

@@ -3,6 +3,7 @@ package pkg
 import (
 	"context"
 	"main/pkg/data"
+	databasePkg "main/pkg/database"
 	"main/pkg/fs"
 	"main/pkg/logger"
 	mutes "main/pkg/mutes"
@@ -25,10 +26,10 @@ type App struct {
 	Tracer           trace.Tracer
 	Logger           *zerolog.Logger
 	Config           *types.Config
-	StateManager     *state.Manager
 	ReportGenerator  *report.Generator
 	StateGenerator   *state.Generator
 	ReportDispatcher *report.Dispatcher
+	Database         databasePkg.Database
 	StopChannel      chan bool
 }
 
@@ -51,11 +52,13 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 	tracer := tracing.InitTracer(config.TracingConfig, version)
 	log := logger.GetLogger(config.LogConfig)
 
-	stateManager := state.NewStateManager(config.StatePath, filesystem, log)
-	mutesManager := mutes.NewMutesManager(config.MutesPath, filesystem, log)
-	reportGenerator := report.NewReportGenerator(stateManager, log, config.Chains, tracer)
+	database := databasePkg.NewSqliteDatabase(log, config.DatabaseConfig)
+
+	mutesManager := mutes.NewMutesManager(log, database)
 	stateGenerator := state.NewStateGenerator(log, tracer, config.Chains)
 	dataManager := data.NewManager(log, config.Chains, tracer)
+
+	generator := report.NewReportNewGenerator(log, config.Chains, database, tracer)
 
 	timeZone, _ := time.LoadLocation(config.Timezone)
 
@@ -75,7 +78,6 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 			config,
 			version,
 			log,
-			stateManager,
 			mutesManager,
 			dataManager,
 			stateGenerator,
@@ -90,16 +92,18 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 		Tracer:           tracer,
 		Logger:           log,
 		Config:           config,
-		StateManager:     stateManager,
-		ReportGenerator:  reportGenerator,
+		ReportGenerator:  generator,
 		StateGenerator:   stateGenerator,
 		ReportDispatcher: reportDispatcher,
+		Database:         database,
 		StopChannel:      make(chan bool),
 	}
 }
 
 func (a *App) Start() {
-	a.StateManager.Load()
+	a.Database.Init()
+	a.Database.Migrate()
+
 	if err := a.ReportDispatcher.Init(); err != nil {
 		a.Logger.Panic().Err(err).Msg("Error initializing reporters")
 	}
@@ -124,7 +128,6 @@ func (a *App) Report() {
 	ctx, span := a.Tracer.Start(context.Background(), "report")
 	defer span.End()
 
-	newState := a.StateGenerator.GetState(a.StateManager.State, ctx)
-	generatedReport := a.ReportGenerator.GenerateReport(a.StateManager.State, newState, ctx)
+	generatedReport := a.ReportGenerator.GenerateReport(ctx)
 	a.ReportDispatcher.SendReport(generatedReport, ctx)
 }

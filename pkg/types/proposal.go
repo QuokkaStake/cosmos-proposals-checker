@@ -47,3 +47,11 @@ func (p ProposalStatus) String() string {
 func (p Proposal) IsInVoting() bool {
 	return p.Status == ProposalStatusVoting
 }
+
+func (p Proposal) Equals(other Proposal) bool {
+	return p.ID == other.ID &&
+		p.Title == other.Title &&
+		p.Description == other.Description &&
+		p.Status == other.Status &&
+		p.EndTime == other.EndTime
+}
