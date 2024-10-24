@@ -14,7 +14,6 @@ type Config struct {
 	DiscordConfig   DiscordConfig   `toml:"discord"`
 	LogConfig       LogConfig       `toml:"log"`
 	TracingConfig   TracingConfig   `toml:"tracing"`
-	MutesPath       string          `toml:"mutes-path"`
 	Chains          Chains          `toml:"chains"`
 	Timezone        string          `toml:"timezone"`
 	Interval        string          `default:"* * * * *" toml:"interval"`
@@ -63,13 +62,6 @@ func (c *Config) DisplayWarnings() []Warning {
 
 	for _, chain := range c.Chains {
 		warnings = append(warnings, chain.DisplayWarnings()...)
-	}
-
-	if c.MutesPath == "" {
-		warnings = append(warnings, Warning{
-			Labels:  map[string]string{},
-			Message: "mutes-path is not set, cannot persist proposals mutes on disk.",
-		})
 	}
 
 	return warnings

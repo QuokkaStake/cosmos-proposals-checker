@@ -1,4 +1,3 @@
-mutes-path = "cosmos-proposals-checker-mutes.json"
 interval = "@hourly"
 
 [database]

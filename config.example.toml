@@ -1,5 +1,3 @@
-# A path to a file that will store mutes of this app. Omitting it will disable the mute functionality.
-mutes-path = "cosmos-proposals-checker-mutes.json"
 # Interval to check and notify.
 # Can be a cron-like interval (like "0 * * * *" for every hour),
 # "@hourly"/"@daily" for hourly/daily intervals, or "@every 1h"

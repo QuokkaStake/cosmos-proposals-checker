@@ -7,7 +7,6 @@ path = "database.sqlite"
 name = "bitsong"
 pretty-name = "Bitsong"
 keplr-name = "bitsong"
-mintscan-prefix = "bitsong"
 lcd-endpoints = ["https://lcd-bitsong-app.cosmostation.io"]
 wallets = [
     { address = "bitsong14rvn7anf22e00vj5x3al4w50ns78s7n4t8yxcy", alias = "Validator wallet" },
