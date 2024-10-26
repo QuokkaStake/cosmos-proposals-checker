@@ -28,6 +28,12 @@ func TestMuteManagerAddAndDeleteMuteIsMuted(t *testing.T) {
 	})
 	require.NoError(t, err)
 
+	err = manager.AddMute(&types.Mute{
+		Chain:   null.StringFrom("chain"),
+		Expires: time.Now().Add(time.Hour),
+	})
+	require.NoError(t, err)
+
 	muted1, err1 := manager.IsEntryMuted(events.VotedEvent{
 		Chain: &types.Chain{Name: "chain"},
 	})

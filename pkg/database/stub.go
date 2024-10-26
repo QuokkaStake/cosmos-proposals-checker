@@ -97,6 +97,10 @@ func (d *StubDatabase) UpsertVote(
 		return d.UpsertVoteError
 	}
 
+	if d.Votes == nil {
+		d.Votes = make(map[string]map[string]map[string]*types.Vote)
+	}
+
 	if _, ok := d.Votes[chain.Name]; !ok {
 		d.Votes[chain.Name] = make(map[string]map[string]*types.Vote)
 	}
