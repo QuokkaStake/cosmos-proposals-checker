@@ -12,6 +12,7 @@ type StubDatabase struct {
 	UpsertProposalError   error
 	GetVoteError          error
 	UpsertVoteError       error
+	IsMutedError          error
 
 	Proposals       map[string]map[string]*types.Proposal
 	Votes           map[string]map[string]map[string]*types.Vote
@@ -196,6 +197,10 @@ func (d *StubDatabase) DeleteMute(mute *types.Mute) (bool, error) {
 }
 
 func (d *StubDatabase) IsMuted(chain, proposalID string) (bool, error) {
+	if d.IsMutedError != nil {
+		return false, d.IsMutedError
+	}
+
 	if d.Mutes == nil {
 		return false, nil
 	}

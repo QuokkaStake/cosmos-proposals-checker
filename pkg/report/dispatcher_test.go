@@ -2,6 +2,7 @@ package report
 
 import (
 	"context"
+	"errors"
 	databasePkg "main/pkg/database"
 	"main/pkg/events"
 	"main/pkg/logger"
@@ -111,6 +112,26 @@ func TestReportDispatcherSendReportErrorSending(t *testing.T) {
 
 	dispatcher.SendReport(reportersPkg.Report{Entries: []entry.ReportEntry{
 		events.ProposalsQueryErrorEvent{},
+	}}, context.Background())
+}
+
+func TestReportDispatcherSendReportErrorGettingMutes(t *testing.T) {
+	t.Parallel()
+
+	db := &databasePkg.StubDatabase{IsMutedError: errors.New("mutes error")}
+	mutesManager := mutes.NewMutesManager(logger.GetNopLogger(), db)
+	dispatcher := NewDispatcher(logger.GetNopLogger(), mutesManager, []reportersPkg.Reporter{
+		&reportersPkg.TestReporter{},
+	}, tracing.InitNoopTracer())
+
+	err := dispatcher.Init()
+	require.NoError(t, err)
+
+	dispatcher.SendReport(reportersPkg.Report{Entries: []entry.ReportEntry{
+		events.NotVotedEvent{
+			Chain:    &types.Chain{Name: "chain"},
+			Proposal: types.Proposal{ID: "proposal"},
+		},
 	}}, context.Background())
 }
 
