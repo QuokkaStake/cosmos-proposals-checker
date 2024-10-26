@@ -6,6 +6,7 @@ import (
 	"errors"
 	migrationsPkg "main/migrations"
 	"main/pkg/types"
+	"os"
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -369,4 +370,8 @@ func (d *SqliteDatabase) IsMuted(chain, proposalID string) (bool, error) {
 	}
 
 	return count > 0, nil
+}
+
+func (d *SqliteDatabase) Destroy() error {
+	return os.Remove(d.config.Path)
 }
