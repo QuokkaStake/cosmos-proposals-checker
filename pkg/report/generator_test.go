@@ -3,338 +3,405 @@ package report
 import (
 	"context"
 	"errors"
+	databasePkg "main/pkg/database"
 	"main/pkg/events"
-	"main/pkg/fs"
+	fetchersPkg "main/pkg/fetchers"
+	loggerPkg "main/pkg/logger"
 	"main/pkg/tracing"
+	"main/pkg/types"
 	"testing"
 
-	"main/pkg/logger"
-	"main/pkg/state"
-	"main/pkg/types"
-
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestReportGeneratorWithProposalError(t *testing.T) {
+func TestGeneratorNew(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
-
-	oldState := state.NewState()
-	newState := state.State{
-		ChainInfos: map[string]*state.ChainInfo{
-			"chain": {
-				ProposalsError: &types.QueryError{
-					QueryError: errors.New("test error"),
-				},
-			},
-		},
-	}
-
-	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
-		&types.Chain{Name: "chain"},
-	}, tracing.InitNoopTracer())
-
-	report := generator.GenerateReport(oldState, newState, context.Background())
-	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
-
-	entry, ok := report.Entries[0].(events.ProposalsQueryErrorEvent)
-	assert.True(t, ok, "Expected to have a proposal query error!")
-	assert.Equal(t, "test error", entry.Error.QueryError.Error(), "Error text mismatch!")
+	logger := loggerPkg.GetNopLogger()
+	tracer := tracing.InitNoopTracer()
+	db := &databasePkg.StubDatabase{}
+	chains := types.Chains{{Name: "chain"}}
+	generator := NewReportNewGenerator(logger, chains, db, tracer)
+	require.NotNil(t, generator)
 }
 
-func TestReportGeneratorWithVoteError(t *testing.T) {
+func TestGeneratorProposalsError(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
-
-	oldState := state.NewState()
-	newState := state.State{
-		ChainInfos: map[string]*state.ChainInfo{
-			"chain": {
-				ProposalVotes: map[string]state.WalletVotes{
-					"proposal": {
-						Proposal: types.Proposal{
-							ID:     "proposal",
-							Status: types.ProposalStatusVoting,
-						},
-						Votes: map[string]state.ProposalVote{
-							"wallet": {
-								Error: &types.QueryError{
-									QueryError: errors.New("test error"),
-								},
-							},
-						},
-					},
-				},
-			},
+	logger := loggerPkg.GetNopLogger()
+	tracer := tracing.InitNoopTracer()
+	db := &databasePkg.StubDatabase{}
+	chains := types.Chains{{
+		Name:    "chain",
+		Wallets: []*types.Wallet{{Address: "address"}},
+	}}
+	generator := &Generator{
+		Logger:   *logger,
+		Chains:   chains,
+		Database: db,
+		Tracer:   tracer,
+		Fetchers: map[string]fetchersPkg.Fetcher{
+			"chain": &fetchersPkg.TestFetcher{WithProposalsError: true},
 		},
 	}
 
-	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
-		&types.Chain{Name: "chain"},
-	}, tracing.InitNoopTracer())
+	report := generator.GenerateReport(context.Background())
+	require.Len(t, report.Entries, 1)
 
-	report := generator.GenerateReport(oldState, newState, context.Background())
-	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
-
-	entry, ok := report.Entries[0].(events.VoteQueryError)
-	assert.True(t, ok, "Expected to have a vote query error!")
-	assert.Equal(t, "proposal", entry.Proposal.ID, "Proposal ID mismatch!")
+	firstEntry, ok := report.Entries[0].(events.ProposalsQueryErrorEvent)
+	require.True(t, ok)
+	require.NotNil(t, firstEntry)
 }
 
-func TestReportGeneratorWithProposalNotInVotingPeriod(t *testing.T) {
+func TestGeneratorProposalsGetLastBlockHeightError(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
-
-	oldState := state.State{
-		ChainInfos: map[string]*state.ChainInfo{
+	logger := loggerPkg.GetNopLogger()
+	tracer := tracing.InitNoopTracer()
+	db := &databasePkg.StubDatabase{
+		LastHeightQueryErrors: map[string]map[string]error{
 			"chain": {
-				ProposalVotes: map[string]state.WalletVotes{
-					"proposal": {
-						Proposal: types.Proposal{
-							ID:     "proposal",
-							Status: types.ProposalStatusPassed,
-						},
-						Votes: map[string]state.ProposalVote{
-							"wallet": {},
-						},
-					},
-				},
+				"proposals": errors.New("custom error"),
 			},
 		},
 	}
-	newState := state.State{
-		ChainInfos: map[string]*state.ChainInfo{
-			"chain": {
-				ProposalVotes: map[string]state.WalletVotes{
-					"proposal": {
-						Proposal: types.Proposal{
-							ID:     "proposal",
-							Status: types.ProposalStatusPassed,
-						},
-						Votes: map[string]state.ProposalVote{
-							"wallet": {
-								Vote: &types.Vote{
-									Options: []types.VoteOption{{Option: "YES", Weight: 1}},
-								},
-							},
-						},
-					},
-				},
-			},
+	chains := types.Chains{{
+		Name:    "chain",
+		Wallets: []*types.Wallet{{Address: "address"}},
+	}}
+	generator := &Generator{
+		Logger:   *logger,
+		Chains:   chains,
+		Database: db,
+		Tracer:   tracer,
+		Fetchers: map[string]fetchersPkg.Fetcher{
+			"chain": &fetchersPkg.TestFetcher{},
 		},
 	}
 
-	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
-		&types.Chain{Name: "chain"},
-	}, tracing.InitNoopTracer())
+	report := generator.GenerateReport(context.Background())
+	require.Len(t, report.Entries, 1)
 
-	report := generator.GenerateReport(oldState, newState, context.Background())
-	assert.Empty(t, report.Entries)
+	firstEntry, ok := report.Entries[0].(events.GenericErrorEvent)
+	require.True(t, ok)
+	require.NotNil(t, firstEntry)
+	require.ErrorContains(t, firstEntry.Error, "custom error")
 }
 
-func TestReportGeneratorWithNotVoted(t *testing.T) {
+func TestGeneratorProposalGetLastBlockHeightError(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
-
-	oldState := state.NewState()
-	newState := state.State{
-		ChainInfos: map[string]*state.ChainInfo{
-			"chain": {
-				ProposalVotes: map[string]state.WalletVotes{
-					"proposal": {
-						Proposal: types.Proposal{
-							ID:     "proposal",
-							Status: types.ProposalStatusVoting,
-						},
-						Votes: map[string]state.ProposalVote{
-							"wallet": {},
-						},
-					},
-				},
-			},
+	logger := loggerPkg.GetNopLogger()
+	tracer := tracing.InitNoopTracer()
+	db := &databasePkg.StubDatabase{
+		GetProposalError:     errors.New("custom error"),
+		LastHeightWriteError: errors.New("write error"),
+	}
+	chains := types.Chains{{
+		Name:    "chain",
+		Wallets: []*types.Wallet{{Address: "address"}},
+	}}
+	generator := &Generator{
+		Logger:   *logger,
+		Chains:   chains,
+		Database: db,
+		Tracer:   tracer,
+		Fetchers: map[string]fetchersPkg.Fetcher{
+			"chain": &fetchersPkg.TestFetcher{},
 		},
 	}
 
-	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
-		&types.Chain{Name: "chain"},
-	}, tracing.InitNoopTracer())
+	report := generator.GenerateReport(context.Background())
+	require.Len(t, report.Entries, 1)
 
-	report := generator.GenerateReport(oldState, newState, context.Background())
-	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
-
-	entry, ok := report.Entries[0].(events.NotVotedEvent)
-	assert.True(t, ok, "Expected to have not voted type!")
-	assert.Equal(t, "proposal", entry.Proposal.ID, "Proposal ID mismatch!")
+	firstEntry, ok := report.Entries[0].(events.GenericErrorEvent)
+	require.True(t, ok)
+	require.NotNil(t, firstEntry)
+	require.ErrorContains(t, firstEntry.Error, "custom error")
 }
 
-func TestReportGeneratorWithVoted(t *testing.T) {
+func TestGeneratorProposalNotInVoting(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
-
-	oldState := state.State{
-		ChainInfos: map[string]*state.ChainInfo{
-			"chain": {
-				ProposalVotes: map[string]state.WalletVotes{
-					"proposal": {
-						Proposal: types.Proposal{
-							ID:     "proposal",
-							Status: types.ProposalStatusVoting,
-						},
-						Votes: map[string]state.ProposalVote{
-							"wallet": {},
-						},
-					},
-				},
-			},
-		},
-	}
-	newState := state.State{
-		ChainInfos: map[string]*state.ChainInfo{
-			"chain": {
-				ProposalVotes: map[string]state.WalletVotes{
-					"proposal": {
-						Proposal: types.Proposal{
-							ID:     "proposal",
-							Status: types.ProposalStatusVoting,
-						},
-						Votes: map[string]state.ProposalVote{
-							"wallet": {
-								Vote: &types.Vote{
-									Options: []types.VoteOption{{Option: "YES", Weight: 1}},
-								},
-							},
-						},
-					},
-				},
-			},
+	logger := loggerPkg.GetNopLogger()
+	tracer := tracing.InitNoopTracer()
+	db := &databasePkg.StubDatabase{}
+	chains := types.Chains{{
+		Name:    "chain",
+		Wallets: []*types.Wallet{{Address: "address"}},
+	}}
+	generator := &Generator{
+		Logger:   *logger,
+		Chains:   chains,
+		Database: db,
+		Tracer:   tracer,
+		Fetchers: map[string]fetchersPkg.Fetcher{
+			"chain": &fetchersPkg.TestFetcher{WithPassedProposals: true},
 		},
 	}
 
-	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
-		&types.Chain{Name: "chain"},
-	}, tracing.InitNoopTracer())
-
-	report := generator.GenerateReport(oldState, newState, context.Background())
-	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
-
-	entry, ok := report.Entries[0].(events.VotedEvent)
-	assert.True(t, ok, "Expected to have voted type!")
-	assert.Equal(t, "proposal", entry.Proposal.ID, "Proposal ID mismatch!")
+	report := generator.GenerateReport(context.Background())
+	require.Empty(t, report.Entries)
 }
 
-func TestReportGeneratorWithRevoted(t *testing.T) {
+func TestGeneratorProposalFinishedVoting(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
-
-	oldState := state.State{
-		ChainInfos: map[string]*state.ChainInfo{
+	logger := loggerPkg.GetNopLogger()
+	tracer := tracing.InitNoopTracer()
+	db := &databasePkg.StubDatabase{
+		UpsertProposalError: errors.New("write error"),
+		Proposals: map[string]map[string]*types.Proposal{
 			"chain": {
-				ProposalVotes: map[string]state.WalletVotes{
-					"proposal": {
-						Proposal: types.Proposal{
-							ID:     "proposal",
-							Status: types.ProposalStatusVoting,
-						},
-						Votes: map[string]state.ProposalVote{
-							"wallet": {
-								Vote: &types.Vote{
-									Options: []types.VoteOption{{Option: "NO", Weight: 1}},
-								},
-							},
-						},
-					},
-				},
+				"1": &types.Proposal{Status: types.ProposalStatusVoting},
 			},
 		},
 	}
-	newState := state.State{
-		ChainInfos: map[string]*state.ChainInfo{
-			"chain": {
-				ProposalVotes: map[string]state.WalletVotes{
-					"proposal": {
-						Proposal: types.Proposal{
-							ID:     "proposal",
-							Status: types.ProposalStatusVoting,
-						},
-						Votes: map[string]state.ProposalVote{
-							"wallet": {
-								Vote: &types.Vote{
-									Options: []types.VoteOption{{Option: "YES", Weight: 1}},
-								},
-							},
-						},
-					},
-				},
-			},
+	chains := types.Chains{{
+		Name:    "chain",
+		Wallets: []*types.Wallet{{Address: "address"}},
+	}}
+	generator := &Generator{
+		Logger:   *logger,
+		Chains:   chains,
+		Database: db,
+		Tracer:   tracer,
+		Fetchers: map[string]fetchersPkg.Fetcher{
+			"chain": &fetchersPkg.TestFetcher{WithPassedProposals: true},
 		},
 	}
 
-	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
-		&types.Chain{Name: "chain"},
-	}, tracing.InitNoopTracer())
-
-	report := generator.GenerateReport(oldState, newState, context.Background())
-	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
-
-	entry, ok := report.Entries[0].(events.RevotedEvent)
-	assert.True(t, ok, "Expected to have revoted type!")
-	assert.Equal(t, "proposal", entry.Proposal.ID, "Proposal ID mismatch!")
+	report := generator.GenerateReport(context.Background())
+	require.Len(t, report.Entries, 1)
+	firstEntry, ok := report.Entries[0].(events.FinishedVotingEvent)
+	require.True(t, ok)
+	require.NotNil(t, firstEntry)
 }
 
-func TestReportGeneratorWithFinishedVoting(t *testing.T) {
+func TestGeneratorProposalVoteLastHeightQueryError(t *testing.T) {
 	t.Parallel()
 
-	stateManager := state.NewStateManager("./state.json", &fs.TestFS{}, logger.GetNopLogger())
-
-	oldState := state.State{
-		ChainInfos: map[string]*state.ChainInfo{
+	logger := loggerPkg.GetNopLogger()
+	tracer := tracing.InitNoopTracer()
+	db := &databasePkg.StubDatabase{
+		LastHeightQueryErrors: map[string]map[string]error{
 			"chain": {
-				ProposalVotes: map[string]state.WalletVotes{
-					"proposal": {
-						Proposal: types.Proposal{
-							ID:     "proposal",
-							Status: types.ProposalStatusVoting,
-						},
-						Votes: map[string]state.ProposalVote{
-							"wallet": {
-								Vote: &types.Vote{Options: types.VoteOptions{{Option: "Yes"}}},
-							},
+				"proposal_1_vote_address": errors.New("custom error"),
+			},
+		},
+	}
+	chains := types.Chains{{
+		Name:    "chain",
+		Wallets: []*types.Wallet{{Address: "address"}},
+	}}
+	generator := &Generator{
+		Logger:   *logger,
+		Chains:   chains,
+		Database: db,
+		Tracer:   tracer,
+		Fetchers: map[string]fetchersPkg.Fetcher{
+			"chain": &fetchersPkg.TestFetcher{},
+		},
+	}
+
+	report := generator.GenerateReport(context.Background())
+	require.Len(t, report.Entries, 1)
+
+	firstEntry, ok := report.Entries[0].(events.GenericErrorEvent)
+	require.True(t, ok)
+	require.NotNil(t, firstEntry)
+	require.ErrorContains(t, firstEntry.Error, "custom error")
+}
+
+func TestGeneratorProposalVoteFetchVoteError(t *testing.T) {
+	t.Parallel()
+
+	logger := loggerPkg.GetNopLogger()
+	tracer := tracing.InitNoopTracer()
+	db := &databasePkg.StubDatabase{}
+	chains := types.Chains{{
+		Name:    "chain",
+		Wallets: []*types.Wallet{{Address: "address"}},
+	}}
+	generator := &Generator{
+		Logger:   *logger,
+		Chains:   chains,
+		Database: db,
+		Tracer:   tracer,
+		Fetchers: map[string]fetchersPkg.Fetcher{
+			"chain": &fetchersPkg.TestFetcher{WithVoteError: true},
+		},
+	}
+
+	report := generator.GenerateReport(context.Background())
+	require.Len(t, report.Entries, 1)
+
+	firstEntry, ok := report.Entries[0].(events.VoteQueryError)
+	require.True(t, ok)
+	require.NotNil(t, firstEntry)
+	require.ErrorContains(t, firstEntry.Error, "vote query error")
+}
+
+func TestGeneratorProposalVoteNotVoted(t *testing.T) {
+	t.Parallel()
+
+	logger := loggerPkg.GetNopLogger()
+	tracer := tracing.InitNoopTracer()
+	db := &databasePkg.StubDatabase{}
+	chains := types.Chains{{
+		Name:    "chain",
+		Wallets: []*types.Wallet{{Address: "address"}},
+	}}
+	generator := &Generator{
+		Logger:   *logger,
+		Chains:   chains,
+		Database: db,
+		Tracer:   tracer,
+		Fetchers: map[string]fetchersPkg.Fetcher{
+			"chain": &fetchersPkg.TestFetcher{},
+		},
+	}
+
+	report := generator.GenerateReport(context.Background())
+	require.Len(t, report.Entries, 1)
+
+	firstEntry, ok := report.Entries[0].(events.NotVotedEvent)
+	require.True(t, ok)
+	require.NotNil(t, firstEntry)
+}
+
+func TestGeneratorProposalVoteGetVoteError(t *testing.T) {
+	t.Parallel()
+
+	logger := loggerPkg.GetNopLogger()
+	tracer := tracing.InitNoopTracer()
+	db := &databasePkg.StubDatabase{
+		GetVoteError: errors.New("get vote error"),
+	}
+	chains := types.Chains{{
+		Name:    "chain",
+		Wallets: []*types.Wallet{{Address: "address"}},
+	}}
+	generator := &Generator{
+		Logger:   *logger,
+		Chains:   chains,
+		Database: db,
+		Tracer:   tracer,
+		Fetchers: map[string]fetchersPkg.Fetcher{
+			"chain": &fetchersPkg.TestFetcher{WithVote: true},
+		},
+	}
+
+	report := generator.GenerateReport(context.Background())
+	require.Len(t, report.Entries, 1)
+
+	firstEntry, ok := report.Entries[0].(events.GenericErrorEvent)
+	require.True(t, ok)
+	require.NotNil(t, firstEntry)
+	require.ErrorContains(t, firstEntry.Error, "get vote error")
+}
+
+func TestGeneratorProposalVoteVoted(t *testing.T) {
+	t.Parallel()
+
+	logger := loggerPkg.GetNopLogger()
+	tracer := tracing.InitNoopTracer()
+	db := &databasePkg.StubDatabase{
+		UpsertVoteError: errors.New("write error"),
+	}
+	chains := types.Chains{{
+		Name:    "chain",
+		Wallets: []*types.Wallet{{Address: "address"}},
+	}}
+	generator := &Generator{
+		Logger:   *logger,
+		Chains:   chains,
+		Database: db,
+		Tracer:   tracer,
+		Fetchers: map[string]fetchersPkg.Fetcher{
+			"chain": &fetchersPkg.TestFetcher{WithVote: true},
+		},
+	}
+
+	report := generator.GenerateReport(context.Background())
+	require.Len(t, report.Entries, 1)
+
+	firstEntry, ok := report.Entries[0].(events.VotedEvent)
+	require.True(t, ok)
+	require.NotNil(t, firstEntry)
+}
+
+func TestGeneratorProposalVoteRevoted(t *testing.T) {
+	t.Parallel()
+
+	logger := loggerPkg.GetNopLogger()
+	tracer := tracing.InitNoopTracer()
+	db := &databasePkg.StubDatabase{
+		Votes: map[string]map[string]map[string]*types.Vote{
+			"chain": {
+				"1": {
+					"address": &types.Vote{
+						Options: types.VoteOptions{
+							{Option: "YES", Weight: 1},
 						},
 					},
 				},
 			},
 		},
 	}
-	newState := state.State{
-		ChainInfos: map[string]*state.ChainInfo{
+	chains := types.Chains{{
+		Name:    "chain",
+		Wallets: []*types.Wallet{{Address: "address"}},
+	}}
+	generator := &Generator{
+		Logger:   *logger,
+		Chains:   chains,
+		Database: db,
+		Tracer:   tracer,
+		Fetchers: map[string]fetchersPkg.Fetcher{
+			"chain": &fetchersPkg.TestFetcher{WithVote: true},
+		},
+	}
+
+	report := generator.GenerateReport(context.Background())
+	require.Len(t, report.Entries, 1)
+
+	firstEntry, ok := report.Entries[0].(events.RevotedEvent)
+	require.True(t, ok)
+	require.NotNil(t, firstEntry)
+}
+
+func TestGeneratorProposalVoteAlreadyVoted(t *testing.T) {
+	t.Parallel()
+
+	logger := loggerPkg.GetNopLogger()
+	tracer := tracing.InitNoopTracer()
+	db := &databasePkg.StubDatabase{
+		LastHeightWriteError: errors.New("custom error"),
+		Votes: map[string]map[string]map[string]*types.Vote{
 			"chain": {
-				ProposalVotes: map[string]state.WalletVotes{
-					"proposal": {
-						Proposal: types.Proposal{
-							ID:     "proposal",
-							Status: types.ProposalStatusPassed,
-						},
-						Votes: map[string]state.ProposalVote{},
+				"1": {
+					"address": &types.Vote{
+						Options: types.VoteOptions{},
 					},
 				},
 			},
 		},
 	}
+	chains := types.Chains{{
+		Name:    "chain",
+		Wallets: []*types.Wallet{{Address: "address"}},
+	}}
+	generator := &Generator{
+		Logger:   *logger,
+		Chains:   chains,
+		Database: db,
+		Tracer:   tracer,
+		Fetchers: map[string]fetchersPkg.Fetcher{
+			"chain": &fetchersPkg.TestFetcher{WithVote: true},
+		},
+	}
 
-	generator := NewReportGenerator(stateManager, logger.GetNopLogger(), types.Chains{
-		&types.Chain{Name: "chain"},
-	}, tracing.InitNoopTracer())
-
-	report := generator.GenerateReport(oldState, newState, context.Background())
-	assert.Len(t, report.Entries, 1, "Expected to have 1 entry!")
-
-	entry, ok := report.Entries[0].(events.FinishedVotingEvent)
-	assert.True(t, ok, "Expected to have not voted type!")
-	assert.Equal(t, "proposal", entry.Proposal.ID, "Proposal ID mismatch!")
+	report := generator.GenerateReport(context.Background())
+	require.Empty(t, report.Entries)
 }

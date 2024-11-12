@@ -15,7 +15,10 @@ func (reporter *Reporter) HandleAddMute(c tele.Context) error {
 		return c.Reply("Error muting notification: " + err)
 	}
 
-	reporter.MutesManager.AddMute(mute)
+	if insertErr := reporter.MutesManager.AddMute(mute); insertErr != nil {
+		reporter.Logger.Error().Err(insertErr).Msg("Error adding mute")
+		return reporter.BotReply(c, "Error adding mute")
+	}
 
 	templateRendered, renderErr := reporter.TemplatesManager.Render("mute_added", mute)
 	if renderErr != nil {

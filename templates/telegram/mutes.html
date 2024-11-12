@@ -2,13 +2,13 @@
 No active mutes.
 {{- end }}
 {{ range . }}
-{{- if .Chain }}
-<strong>Chain:</strong> {{ .Chain }}
+{{- if .Chain.String }}
+<strong>Chain:</strong> {{ .Chain.String }}
 {{- else }}
 <strong>Chain:</strong> all chains
 {{- end }}
-{{- if .ProposalID }}
-<strong>Proposal ID:</strong> {{ .ProposalID }}
+{{- if .ProposalID.String }}
+<strong>Proposal ID:</strong> {{ .ProposalID.String }}
 {{- else }}
 <strong>Proposal ID:</strong> all proposals
 {{- end }}

@@ -40,3 +40,4 @@ linters:
     - godox
     - perfsprint
     - mnd
+    - interfacebloat

@@ -1,11 +1,11 @@
 Created mute with the following params:
-{{- if .Chain }}
-**Chain:** {{ .Chain }}
+{{- if .Chain.String }}
+**Chain:** {{ .Chain.String }}
 {{- else }}
 **Chain:** all chains
 {{- end }}
-{{- if .ProposalID }}
-**Proposal ID:** {{ .ProposalID }}
+{{- if .ProposalID.String }}
+**Proposal ID:** {{ .ProposalID.String }}
 {{- else }}
 **Proposal ID:** all proposals
 {{- end }}

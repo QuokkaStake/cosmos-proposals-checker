@@ -2,8 +2,10 @@ package discord
 
 import (
 	"fmt"
-	mutes "main/pkg/mutes"
+	"main/pkg/types"
 	"time"
+
+	"github.com/guregu/null/v5"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -38,17 +40,19 @@ func (reporter *Reporter) GetAddMuteCommand() *Command {
 			options := i.ApplicationCommandData().Options
 
 			durationString, _ := options[0].Value.(string)
-			var chain string
-			var proposal string
+			chain := null.NewString("", false)
+			proposal := null.NewString("", false)
 
 			_, opts := options[0], options[1:]
 
 			for _, opt := range opts {
 				if opt.Name == "chain" {
-					chain, _ = opt.Value.(string)
+					chainRaw, _ := opt.Value.(string)
+					chain = null.StringFrom(chainRaw)
 				}
 				if opt.Name == "proposal" {
-					proposal, _ = opt.Value.(string)
+					proposalRaw, _ := opt.Value.(string)
+					proposal = null.StringFrom(proposalRaw)
 				}
 			}
 
@@ -58,7 +62,7 @@ func (reporter *Reporter) GetAddMuteCommand() *Command {
 				return
 			}
 
-			mute := &mutes.Mute{
+			mute := &types.Mute{
 				Chain:      chain,
 				ProposalID: proposal,
 				Expires:    time.Now().Add(duration),
@@ -68,7 +72,11 @@ func (reporter *Reporter) GetAddMuteCommand() *Command {
 				),
 			}
 
-			reporter.MutesManager.AddMute(mute)
+			if insertErr := reporter.MutesManager.AddMute(mute); insertErr != nil {
+				reporter.Logger.Error().Err(err).Msg("Error adding mute")
+				reporter.BotRespond(s, i, "Error adding mute!")
+				return
+			}
 
 			template, err := reporter.TemplatesManager.Render("mute_added", mute)
 			if err != nil {

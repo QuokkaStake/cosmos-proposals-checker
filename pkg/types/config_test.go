@@ -87,11 +87,22 @@ func TestChainGetNameWithPrettyName(t *testing.T) {
 	assert.Equal(t, "chain-pretty", err, "Chain name should match!")
 }
 
-func TestValidateConfigNoChains(t *testing.T) {
+func TestValidateConfigNoDatabase(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
 		Chains: []*Chain{},
+	}
+	err := config.Validate()
+	require.Error(t, err, nil, "Error should be presented!")
+}
+
+func TestValidateConfigNoChains(t *testing.T) {
+	t.Parallel()
+
+	config := Config{
+		DatabaseConfig: DatabaseConfig{Path: "database.sqlite"},
+		Chains:         []*Chain{},
 	}
 	err := config.Validate()
 	require.Error(t, err, nil, "Error should be presented!")
@@ -115,6 +126,7 @@ func TestValidateConfigWrongProposalType(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
+		DatabaseConfig: DatabaseConfig{Path: "database.sqlite"},
 		Chains: []*Chain{
 			{
 				Name:          "chain",
@@ -133,7 +145,8 @@ func TestValidateConfigInvalidTimezone(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
-		Timezone: "test",
+		Timezone:       "test",
+		DatabaseConfig: DatabaseConfig{Path: "database.sqlite"},
 		Chains: []*Chain{
 			{
 				Name:          "chain",
@@ -152,7 +165,8 @@ func TestValidateConfigInvalidWallet(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
-		Timezone: "Europe/Moscow",
+		Timezone:       "Europe/Moscow",
+		DatabaseConfig: DatabaseConfig{Path: "database.sqlite"},
 		Chains: []*Chain{
 			{
 				Name:          "chain",
@@ -171,7 +185,8 @@ func TestValidateConfigInvalidType(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
-		Timezone: "Europe/Moscow",
+		Timezone:       "Europe/Moscow",
+		DatabaseConfig: DatabaseConfig{Path: "database.sqlite"},
 		Chains: []*Chain{
 			{
 				Name:          "chain",
@@ -190,7 +205,8 @@ func TestValidateConfigValidChain(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
-		Timezone: "Europe/Moscow",
+		Timezone:       "Europe/Moscow",
+		DatabaseConfig: DatabaseConfig{Path: "database.sqlite"},
 		Chains: []*Chain{
 			{
 				Name:          "chain",
@@ -209,46 +225,11 @@ func TestConfigDisplayWarningInvalidChain(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
-		Timezone:  "Europe/Moscow",
-		StatePath: "test",
-		MutesPath: "test",
+		Timezone:       "Europe/Moscow",
+		DatabaseConfig: DatabaseConfig{Path: "database.sqlite"},
 		Chains: []*Chain{
 			{
 				KeplrName: "test",
-			},
-		},
-	}
-	warnings := config.DisplayWarnings()
-	assert.Len(t, warnings, 1)
-}
-
-func TestConfigDisplayWarningNoStatePath(t *testing.T) {
-	t.Parallel()
-
-	config := Config{
-		Timezone:  "Europe/Moscow",
-		MutesPath: "test",
-		Chains: []*Chain{
-			{
-				KeplrName: "test",
-				Explorer:  &Explorer{WalletLinkPattern: "test", ProposalLinkPattern: "test"},
-			},
-		},
-	}
-	warnings := config.DisplayWarnings()
-	assert.Len(t, warnings, 1)
-}
-
-func TestConfigDisplayWarningNoMutesPath(t *testing.T) {
-	t.Parallel()
-
-	config := Config{
-		Timezone:  "Europe/Moscow",
-		StatePath: "test",
-		Chains: []*Chain{
-			{
-				KeplrName: "test",
-				Explorer:  &Explorer{WalletLinkPattern: "test", ProposalLinkPattern: "test"},
 			},
 		},
 	}
@@ -260,9 +241,8 @@ func TestConfigDisplayWarningOk(t *testing.T) {
 	t.Parallel()
 
 	config := Config{
-		Timezone:  "Europe/Moscow",
-		StatePath: "test",
-		MutesPath: "test",
+		Timezone:       "Europe/Moscow",
+		DatabaseConfig: DatabaseConfig{Path: "database.sqlite"},
 		Chains: []*Chain{
 			{
 				KeplrName: "test",

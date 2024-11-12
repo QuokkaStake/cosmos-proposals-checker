@@ -43,7 +43,7 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
       - name: Run tests
-        run: go test -coverprofile coverage.txt -v ./...
+        run: go test -coverprofile coverage.txt -coverpkg ./... -v ./...
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.3.0
         with:

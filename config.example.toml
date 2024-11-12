@@ -1,7 +1,3 @@
-# A path to a file that will store the state of the app.
-state-path = "cosmos-proposals-checker-state.json"
-# A path to a file that will store mutes of this app. Omitting it will disable the mute functionality.
-mutes-path = "cosmos-proposals-checker-mutes.json"
 # Interval to check and notify.
 # Can be a cron-like interval (like "0 * * * *" for every hour),
 # "@hourly"/"@daily" for hourly/daily intervals, or "@every 1h"
@@ -11,6 +7,11 @@ mutes-path = "cosmos-proposals-checker-mutes.json"
 interval = "@hourly"
 # Timezone in which time (like undelegation finish time) will be displayed. Defaults to "Etc/GMT", so UTC+0
 timezone = "Europe/Moscow"
+
+# Database config.
+[database]
+# Path to SQLite database to store state in.
+path = "database.sqlite"
 
 # Logging configuration
 [log]

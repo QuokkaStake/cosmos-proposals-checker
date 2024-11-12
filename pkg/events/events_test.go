@@ -23,6 +23,14 @@ func TestProposalsQueryErrorEvent(t *testing.T) {
 	assert.False(t, event.IsAlert())
 }
 
+func TestGenericErrorEvent(t *testing.T) {
+	t.Parallel()
+
+	event := GenericErrorEvent{}
+	assert.Equal(t, "generic_error", event.Name())
+	assert.False(t, event.IsAlert())
+}
+
 func TestVoteQueryErrorEvent(t *testing.T) {
 	t.Parallel()
 

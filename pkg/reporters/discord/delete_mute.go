@@ -1,8 +1,10 @@
 package discord
 
 import (
-	mutes "main/pkg/mutes"
+	"main/pkg/types"
 	"time"
+
+	"github.com/guregu/null/v5"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -30,27 +32,32 @@ func (reporter *Reporter) GetDeleteMuteCommand() *Command {
 		Handler: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			options := i.ApplicationCommandData().Options
 
-			var chain string
-			var proposal string
+			chain := null.NewString("", false)
+			proposal := null.NewString("", false)
 
 			for _, opt := range options {
 				if opt.Name == "chain" {
-					chain, _ = opt.Value.(string)
+					chainRaw, _ := opt.Value.(string)
+					chain = null.StringFrom(chainRaw)
 				}
 				if opt.Name == "proposal" {
-					proposal, _ = opt.Value.(string)
+					proposalRaw, _ := opt.Value.(string)
+					proposal = null.StringFrom(proposalRaw)
 				}
 			}
 
-			mute := &mutes.Mute{
+			mute := &types.Mute{
 				Chain:      chain,
 				ProposalID: proposal,
 				Expires:    time.Now(),
 				Comment:    "",
 			}
 
-			if found := reporter.MutesManager.DeleteMute(mute); !found {
+			if found, insertErr := reporter.MutesManager.DeleteMute(mute); !found {
 				reporter.BotRespond(s, i, "Could not find the mute to delete!")
+				return
+			} else if insertErr != nil {
+				reporter.BotRespond(s, i, "Error deleting mute!")
 				return
 			}
 

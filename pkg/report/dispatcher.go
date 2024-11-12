@@ -32,8 +32,6 @@ func NewDispatcher(
 }
 
 func (d *Dispatcher) Init() error {
-	d.MutesManager.Load()
-
 	for _, reporter := range d.Reporters {
 		if err := reporter.Init(); err != nil {
 			d.Logger.Error().Err(err).
@@ -73,7 +71,11 @@ func (d *Dispatcher) SendReport(report reportersPkg.Report, ctx context.Context)
 			Msg("Sending report...")
 
 		for _, reportEntry := range report.Entries {
-			if d.MutesManager.IsEntryMuted(reportEntry) {
+			if isMuted, muteErr := d.MutesManager.IsEntryMuted(reportEntry); muteErr != nil {
+				d.Logger.Warn().
+					Err(muteErr).
+					Msg("Error checking whether the proposal was muted.")
+			} else if isMuted {
 				d.Logger.Debug().
 					Str("entry", reportEntry.Name()).
 					Msg("Notifications are muted, not sending.")
