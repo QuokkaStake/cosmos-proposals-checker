@@ -17,7 +17,6 @@ linters:
     - funlen
     - nlreturn
     - wrapcheck
-    - gomnd
     - cyclop
     - err113
     - exhaustruct

@@ -9,7 +9,6 @@ import (
 
 	"github.com/jarcoal/httpmock"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -116,7 +115,6 @@ func TestAppStartOk(t *testing.T) {
 
 	app.Stop()
 	wg.Wait()
-	assert.True(t, true)
 }
 
 //nolint:paralleltest // disabled due to httpmock usage
@@ -129,6 +127,4 @@ func TestAppReport(t *testing.T) {
 	app.Database = &databasePkg.StubDatabase{}
 	app.ReportGenerator.Database = &databasePkg.StubDatabase{}
 	app.Report()
-
-	assert.True(t, true)
 }

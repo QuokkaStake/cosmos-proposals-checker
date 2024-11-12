@@ -53,7 +53,7 @@ type Response struct {
 	Message string
 }
 
-func (r *Reporter) NewAlertFromReportEntry(eventRaw entry.ReportEntry) (Alert, error) {
+func (r Reporter) NewAlertFromReportEntry(eventRaw entry.ReportEntry) (Alert, error) {
 	event, ok := eventRaw.(entry.ReportEntryNotError)
 	if !ok {
 		return Alert{}, errors.New("error converting alert entry")
