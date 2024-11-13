@@ -34,7 +34,7 @@ type Chain struct {
 	NeutronSmartContract string `default:"neutron1436kxs0w2es6xlqpp9rd35e3d0cjnw4sv8j3a7483sgks29jqwgshlt6zh" toml:"neutron-smart-contract"`
 }
 
-func (c Chain) Validate() error {
+func (c *Chain) Validate() error {
 	if c.Name == "" {
 		return fmt.Errorf("empty chain name")
 	}
@@ -64,7 +64,7 @@ func (c Chain) Validate() error {
 	return nil
 }
 
-func (c Chain) GetName() string {
+func (c *Chain) GetName() string {
 	if c.PrettyName != "" {
 		return c.PrettyName
 	}
@@ -92,7 +92,7 @@ func (c *Chain) GetExplorerProposalsLinks(proposalID string) []Link {
 	return links
 }
 
-func (c Chain) GetProposalLink(proposal Proposal) Link {
+func (c *Chain) GetProposalLink(proposal Proposal) Link {
 	if c.Explorer == nil || c.Explorer.ProposalLinkPattern == "" {
 		return Link{Name: proposal.Title}
 	}
@@ -103,7 +103,7 @@ func (c Chain) GetProposalLink(proposal Proposal) Link {
 	}
 }
 
-func (c Chain) GetWalletLink(wallet *Wallet) Link {
+func (c *Chain) GetWalletLink(wallet *Wallet) Link {
 	if c.Explorer == nil || c.Explorer.WalletLinkPattern == "" {
 		return Link{Name: wallet.AddressOrAlias()}
 	}
