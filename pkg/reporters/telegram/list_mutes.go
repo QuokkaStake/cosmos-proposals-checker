@@ -23,11 +23,5 @@ func (reporter *Reporter) HandleListMutes(c tele.Context) error {
 		return !m.IsExpired()
 	})
 
-	template, err := reporter.TemplatesManager.Render("mutes", filteredMutes)
-	if err != nil {
-		reporter.Logger.Error().Err(err).Msg("Error rendering template")
-		return reporter.BotReply(c, "Error rendering template")
-	}
-
-	return reporter.BotReply(c, template)
+	return reporter.ReplyRender(c, "mutes", filteredMutes)
 }

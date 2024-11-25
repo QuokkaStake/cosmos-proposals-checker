@@ -1,0 +1,622 @@
+{
+  "ok": true,
+  "result": {
+    "message_id": 0,
+    "from": {
+      "id": 0,
+      "is_bot": true,
+      "first_name": "string",
+      "last_name": "string",
+      "username": "string",
+      "language_code": "string",
+      "can_join_groups": true,
+      "can_read_all_group_messages": true,
+      "supports_inline_queries": true
+    },
+    "sender_chat": {
+      "id": 0,
+      "type": "private",
+      "title": "string",
+      "username": "string",
+      "first_name": "string",
+      "last_name": "string",
+      "photo": {
+        "small_file_id": "string",
+        "small_file_unique_id": "string",
+        "big_file_id": "string",
+        "big_file_unique_id": "string"
+      },
+      "bio": "string",
+      "description": "string",
+      "invite_link": "string",
+      "permissions": {
+        "can_send_messages": true,
+        "can_send_media_messages": true,
+        "can_send_polls": true,
+        "can_send_other_messages": true,
+        "can_add_web_page_previews": true,
+        "can_change_info": true,
+        "can_invite_users": true,
+        "can_pin_messages": true
+      },
+      "slow_mode_delay": 0,
+      "sticker_set_name": "string",
+      "can_set_sticker_set": true,
+      "linked_chat_id": 0,
+      "location": {
+        "location": {
+          "longitude": 0,
+          "latitude": 0,
+          "horizontal_accuracy": 0,
+          "live_period": 0,
+          "heading": 0,
+          "proximity_alert_radius": 0
+        },
+        "address": "string"
+      }
+    },
+    "date": 0,
+    "chat": {
+      "id": 0,
+      "type": "private",
+      "title": "string",
+      "username": "string",
+      "first_name": "string",
+      "last_name": "string",
+      "photo": {
+        "small_file_id": "string",
+        "small_file_unique_id": "string",
+        "big_file_id": "string",
+        "big_file_unique_id": "string"
+      },
+      "bio": "string",
+      "description": "string",
+      "invite_link": "string",
+      "permissions": {
+        "can_send_messages": true,
+        "can_send_media_messages": true,
+        "can_send_polls": true,
+        "can_send_other_messages": true,
+        "can_add_web_page_previews": true,
+        "can_change_info": true,
+        "can_invite_users": true,
+        "can_pin_messages": true
+      },
+      "slow_mode_delay": 0,
+      "sticker_set_name": "string",
+      "can_set_sticker_set": true,
+      "linked_chat_id": 0,
+      "location": {
+        "location": {
+          "longitude": 0,
+          "latitude": 0,
+          "horizontal_accuracy": 0,
+          "live_period": 0,
+          "heading": 0,
+          "proximity_alert_radius": 0
+        },
+        "address": "string"
+      }
+    },
+    "forward_from": {
+      "id": 0,
+      "is_bot": true,
+      "first_name": "string",
+      "last_name": "string",
+      "username": "string",
+      "language_code": "string",
+      "can_join_groups": true,
+      "can_read_all_group_messages": true,
+      "supports_inline_queries": true
+    },
+    "forward_from_chat": {
+      "id": 0,
+      "type": "private",
+      "title": "string",
+      "username": "string",
+      "first_name": "string",
+      "last_name": "string",
+      "photo": {
+        "small_file_id": "string",
+        "small_file_unique_id": "string",
+        "big_file_id": "string",
+        "big_file_unique_id": "string"
+      },
+      "bio": "string",
+      "description": "string",
+      "invite_link": "string",
+      "permissions": {
+        "can_send_messages": true,
+        "can_send_media_messages": true,
+        "can_send_polls": true,
+        "can_send_other_messages": true,
+        "can_add_web_page_previews": true,
+        "can_change_info": true,
+        "can_invite_users": true,
+        "can_pin_messages": true
+      },
+      "slow_mode_delay": 0,
+      "sticker_set_name": "string",
+      "can_set_sticker_set": true,
+      "linked_chat_id": 0,
+      "location": {
+        "location": {
+          "longitude": 0,
+          "latitude": 0,
+          "horizontal_accuracy": 0,
+          "live_period": 0,
+          "heading": 0,
+          "proximity_alert_radius": 0
+        },
+        "address": "string"
+      }
+    },
+    "forward_from_message_id": 0,
+    "forward_signature": "string",
+    "forward_sender_name": "string",
+    "forward_date": 0,
+    "via_bot": {
+      "id": 0,
+      "is_bot": true,
+      "first_name": "string",
+      "last_name": "string",
+      "username": "string",
+      "language_code": "string",
+      "can_join_groups": true,
+      "can_read_all_group_messages": true,
+      "supports_inline_queries": true
+    },
+    "edit_date": 0,
+    "media_group_id": "string",
+    "author_signature": "string",
+    "text": "string",
+    "entities": [
+      {
+        "type": "mention",
+        "offset": 0,
+        "length": 0,
+        "url": "string",
+        "user": {
+          "id": 0,
+          "is_bot": true,
+          "first_name": "string",
+          "last_name": "string",
+          "username": "string",
+          "language_code": "string",
+          "can_join_groups": true,
+          "can_read_all_group_messages": true,
+          "supports_inline_queries": true
+        },
+        "language": "string"
+      }
+    ],
+    "animation": {
+      "file_id": "string",
+      "file_unique_id": "string",
+      "width": 0,
+      "height": 0,
+      "duration": 0,
+      "thumb": {
+        "file_id": "string",
+        "file_unique_id": "string",
+        "width": 0,
+        "height": 0,
+        "file_size": 0
+      },
+      "file_name": "string",
+      "mime_type": "string",
+      "file_size": 0
+    },
+    "audio": {
+      "file_id": "string",
+      "file_unique_id": "string",
+      "duration": 0,
+      "performer": "string",
+      "title": "string",
+      "file_name": "string",
+      "mime_type": "string",
+      "file_size": 0,
+      "thumb": {
+        "file_id": "string",
+        "file_unique_id": "string",
+        "width": 0,
+        "height": 0,
+        "file_size": 0
+      }
+    },
+    "document": {
+      "file_id": "string",
+      "file_unique_id": "string",
+      "thumb": {
+        "file_id": "string",
+        "file_unique_id": "string",
+        "width": 0,
+        "height": 0,
+        "file_size": 0
+      },
+      "file_name": "string",
+      "mime_type": "string",
+      "file_size": 0
+    },
+    "photo": [
+      {
+        "file_id": "string",
+        "file_unique_id": "string",
+        "width": 0,
+        "height": 0,
+        "file_size": 0
+      }
+    ],
+    "sticker": {
+      "file_id": "string",
+      "file_unique_id": "string",
+      "width": 0,
+      "height": 0,
+      "is_animated": true,
+      "thumb": {
+        "file_id": "string",
+        "file_unique_id": "string",
+        "width": 0,
+        "height": 0,
+        "file_size": 0
+      },
+      "emoji": "string",
+      "set_name": "string",
+      "mask_position": {
+        "point": "forehead",
+        "x_shift": 0,
+        "y_shift": 0,
+        "scale": 0
+      },
+      "file_size": 0
+    },
+    "video": {
+      "file_id": "string",
+      "file_unique_id": "string",
+      "width": 0,
+      "height": 0,
+      "duration": 0,
+      "thumb": {
+        "file_id": "string",
+        "file_unique_id": "string",
+        "width": 0,
+        "height": 0,
+        "file_size": 0
+      },
+      "file_name": "string",
+      "mime_type": "string",
+      "file_size": 0
+    },
+    "video_note": {
+      "file_id": "string",
+      "file_unique_id": "string",
+      "length": 0,
+      "duration": 0,
+      "thumb": {
+        "file_id": "string",
+        "file_unique_id": "string",
+        "width": 0,
+        "height": 0,
+        "file_size": 0
+      },
+      "file_size": 0
+    },
+    "voice": {
+      "file_id": "string",
+      "file_unique_id": "string",
+      "duration": 0,
+      "mime_type": "string",
+      "file_size": 0
+    },
+    "caption": "string",
+    "caption_entities": [
+      {
+        "type": "mention",
+        "offset": 0,
+        "length": 0,
+        "url": "string",
+        "user": {
+          "id": 0,
+          "is_bot": true,
+          "first_name": "string",
+          "last_name": "string",
+          "username": "string",
+          "language_code": "string",
+          "can_join_groups": true,
+          "can_read_all_group_messages": true,
+          "supports_inline_queries": true
+        },
+        "language": "string"
+      }
+    ],
+    "contact": {
+      "phone_number": "string",
+      "first_name": "string",
+      "last_name": "string",
+      "user_id": 0,
+      "vcard": "string"
+    },
+    "dice": {
+      "emoji": "string",
+      "value": 0
+    },
+    "game": {
+      "title": "string",
+      "description": "string",
+      "photo": [
+        {
+          "file_id": "string",
+          "file_unique_id": "string",
+          "width": 0,
+          "height": 0,
+          "file_size": 0
+        }
+      ],
+      "text": "string",
+      "text_entities": [
+        {
+          "type": "mention",
+          "offset": 0,
+          "length": 0,
+          "url": "string",
+          "user": {
+            "id": 0,
+            "is_bot": true,
+            "first_name": "string",
+            "last_name": "string",
+            "username": "string",
+            "language_code": "string",
+            "can_join_groups": true,
+            "can_read_all_group_messages": true,
+            "supports_inline_queries": true
+          },
+          "language": "string"
+        }
+      ],
+      "animation": {
+        "file_id": "string",
+        "file_unique_id": "string",
+        "width": 0,
+        "height": 0,
+        "duration": 0,
+        "thumb": {
+          "file_id": "string",
+          "file_unique_id": "string",
+          "width": 0,
+          "height": 0,
+          "file_size": 0
+        },
+        "file_name": "string",
+        "mime_type": "string",
+        "file_size": 0
+      }
+    },
+    "poll": {
+      "id": "string",
+      "question": "string",
+      "options": [
+        {
+          "text": "string",
+          "voter_count": 0
+        }
+      ],
+      "total_voter_count": 0,
+      "is_closed": true,
+      "is_anonymous": true,
+      "type": "string",
+      "allows_multiple_answers": true,
+      "correct_option_id": 0,
+      "explanation": "string",
+      "explanation_entities": [
+        {
+          "type": "mention",
+          "offset": 0,
+          "length": 0,
+          "url": "string",
+          "user": {
+            "id": 0,
+            "is_bot": true,
+            "first_name": "string",
+            "last_name": "string",
+            "username": "string",
+            "language_code": "string",
+            "can_join_groups": true,
+            "can_read_all_group_messages": true,
+            "supports_inline_queries": true
+          },
+          "language": "string"
+        }
+      ],
+      "open_period": 0,
+      "close_date": 0
+    },
+    "venue": {
+      "location": {
+        "longitude": 0,
+        "latitude": 0,
+        "horizontal_accuracy": 0,
+        "live_period": 0,
+        "heading": 0,
+        "proximity_alert_radius": 0
+      },
+      "title": "string",
+      "address": "string",
+      "foursquare_id": "string",
+      "foursquare_type": "string",
+      "google_place_id": "string",
+      "google_place_type": "string"
+    },
+    "location": {
+      "longitude": 0,
+      "latitude": 0,
+      "horizontal_accuracy": 0,
+      "live_period": 0,
+      "heading": 0,
+      "proximity_alert_radius": 0
+    },
+    "new_chat_members": [
+      {
+        "id": 0,
+        "is_bot": true,
+        "first_name": "string",
+        "last_name": "string",
+        "username": "string",
+        "language_code": "string",
+        "can_join_groups": true,
+        "can_read_all_group_messages": true,
+        "supports_inline_queries": true
+      }
+    ],
+    "left_chat_member": {
+      "id": 0,
+      "is_bot": true,
+      "first_name": "string",
+      "last_name": "string",
+      "username": "string",
+      "language_code": "string",
+      "can_join_groups": true,
+      "can_read_all_group_messages": true,
+      "supports_inline_queries": true
+    },
+    "new_chat_title": "string",
+    "new_chat_photo": [
+      {
+        "file_id": "string",
+        "file_unique_id": "string",
+        "width": 0,
+        "height": 0,
+        "file_size": 0
+      }
+    ],
+    "delete_chat_photo": true,
+    "group_chat_created": true,
+    "supergroup_chat_created": true,
+    "channel_chat_created": true,
+    "migrate_to_chat_id": 0,
+    "migrate_from_chat_id": 0,
+    "invoice": {
+      "title": "string",
+      "description": "string",
+      "start_parameter": "string",
+      "currency": "string",
+      "total_amount": 0
+    },
+    "successful_payment": {
+      "currency": "string",
+      "total_amount": 0,
+      "invoice_payload": "string",
+      "shipping_option_id": "string",
+      "order_info": {
+        "name": "string",
+        "phone_number": "string",
+        "email": "string",
+        "shipping_address": {
+          "country_code": "string",
+          "state": "string",
+          "city": "string",
+          "street_line1": "string",
+          "street_line2": "string",
+          "post_code": "string"
+        }
+      },
+      "telegram_payment_charge_id": "string",
+      "provider_payment_charge_id": "string"
+    },
+    "connected_website": "string",
+    "passport_data": {
+      "data": [
+        {
+          "type": "personal_details",
+          "data": "string",
+          "phone_number": "string",
+          "email": "string",
+          "files": [
+            {
+              "file_id": "string",
+              "file_unique_id": "string",
+              "file_size": 0,
+              "file_date": 0
+            }
+          ],
+          "front_side": {
+            "file_id": "string",
+            "file_unique_id": "string",
+            "file_size": 0,
+            "file_date": 0
+          },
+          "reverse_side": {
+            "file_id": "string",
+            "file_unique_id": "string",
+            "file_size": 0,
+            "file_date": 0
+          },
+          "selfie": {
+            "file_id": "string",
+            "file_unique_id": "string",
+            "file_size": 0,
+            "file_date": 0
+          },
+          "translation": [
+            {
+              "file_id": "string",
+              "file_unique_id": "string",
+              "file_size": 0,
+              "file_date": 0
+            }
+          ],
+          "hash": "string"
+        }
+      ],
+      "credentials": {
+        "data": "string",
+        "hash": "string",
+        "secret": "string"
+      }
+    },
+    "proximity_alert_triggered": {
+      "traveler": {
+        "id": 0,
+        "is_bot": true,
+        "first_name": "string",
+        "last_name": "string",
+        "username": "string",
+        "language_code": "string",
+        "can_join_groups": true,
+        "can_read_all_group_messages": true,
+        "supports_inline_queries": true
+      },
+      "watcher": {
+        "id": 0,
+        "is_bot": true,
+        "first_name": "string",
+        "last_name": "string",
+        "username": "string",
+        "language_code": "string",
+        "can_join_groups": true,
+        "can_read_all_group_messages": true,
+        "supports_inline_queries": true
+      },
+      "distance": 0
+    },
+    "reply_markup": {
+      "inline_keyboard": [
+        [
+          {
+            "text": "string",
+            "url": "string",
+            "login_url": {
+              "url": "string",
+              "forward_text": "string",
+              "bot_username": "string",
+              "request_write_access": true
+            },
+            "callback_data": "string",
+            "switch_inline_query": "string",
+            "switch_inline_query_current_chat": "string",
+            "pay": true
+          }
+        ]
+      ]
+    }
+  }
+}

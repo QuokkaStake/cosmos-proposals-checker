@@ -22,11 +22,5 @@ func (reporter *Reporter) HandleTally(c tele.Context) error {
 		return reporter.BotReply(c, fmt.Sprintf("Error getting tallies info: %s", err))
 	}
 
-	template, err := reporter.TemplatesManager.Render("tally", tallies)
-	if err != nil {
-		reporter.Logger.Error().Err(err).Msg("Error rendering template")
-		return reporter.BotReply(c, "Error rendering template")
-	}
-
-	return reporter.BotReply(c, template)
+	return reporter.ReplyRender(c, "tally", tallies)
 }

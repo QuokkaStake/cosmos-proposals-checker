@@ -20,11 +20,5 @@ func (reporter *Reporter) HandleAddMute(c tele.Context) error {
 		return reporter.BotReply(c, "Error adding mute")
 	}
 
-	templateRendered, renderErr := reporter.TemplatesManager.Render("mute_added", mute)
-	if renderErr != nil {
-		reporter.Logger.Error().Err(renderErr).Msg("Error rendering template")
-		return reporter.BotReply(c, "Error rendering template")
-	}
-
-	return reporter.BotReply(c, templateRendered)
+	return reporter.ReplyRender(c, "mute_added", mute)
 }

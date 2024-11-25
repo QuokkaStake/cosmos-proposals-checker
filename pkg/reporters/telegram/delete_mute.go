@@ -10,7 +10,7 @@ func (reporter *Reporter) HandleDeleteMute(c tele.Context) error {
 		Str("text", c.Text()).
 		Msg("Got delete mute query")
 
-	mute, err := ParseMuteDeleteOptions(c.Text(), c)
+	mute, err := ParseMuteDeleteOptions(c)
 	if err != "" {
 		return c.Reply("Error deleting mute: " + err)
 	}
@@ -21,11 +21,5 @@ func (reporter *Reporter) HandleDeleteMute(c tele.Context) error {
 		return c.Reply("Error deleting mute!")
 	}
 
-	templateRendered, renderErr := reporter.TemplatesManager.Render("mute_deleted", mute)
-	if renderErr != nil {
-		reporter.Logger.Error().Err(renderErr).Msg("Error rendering template")
-		return reporter.BotReply(c, "Error rendering template")
-	}
-
-	return reporter.BotReply(c, templateRendered)
+	return reporter.ReplyRender(c, "mute_deleted", mute)
 }

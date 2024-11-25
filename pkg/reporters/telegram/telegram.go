@@ -69,6 +69,16 @@ func (reporter *Reporter) Init() error {
 		return nil
 	}
 
+	if err := reporter.InitBot(); err != nil {
+		return err
+	}
+
+	go reporter.TelegramBot.Start()
+
+	return nil
+}
+
+func (reporter *Reporter) InitBot() error {
 	bot, err := tele.NewBot(tele.Settings{
 		Token:  reporter.TelegramToken,
 		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
@@ -89,7 +99,6 @@ func (reporter *Reporter) Init() error {
 	bot.Handle("/params", reporter.HandleParams)
 
 	reporter.TelegramBot = bot
-	go reporter.TelegramBot.Start()
 
 	return nil
 }
@@ -203,7 +212,7 @@ func ParseMuteOptions(query string, c tele.Context) (*types.Mute, string) {
 	return mute, ""
 }
 
-func ParseMuteDeleteOptions(query string, c tele.Context) (*types.Mute, string) {
+func ParseMuteDeleteOptions(c tele.Context) (*types.Mute, string) {
 	// we only construct mute with chain/proposal to compare, no need to take care
 	// about the expiration/comment
 	mute := &types.Mute{
@@ -232,4 +241,9 @@ func ParseMuteDeleteOptions(query string, c tele.Context) (*types.Mute, string) 
 	}
 
 	return mute, ""
+}
+
+func (reporter *Reporter) Stop() {
+	reporter.Logger.Info().Msg("Shutting down...")
+	reporter.TelegramBot.Stop()
 }
