@@ -56,7 +56,7 @@ func (d *SqliteDatabase) Init() {
 
 	var version string
 	if versionErr := db.QueryRow("SELECT SQLITE_VERSION()").Scan(&version); versionErr != nil {
-		d.logger.Panic().Err(err).Msg("Could not query SQLite database")
+		d.logger.Panic().Err(versionErr).Msg("Could not query SQLite database")
 	}
 
 	d.logger.Info().
