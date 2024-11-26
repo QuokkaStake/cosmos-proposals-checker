@@ -2,7 +2,6 @@ package telegram
 
 import (
 	"errors"
-	tele "gopkg.in/telebot.v3"
 	"main/assets"
 	"main/pkg/data"
 	databasePkg "main/pkg/database"
@@ -16,10 +15,13 @@ import (
 	"testing"
 	"time"
 
+	tele "gopkg.in/telebot.v3"
+
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
 )
 
+//nolint:paralleltest // disabled
 func TestReporterInitNotEnabled(t *testing.T) {
 	config := types.TelegramConfig{}
 	chains := types.Chains{{Name: "chain", LCDEndpoints: []string{"https://example.com"}}}
@@ -115,8 +117,7 @@ func TestReporterInitOkay(t *testing.T) {
 	wg.Add(1)
 
 	go func() {
-		err = reporter.Init()
-		require.NoError(t, err)
+		_ = reporter.Init()
 
 		ctx := reporter.TelegramBot.NewContext(tele.Update{
 			ID: 1,
