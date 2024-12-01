@@ -1,6 +1,8 @@
 package telegram
 
 import (
+	"fmt"
+
 	tele "gopkg.in/telebot.v3"
 )
 
@@ -17,7 +19,7 @@ func (reporter *Reporter) HandleAddMute(c tele.Context) error {
 
 	if insertErr := reporter.MutesManager.AddMute(mute); insertErr != nil {
 		reporter.Logger.Error().Err(insertErr).Msg("Error adding mute")
-		return reporter.BotReply(c, "Error adding mute")
+		return reporter.BotReply(c, fmt.Sprintf("Error adding mute: %s", insertErr))
 	}
 
 	return reporter.ReplyRender(c, "mute_added", mute)

@@ -13,6 +13,7 @@ type StubDatabase struct {
 	GetVoteError          error
 	UpsertVoteError       error
 	IsMutedError          error
+	UpsertMuteError       error
 
 	Proposals       map[string]map[string]*types.Proposal
 	Votes           map[string]map[string]map[string]*types.Vote
@@ -156,6 +157,10 @@ func (d *StubDatabase) UpsertLastBlockHeight(
 }
 
 func (d *StubDatabase) UpsertMute(mute *types.Mute) error {
+	if d.UpsertMuteError != nil {
+		return d.UpsertMuteError
+	}
+
 	if d.Mutes == nil {
 		d.Mutes = []*types.Mute{}
 	}
