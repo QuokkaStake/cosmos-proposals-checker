@@ -1,6 +1,8 @@
 package telegram
 
 import (
+	"fmt"
+
 	tele "gopkg.in/telebot.v3"
 )
 
@@ -15,10 +17,10 @@ func (reporter *Reporter) HandleDeleteMute(c tele.Context) error {
 		return c.Reply("Error deleting mute: " + err)
 	}
 
-	if found, deleteErr := reporter.MutesManager.DeleteMute(mute); !found {
+	if found, deleteErr := reporter.MutesManager.DeleteMute(mute); deleteErr != nil {
+		return c.Reply(fmt.Sprintf("Error deleting mute: %s!", deleteErr))
+	} else if !found {
 		return c.Reply("Could not find the mute to delete!")
-	} else if deleteErr != nil {
-		return c.Reply("Error deleting mute!")
 	}
 
 	return reporter.ReplyRender(c, "mute_deleted", mute)
