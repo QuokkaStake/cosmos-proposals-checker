@@ -189,7 +189,7 @@ func TestTelegramReporterReporterAddMuteInvalidArgument(t *testing.T) {
 }
 
 //nolint:paralleltest // disabled
-func TestTelegramReporterReporterAddMuteErrorSending(t *testing.T) {
+func TestTelegramReporterReporterAddMuteError(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
