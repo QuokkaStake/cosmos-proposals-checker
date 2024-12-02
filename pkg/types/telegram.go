@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"reflect"
 
 	"github.com/jarcoal/httpmock"
 )
@@ -40,38 +39,6 @@ func TelegramResponseHasText(text string) httpmock.Matcher {
 
 			if response.Text != text {
 				panic(fmt.Sprintf("expected %q but got %q", response.Text, text))
-			}
-
-			return true
-		})
-}
-
-func TelegramResponseHasBytesAndMarkup(text []byte, keyboard TelegramInlineKeyboardResponse) httpmock.Matcher {
-	return TelegramResponseHasTextAndMarkup(string(text), keyboard)
-}
-
-func TelegramResponseHasTextAndMarkup(text string, keyboard TelegramInlineKeyboardResponse) httpmock.Matcher {
-	return httpmock.NewMatcher("TelegramResponseHasTextAndMarkup",
-		func(req *http.Request) bool {
-			response := TelegramResponse{}
-
-			err := json.NewDecoder(req.Body).Decode(&response)
-			if err != nil {
-				return false
-			}
-
-			if response.Text != text {
-				panic(fmt.Sprintf("expected %q but got %q", response.Text, text))
-			}
-
-			var responseKeyboard TelegramInlineKeyboardResponse
-			err = json.Unmarshal([]byte(response.ReplyMarkup), &responseKeyboard)
-			if err != nil {
-				panic(err)
-			}
-
-			if !reflect.DeepEqual(responseKeyboard, keyboard) {
-				panic(fmt.Sprintf("expected keyboard %q but got %q", responseKeyboard, keyboard))
 			}
 
 			return true
