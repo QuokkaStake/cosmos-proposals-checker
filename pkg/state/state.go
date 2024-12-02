@@ -4,6 +4,7 @@ import (
 	"main/pkg/types"
 	"sort"
 	"strconv"
+	"time"
 )
 
 type ProposalVote struct {
@@ -234,6 +235,7 @@ func (s *State) ToRenderedState() RenderedState {
 	sort.Strings(keys)
 
 	renderedState := RenderedState{
+		RenderTime: time.Now(),
 		ChainInfos: make([]RenderedChainInfo, len(keys)),
 	}
 
