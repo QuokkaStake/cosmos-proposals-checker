@@ -13,7 +13,8 @@ func (reporter *Reporter) HandleTally(c tele.Context) error {
 		Str("text", c.Text()).
 		Msg("Got tally list query")
 
-	if err := reporter.BotReply(c, "Calculating tally for proposals. This might take a while..."); err != nil {
+	msg, err := reporter.TelegramBot.Reply(c.Message(), "Calculating tally for proposals. This might take a while...")
+	if err != nil {
 		return err
 	}
 
@@ -22,5 +23,5 @@ func (reporter *Reporter) HandleTally(c tele.Context) error {
 		return reporter.BotReply(c, fmt.Sprintf("Error getting tallies info: %s", err))
 	}
 
-	return reporter.ReplyRender(c, "tally", tallies)
+	return reporter.EditRender(c, msg, "tally", tallies)
 }

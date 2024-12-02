@@ -70,9 +70,6 @@ func TestTelegramReporterGetParamsError(t *testing.T) {
 		},
 	})
 
-	err = database.UpsertMute(&types.Mute{})
-	require.NoError(t, err)
-
 	err = reporter.HandleParams(ctx)
 	require.NoError(t, err)
 }
@@ -130,9 +127,6 @@ func TestTelegramReporterGetParamsOk(t *testing.T) {
 			Chat:   &tele.Chat{ID: 2},
 		},
 	})
-
-	err = database.UpsertMute(&types.Mute{})
-	require.NoError(t, err)
 
 	err = reporter.HandleParams(ctx)
 	require.NoError(t, err)

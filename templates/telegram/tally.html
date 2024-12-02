@@ -1,13 +1,14 @@
+{{- $info := . }}
 {{- if not . }}
 <strong>No active proposals.</strong>
 {{- end }}
-{{- range $chainName, $tallyInfos := . }}
+{{- range $chainName, $tallyInfos := .ChainsTallyInfos }}
 {{- if $tallyInfos.TallyInfos }}
 <strong>Proposals on chain {{ $tallyInfos.Chain.GetName }}:</strong>
 {{ range $chainIndex, $tallyInfo := $tallyInfos.TallyInfos }}
 {{- $proposalLink := $tallyInfos.Chain.GetProposalLink .Proposal }}
 Proposal #{{ .Proposal.ID }}: {{ SerializeLink $proposalLink }}
-Ends in: {{ .Proposal.GetTimeLeft }}
+Ends in: {{ $info.GetProposalTimeLeft .Proposal }}
 - Not voted: {{ .GetNotVoted }}
 - Voted: {{ .GetQuorum }}
 {{- range $tallyOptionIndex, $tallyOption := .Tally }}

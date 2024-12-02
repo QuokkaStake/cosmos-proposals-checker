@@ -37,7 +37,7 @@ func TestDataManagerGetTallyWithError(t *testing.T) {
 
 	tallies, err := dataManager.GetTallies(context.Background())
 	require.Error(t, err)
-	assert.Empty(t, tallies)
+	assert.Empty(t, tallies.ChainsTallyInfos)
 }
 
 func TestDataManagerGetTallyEmpty(t *testing.T) {
@@ -53,7 +53,7 @@ func TestDataManagerGetTallyEmpty(t *testing.T) {
 
 	tallies, err := dataManager.GetTallies(context.Background())
 	require.NoError(t, err)
-	assert.Empty(t, tallies)
+	assert.Empty(t, tallies.ChainsTallyInfos)
 }
 
 func TestDataManagerGetTallyOk(t *testing.T) {
@@ -69,7 +69,7 @@ func TestDataManagerGetTallyOk(t *testing.T) {
 
 	tallies, err := dataManager.GetTallies(context.Background())
 	require.NoError(t, err)
-	assert.NotEmpty(t, tallies)
+	assert.NotEmpty(t, tallies.ChainsTallyInfos)
 }
 
 func TestDataManagerGetParamsWithError(t *testing.T) {
