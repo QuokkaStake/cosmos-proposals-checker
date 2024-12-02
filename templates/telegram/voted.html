@@ -3,7 +3,7 @@
 {{ .Proposal.Title }}
 
 Vote: {{ .Vote.ResolveVote }}
-Voting ends at: {{ SerializeDate .Proposal.EndTime }} (in {{ .Proposal.GetTimeLeft }})
+Voting ends at: {{ SerializeDate .Proposal.EndTime }} (in {{ .GetProposalTimeLeft }})
 
 {{ range .Chain.GetExplorerProposalsLinks .Proposal.ID }}{{ SerializeLink .}}
 {{ end }}

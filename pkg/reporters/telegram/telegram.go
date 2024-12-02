@@ -125,7 +125,7 @@ func (reporter *Reporter) SendReportEntry(reportEntry entry.ReportEntry, ctx con
 		&tele.User{
 			ID: reporter.TelegramChat,
 		},
-		serializedEntry,
+		strings.TrimSpace(serializedEntry),
 		tele.ModeHTML,
 		tele.NoPreview,
 	)

@@ -2,13 +2,16 @@ package events
 
 import (
 	"main/pkg/types"
+	"main/pkg/utils"
+	"time"
 )
 
 type VotedEvent struct {
-	Chain    *types.Chain
-	Wallet   *types.Wallet
-	Proposal types.Proposal
-	Vote     *types.Vote
+	RenderTime time.Time
+	Chain      *types.Chain
+	Wallet     *types.Wallet
+	Proposal   types.Proposal
+	Vote       *types.Vote
 }
 
 func (e VotedEvent) Name() string {
@@ -29,4 +32,8 @@ func (e VotedEvent) GetProposal() types.Proposal {
 
 func (e VotedEvent) GetWallet() *types.Wallet {
 	return e.Wallet
+}
+
+func (e VotedEvent) GetProposalTimeLeft() string {
+	return utils.FormatDuration(e.Proposal.EndTime.Sub(e.RenderTime).Round(time.Second))
 }

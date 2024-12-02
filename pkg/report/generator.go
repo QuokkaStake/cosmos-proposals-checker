@@ -10,6 +10,7 @@ import (
 	"main/pkg/reporters"
 	"main/pkg/types"
 	"sync"
+	"time"
 
 	"github.com/rs/zerolog"
 	"go.opentelemetry.io/otel/attribute"
@@ -260,9 +261,10 @@ func (g *Generator) ProcessWallet(
 			Msg("Wallet has not voted - sending an alert.")
 		return []entry.ReportEntry{
 			events.NotVotedEvent{
-				Chain:    chain,
-				Proposal: proposal,
-				Wallet:   wallet,
+				Chain:      chain,
+				Proposal:   proposal,
+				Wallet:     wallet,
+				RenderTime: time.Now(),
 			},
 		}
 	}
@@ -292,10 +294,11 @@ func (g *Generator) ProcessWallet(
 
 		return []entry.ReportEntry{
 			events.VotedEvent{
-				Chain:    chain,
-				Proposal: proposal,
-				Wallet:   wallet,
-				Vote:     vote,
+				RenderTime: time.Now(),
+				Chain:      chain,
+				Proposal:   proposal,
+				Wallet:     wallet,
+				Vote:       vote,
 			},
 		}
 	}
@@ -309,11 +312,12 @@ func (g *Generator) ProcessWallet(
 
 		return []entry.ReportEntry{
 			events.RevotedEvent{
-				Chain:    chain,
-				Proposal: proposal,
-				Wallet:   wallet,
-				Vote:     vote,
-				OldVote:  previousVote,
+				RenderTime: time.Now(),
+				Chain:      chain,
+				Proposal:   proposal,
+				Wallet:     wallet,
+				Vote:       vote,
+				OldVote:    previousVote,
 			},
 		}
 	}
