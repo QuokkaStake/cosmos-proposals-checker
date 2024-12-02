@@ -1,3 +1,4 @@
+{{- $state := . }}
 {{- if not .ChainInfos }}
 <strong>No active proposals</strong>
 {{- end }}
@@ -9,7 +10,7 @@
 {{- end }}
 {{- range .ProposalVotes }}
 {{- $proposalLink := $chain.GetProposalLink .Proposal }}
-Proposal #{{ .Proposal.ID }}: {{ SerializeLink $proposalLink }} (voting ends in {{ .Proposal.GetTimeLeft  }})
+Proposal #{{ .Proposal.ID }}: {{ SerializeLink $proposalLink }} (voting ends in {{ $state.GetProposalTimeLeft .Proposal  }})
 {{- range $wallet, $vote := .Votes }}
 {{- $walletLink := $chain.GetWalletLink $vote.Wallet -}}
 {{- if $vote.IsError }}

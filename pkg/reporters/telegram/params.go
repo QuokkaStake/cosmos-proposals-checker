@@ -18,11 +18,5 @@ func (reporter *Reporter) HandleParams(c tele.Context) error {
 		return reporter.BotReply(c, fmt.Sprintf("Error getting chain params: %s", err))
 	}
 
-	template, err := reporter.TemplatesManager.Render("params", params)
-	if err != nil {
-		reporter.Logger.Error().Err(err).Msg("Error rendering template")
-		return reporter.BotReply(c, "Error rendering template")
-	}
-
-	return reporter.BotReply(c, template)
+	return reporter.ReplyRender(c, "params", params)
 }

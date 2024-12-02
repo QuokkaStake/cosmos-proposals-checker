@@ -16,11 +16,5 @@ func (reporter *Reporter) HandleProposals(c tele.Context) error {
 	state := reporter.StateGenerator.GetState(statePkg.NewState(), context.Background())
 	renderedState := state.ToRenderedState()
 
-	template, err := reporter.TemplatesManager.Render("proposals", renderedState)
-	if err != nil {
-		reporter.Logger.Error().Err(err).Msg("Error rendering template")
-		return reporter.BotReply(c, "Error rendering template")
-	}
-
-	return reporter.BotReply(c, template)
+	return reporter.ReplyRender(c, "proposals", renderedState)
 }

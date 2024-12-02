@@ -13,6 +13,9 @@ type StubDatabase struct {
 	GetVoteError          error
 	UpsertVoteError       error
 	IsMutedError          error
+	UpsertMuteError       error
+	DeleteMuteError       error
+	GetAllMutesError      error
 
 	Proposals       map[string]map[string]*types.Proposal
 	Votes           map[string]map[string]map[string]*types.Vote
@@ -156,6 +159,10 @@ func (d *StubDatabase) UpsertLastBlockHeight(
 }
 
 func (d *StubDatabase) UpsertMute(mute *types.Mute) error {
+	if d.UpsertMuteError != nil {
+		return d.UpsertMuteError
+	}
+
 	if d.Mutes == nil {
 		d.Mutes = []*types.Mute{}
 	}
@@ -174,6 +181,10 @@ func (d *StubDatabase) UpsertMute(mute *types.Mute) error {
 }
 
 func (d *StubDatabase) GetAllMutes() ([]*types.Mute, error) {
+	if d.GetAllMutesError != nil {
+		return []*types.Mute{}, d.GetAllMutesError
+	}
+
 	if d.Mutes == nil {
 		return []*types.Mute{}, nil
 	}
@@ -182,6 +193,10 @@ func (d *StubDatabase) GetAllMutes() ([]*types.Mute, error) {
 }
 
 func (d *StubDatabase) DeleteMute(mute *types.Mute) (bool, error) {
+	if d.DeleteMuteError != nil {
+		return false, d.DeleteMuteError
+	}
+
 	if d.Mutes == nil {
 		return false, nil
 	}

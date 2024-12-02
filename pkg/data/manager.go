@@ -6,6 +6,7 @@ import (
 	fetchersPkg "main/pkg/fetchers"
 	"main/pkg/types"
 	"sync"
+	"time"
 
 	"go.opentelemetry.io/otel/trace"
 
@@ -34,7 +35,7 @@ func NewManager(logger *zerolog.Logger, chains types.Chains, tracer trace.Tracer
 	}
 }
 
-func (m *Manager) GetTallies(ctx context.Context) (map[string]types.ChainTallyInfos, error) {
+func (m *Manager) GetTallies(ctx context.Context) (types.ChainsTallyInfos, error) {
 	childCtx, span := m.Tracer.Start(ctx, "Fetching tallies")
 	defer span.End()
 
@@ -42,7 +43,10 @@ func (m *Manager) GetTallies(ctx context.Context) (map[string]types.ChainTallyIn
 	var mutex sync.Mutex
 
 	errors := make([]error, 0)
-	tallies := make(map[string]types.ChainTallyInfos)
+	tallies := types.ChainsTallyInfos{
+		RenderTime:       time.Now(),
+		ChainsTallyInfos: make(map[string]types.ChainTallyInfos),
+	}
 
 	for index, chain := range m.Chains {
 		fetcher := m.Fetchers[index]
@@ -59,7 +63,7 @@ func (m *Manager) GetTallies(ctx context.Context) (map[string]types.ChainTallyIn
 				m.Logger.Error().Err(err).Str("chain", c.Name).Msg("Error fetching tallies")
 				errors = append(errors, err)
 			} else if len(talliesForChain.TallyInfos) > 0 {
-				tallies[c.Name] = talliesForChain
+				tallies.ChainsTallyInfos[c.Name] = talliesForChain
 			}
 			mutex.Unlock()
 		}(chain, fetcher)
@@ -69,7 +73,7 @@ func (m *Manager) GetTallies(ctx context.Context) (map[string]types.ChainTallyIn
 
 	if len(errors) > 0 {
 		m.Logger.Error().Msg("Errors getting tallies info, not processing")
-		return map[string]types.ChainTallyInfos{}, fmt.Errorf("could not get tallies info: got %d errors", len(errors))
+		return tallies, fmt.Errorf("could not get tallies info: got %d errors", len(errors))
 	}
 
 	return tallies, nil

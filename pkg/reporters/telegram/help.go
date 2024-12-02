@@ -10,11 +10,5 @@ func (reporter *Reporter) HandleHelp(c tele.Context) error {
 		Str("text", c.Text()).
 		Msg("Got help query")
 
-	template, err := reporter.TemplatesManager.Render("help", reporter.Version)
-	if err != nil {
-		reporter.Logger.Error().Err(err).Msg("Error rendering template")
-		return reporter.BotReply(c, "Error rendering template")
-	}
-
-	return reporter.BotReply(c, template)
+	return reporter.ReplyRender(c, "help", reporter.Version)
 }

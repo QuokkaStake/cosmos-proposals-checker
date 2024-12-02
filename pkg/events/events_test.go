@@ -7,6 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestNotExistingEvent(t *testing.T) {
+	t.Parallel()
+
+	event := NotExistingEvent{}
+	assert.Equal(t, "not_existing", event.Name())
+	assert.False(t, event.IsAlert())
+}
+
 func TestFinishedVotingEvent(t *testing.T) {
 	t.Parallel()
 

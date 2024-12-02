@@ -2,6 +2,8 @@ package types
 
 import (
 	"fmt"
+	"main/pkg/utils"
+	"time"
 
 	"cosmossdk.io/math"
 )
@@ -62,7 +64,16 @@ func (t TallyInfo) GetNotVoted() string {
 	)
 }
 
+type ChainsTallyInfos struct {
+	RenderTime       time.Time
+	ChainsTallyInfos map[string]ChainTallyInfos
+}
+
 type ChainTallyInfos struct {
 	Chain      *Chain
 	TallyInfos []TallyInfo
+}
+
+func (i ChainsTallyInfos) GetProposalTimeLeft(p Proposal) string {
+	return utils.FormatDuration(p.EndTime.Sub(i.RenderTime).Round(time.Second))
 }

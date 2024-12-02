@@ -1,8 +1,13 @@
 package state
 
-import "main/pkg/types"
+import (
+	"main/pkg/types"
+	"main/pkg/utils"
+	"time"
+)
 
 type RenderedState struct {
+	RenderTime time.Time
 	ChainInfos []RenderedChainInfo
 }
 
@@ -33,4 +38,8 @@ func (v RenderedWalletVote) IsError() bool {
 
 func (c RenderedChainInfo) HasProposalsError() bool {
 	return c.ProposalsError != nil
+}
+
+func (s RenderedState) GetProposalTimeLeft(p types.Proposal) string {
+	return utils.FormatDuration(p.EndTime.Sub(s.RenderTime).Round(time.Second))
 }
