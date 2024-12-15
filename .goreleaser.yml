@@ -6,6 +6,9 @@ builds:
     goos:
       - linux
       - darwin
+    ignore:
+      - goos: linux
+        goarch: arm64
 nfpms:
   - vendor: 🐹 Quokka Stake
     maintainer: Sergey <freak12techno@gmail.com>
