@@ -1,5 +1,8 @@
+version: 2
 builds:
   - main: ./cmd/cosmos-proposals-checker.go
+    env:
+      - CGO_ENABLED=1
     goos:
       - linux
       - darwin
@@ -12,7 +15,7 @@ nfpms:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ .Tag }}"
+  version_template: "{{ .Tag }}"
 changelog:
   sort: asc
   filters:
