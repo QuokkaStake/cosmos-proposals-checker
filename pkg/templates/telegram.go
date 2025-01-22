@@ -3,6 +3,7 @@ package templates
 import (
 	"bytes"
 	"fmt"
+	"html"
 	"html/template"
 	"main/pkg/types"
 	"main/pkg/utils"
@@ -77,7 +78,7 @@ func (m *TelegramTemplatesManager) GetTemplate(templateName string) (*template.T
 
 func (m *TelegramTemplatesManager) SerializeLink(link types.Link) template.HTML {
 	if link.Href != "" {
-		return template.HTML(fmt.Sprintf("<a href='%s'>%s</a>", link.Href, link.Name))
+		return template.HTML(fmt.Sprintf("<a href='%s'>%s</a>", link.Href, html.EscapeString(link.Name)))
 	}
 
 	return template.HTML(link.Name)
