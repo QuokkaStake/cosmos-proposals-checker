@@ -1,7 +1,7 @@
 {{- if not . }}
 **No active proposals.**
 {{- end }}
-{{- range $chainName, $tallyInfos := . }}
+{{- range $chainName, $tallyInfos := .ChainsTallyInfos }}
 {{- if $tallyInfos.TallyInfos }}
 **Proposals on chain {{ $tallyInfos.Chain.GetName }}:**
 {{ range $chainIndex, $tallyInfo := $tallyInfos.TallyInfos }}
